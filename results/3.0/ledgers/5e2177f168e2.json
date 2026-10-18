@@ -1,0 +1,16 @@
+{
+  "run_id": "5e2177f168e2",
+  "ledger_sha256": "7aaeac0934bec644ecd12227b7ac5c3890e7f4fb573dca0b22c2b0a693eb5eec",
+  "budget_usd": 5.0,
+  "calls": [
+    {
+      "id": "d01:0:candidate:0",
+      "digest": "b1a2a485f26787388781beda4cccbf023c03686e0a277e1c9e7c1ad03dee6ce0",
+      "state": "uncertain",
+      "reserved": 0.0185515,
+      "actual": null
+    }
+  ],
+  "billing_reconciled": false,
+  "note": "Read-only export of the original local SQLite ledger. Null actual cost is unknown, not zero. No ledger state was changed."
+}

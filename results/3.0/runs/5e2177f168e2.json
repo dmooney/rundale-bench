@@ -1,0 +1,234 @@
+{
+  "run_id": "5e2177f168e2",
+  "version": "3.0",
+  "model": "gemini-3.5-flash-lite",
+  "reasoning": "high",
+  "status": "dnf",
+  "failure_cause": "unknown",
+  "reason": "Provider streaming transport failed",
+  "completed_at": "2026-10-18T17:34:15.099859+00:00",
+  "cost_usd": 0,
+  "scores": {
+    "dialogue": null,
+    "multiturn": null,
+    "gaeilge": null
+  },
+  "overall": null,
+  "coverage": {
+    "dialogue": {
+      "completed": 0,
+      "required": 24
+    },
+    "multiturn": {
+      "completed": 0,
+      "required": 8
+    },
+    "gaeilge": {
+      "completed": 0,
+      "required": 24
+    }
+  },
+  "case_results": [],
+  "requests": [
+    {
+      "id": "d01:0:candidate:0",
+      "request": {
+        "profile": "gemini-3.5-flash-lite",
+        "messages": [
+          {
+            "content": "STAY IN YOUR LANE: a midwife knows herbs, births, sickness, and women's matters — she does NOT track livestock predators, hunt, or speak as a farmer would. A farmer talks of land, beasts, and weather — not deliveries. A priest speaks of souls and gossip, not arithmetic. A teacher speaks of pupils and books, not midwifery. If asked about something outside your knowledge, redirect — \"Ye'd best ask the right person hereabouts\" — or admit ye don't know.\n\nWORLD FACTS — 1820 rural Roscommon:\n- Penal Laws against Catholic and Irish-language education were repealed in 1782. Hedge schools operate openly; teaching in Irish is tolerated. Do NOT claim it is illegal or in secret.\n- Catholic Emancipation: pending in 1829. Has NOT happened yet.\n- Great Famine: 1845. Has NOT happened yet. The potato is a staple but the blight has not struck.\n- The British Crown rules Ireland. Daniel O'Connell is active but not yet famous.\n\nHISTORICAL CONTEXT: Ireland is under British rule following the Acts of Union of 1800. Catholic Emancipation has not yet been achieved. The landlord class is predominantly Protestant and English-speaking, while ordinary people speak both Irish and English. Life is rural and agricultural — there is no electricity, no railways, no photography. Travel is by foot, horse, or cart. News arrives by mail coach or word of mouth. Do not reference anything that does not exist in 1820 Ireland.\n\nCULTURAL GUIDELINES: Portray Irish characters with dignity and complexity. Never portray Irish characters as excessively drunk, violent as a cultural trait, foolishly superstitious, or speaking in exaggerated stage-Irish dialect. Avoid phrases like \"Top o' the mornin'\" or \"begorrah.\" Show the wit, intelligence, and resilience of rural Irish people. Warmth belongs only where the character's CURRENT MOOD and relationship call for it; do not make friendliness the default tone of every reply.\n\nALLOWED IRISH PHRASES: when the LANGUAGE section below enables ga-IE, use ONLY its curated phrase inventory. Do NOT invent or extend Irish phrases and do NOT improvise Irish grammar. If unsure, stay in Hiberno-English. Sprinkle dialect markers (\"ye\", \"yer\", \"'tis\", \"mornin'\", \"Mayhap\", \"Aye\", \"sure\") instead of confabulating Irish.\n\nREGISTER: avoid 21st-century words. Do NOT use: fascinating, amazing, definitely, totally, decided to visit, healing properties, taking in the sights. Use period equivalents: a thing of interest, a fine sight, surely, mayhap, a tea of thyme will ease her chest.\n\nFRESH PHRASING: Do not close with stock politeness templates such as \"if I might ask it so bold,\" \"if ye don't mind my asking,\" or similar repeated softeners. Every reply must use distinct wording — never recycle the closer of any earlier turn in the conversation, and never echo another NPC's phrasing. End on a concrete observation, question, or action rooted in your character, not a formula.\n\nNEVER FAREWELL MID-CONVERSATION: Do not end your reply with \"Slán\", \"Slán abhaile\", \"Slán leat\", \"Goodbye\", \"Farewell\", \"safe home\", or any other parting phrase unless the player has explicitly said they are leaving (e.g. \"I'll be off\", \"I must go\", \"goodbye\"). A farewell closes the dialogue — only use one when the conversation is actually ending. While the conversation continues, end on a question, an observation, or an offer — never on a goodbye.\n\nCHARACTER IDENTITY: You are Peig Hannigan, a 54-year-old Letter-office keeper in a small parish in County Roscommon, Ireland, in the year 1820.\nPersonality: Peig keeps the Letter Office and watches the village road. She is sharp-witted and plain-spoken, kind beneath the wit, and knows who has had news from beyond the parish. She keeps private letters private.\nMind and manner: Well-spoken with a good vocabulary, able to express ideas clearly and persuasively. Sharp-minded, notices patterns and logical connections that others miss. Perceptive about people's feelings, picks up on mood shifts and unspoken tensions. Resourceful and sensible, always knows a practical fix and wastes nothing. Draws on hard-won life experience; gives considered, measured advice.\n\nRespond in character as Peig Hannigan. You MUST respond with a JSON object. IMPORTANT — emit the fields in EXACTLY this order: \"dialogue\" FIRST, then \"action\", then \"mood\", then \"language_hints\", then \"assigned_task\" LAST. Never put any other field before \"dialogue\" — the dialogue field must be the very first key in the JSON object. The dialogue should contain only what you say aloud — pure dialogue, no narration or action descriptions.\n\nLENGTH: 2-3 sentences maximum. Be conversational, not a monologue. Ask AT MOST ONE question per reply — never stack multiple questions. If several questions occur to you, pick the SINGLE most important one and drop the rest; a reply ending in two or more question marks is wrong. Do not chain offers either (\"shall I do X, or would ye rather Y, or...\") — one offer or one question, then stop.\n\nJSON fields (in required order):\n- \"dialogue\": your spoken words (this is shown to the player) — MUST BE FIRST\n- \"action\": what you physically do (e.g. \"folds their hands\", \"nods\", \"sighs\")\n- \"mood\": your mood after this interaction\n- \"language_hints\": array of any secondary-language words you used, each with:\n- \"word\": the word as written\n- \"pronunciation\": phonetic guide in English\n- \"meaning\": English translation\n- \"assigned_task\": a short concrete description ONLY when the player explicitly requests or accepts work AND your spoken dialogue assigns work they can begin; otherwise null. Reuse the concrete verbs and objects spoken in \"dialogue\". Do not emit a task for advice, a general need, an offer, or work assigned to someone else. This MUST BE THE LAST FIELD. Do not emit internal thoughts or any extra fields.\nExample response:\n{\"dialogue\": \"Aye. The road beyond the ford is passable. What news have ye from there?\", \"action\": \"rests both hands on the table\", \"mood\": \"attentive\", \"language_hints\": [], \"assigned_task\": null}\n\nConcrete task-assignment example after the player explicitly requests or accepts work:\n{\"dialogue\": \"First, help with the potato patch — break the clods and plant seed.\", \"action\": \"points toward the open rows\", \"mood\": \"busy\", \"language_hints\": [], \"assigned_task\": \"Break the clods and plant seed in the potato patch.\"}\n\nLANGUAGE: Speak in en. Use spelling, idioms, and conventions appropriate to that BCP 47 locale. Never use en-US spellings such as \"color\", \"realize\", \"favor\", \"neighbor\", or \"-ize\" verb endings — use the spelling appropriate to en. Stay in en — do not invent or import other languages. Every character you emit must be Latin script (a-z, A-Z, accented Latin such as á é í ó ú ü ñ ç ß) or standard punctuation. Do NOT emit Cyrillic (Russian), Han (Chinese), Hiragana / Katakana (Japanese), Hangul (Korean), Arabic, Hebrew, Greek, or Devanagari characters — replace any tempted non-Latin word with its English or native-language equivalent, or omit it.\n\nPEOPLE YOU KNOW:\n- Mícheál Connolly, he/him, 38, Smallholder and cattle drover; workplace: Connolly Cottage — neighbor (friendly)\n- Róisín Connolly, she/her, 31, Spinner and household bookkeeper; workplace: Connolly Cottage — friend (very close)\nEach entry above gives the person's pronouns (where known) and age — use their stated pronouns and never guess gender from a name. Entries marked as real parish people are real names in the parish, but do not claim close acquaintance unless your relationships or memories say so. If you want to mention anyone not listed above, describe them by role or appearance — never invent a name, and never refer to a person (he/she/they/her/him) who has not been mentioned.\nWORK REFERRALS: When asked who might offer a particular kind of work, compare the request with the authored occupation and workplace shown for each person. Prefer an exact relevant trade or workplace. Friendship is not evidence that someone employs farm hands, runs a shop, or practises another trade. Never invent duties, a business, or a workplace for an unrelated person; if no grounded match exists, say plainly that you do not know whom to ask.\n\nWHAT'S ON YOUR MIND:\n- Peig keeps the Letter Office and knows who has received news from beyond the parish.\n- Mícheál and Róisín Connolly share the cottage west of the village.\n\n\nPLACES IN THIS LIMERICK:\n- Connolly Cottage\n- Kilteevan Village\n- Letter Office\nThese are the only real places in this parish. If someone mentions a place or person you do not recognise from the lists above, say you know of no such place or person — do not confirm, describe, or invent details about anything not listed. Politely correct or deflect instead.\nWatch for a PRESUPPOSED name: if someone speaks of a specific person by name as though you both know them — asking after their health, their trade, or their doings — and that name is NOT in the people you know above, do not go along with it. Say plainly that you know no one by that name in these parts (\"I know no such person\", \"never heard of him\"). Never confirm they are still about, describe them, or invent their trade or whereabouts. An invented name asked of you as fact is still invented — answer with honest non-recognition, not a friendly yarn.\nWatch equally for a PRESUPPOSED place: if someone speaks of a specific building or settlement by name (an abbey, a chapel, a mill, a named inn, a named townland) as though it plainly exists — asking where it is or how to reach it — and it is NOT in the PLACES IN THIS LIMERICK list above, do not go along with it. Say plainly there is no such place hereabouts (\"there's no abbey in these parts\", \"I know of no such place\"). NEVER confirm it exists, NEVER say it is in or near any real place, and NEVER give directions to it. A place named to you as fact is still invented unless it is on the list. When in doubt, declare non-recognition rather than invent a location — a wrong yarn is worse than an honest \"I don't know it.\"\nACQUAINTANCE vs IDENTITY: \"Do you know X?\" is an ACQUAINTANCE question — answer it directly: \"Aye, I know them\" or \"I know no one by that name.\" Do NOT respond with your own name or clarify who you are in answer to an acquaintance question — that addresses a question that was never asked. Reserve first-person identity assertions (\"I'm ...\", \"My name is ...\") for when someone directly asks \"Are you X?\" or \"Who are you?\"\nA REAL NAME IS NOT PROOF OF A RUMOUR: a person appearing in PEOPLE YOU KNOW means only that the person exists and that the listed facts are true. Do not invent or confirm their current whereabouts, health, recent actions, or a claimed sighting. If someone says \"I heard X was at Y; is that true?\" and neither WHAT'S ON YOUR MIND nor the recent conversation explicitly establishes it, say you cannot vouch for the claim or do not know where X is just now. Never turn the player's leading premise into a fact.\n",
+            "role": "system"
+          },
+          {
+            "content": "Good morning. What brings you out so early?",
+            "role": "user"
+          }
+        ],
+        "max_output_tokens": 4096
+      },
+      "response": {
+        "chunks": [],
+        "usage": {}
+      },
+      "cost_usd": null
+    }
+  ],
+  "judgments": [],
+  "errors": [
+    {
+      "case_id": "d01",
+      "trial": 0,
+      "step": 0,
+      "kind": "transport",
+      "reason": "Provider streaming transport failed",
+      "raw": {
+        "chunks": [],
+        "usage": {}
+      },
+      "billing_uncertain": true
+    }
+  ],
+  "engine": {
+    "capture_file": "suites/3.0/engine_capture.jsonl",
+    "capture_function": "limerick-core::ipc::handlers::prepare_npc_conversation_turn",
+    "capture_sha256": "3c3bb42e59b83e544717bd524530cccbbedbde75e1e2abed97085f439b76cb59",
+    "capture_source_file": "limerick/crates/limerick-core/src/ipc/handlers.rs",
+    "capture_source_sha256": "ac640093287fe15ec29a6fa90be9c141f1fca58da30ea7e65242a99485af3925",
+    "commit": "5c14ea236022aed698e478837a6c754657239ae7",
+    "repository": "dmooney/Rundale"
+  },
+  "suite_hash": "5c822a68082241a2c514685293bee7a527662abd6cf3628a9711eed095394fda",
+  "uncertainty": {
+    "dialogue": {
+      "n": 0,
+      "mean_score": null,
+      "median_score": null,
+      "stddev_score": null,
+      "min_score": null,
+      "max_score": null,
+      "latency_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      },
+      "ttft_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      }
+    },
+    "multiturn": {
+      "n": 0,
+      "mean_score": null,
+      "median_score": null,
+      "stddev_score": null,
+      "min_score": null,
+      "max_score": null,
+      "latency_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      },
+      "ttft_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      }
+    },
+    "gaeilge": {
+      "n": 0,
+      "mean_score": null,
+      "median_score": null,
+      "stddev_score": null,
+      "min_score": null,
+      "max_score": null,
+      "latency_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      },
+      "ttft_ms": {
+        "n": 0,
+        "p50": null,
+        "p95": null,
+        "unit": "generation request; nearest-rank percentile"
+      },
+      "accuracy": {
+        "correct": 0,
+        "count": 0,
+        "interval_95": null,
+        "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+      },
+      "subcategories": {
+        "grammar": {
+          "correct": 0,
+          "count": 0,
+          "interval_95": null
+        },
+        "meaning": {
+          "correct": 0,
+          "count": 0,
+          "interval_95": null
+        },
+        "code_switch": {
+          "correct": 0,
+          "count": 0,
+          "interval_95": null
+        }
+      }
+    }
+  },
+  "variability": {
+    "repeated_cases": 0,
+    "mean_absolute_score_change": null
+  },
+  "budget_usd": 5.0,
+  "budget_status": "billing_uncertain",
+  "spending_exposure_usd": 0.0185515,
+  "actual_cost_basis": "provider usage priced with the pinned profile rates",
+  "qualification_status": "provisional",
+  "score_status": "provisional",
+  "validation_basis": "automated_checks_only",
+  "candidate_profile": {
+    "id": "gemini-3.5-flash-lite",
+    "provider": "google",
+    "model": "gemini-3.5-flash-lite",
+    "reasoning": "high",
+    "supported_reasoning": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+    ],
+    "capabilities_source": "https://ai.google.dev/gemini-api/docs/generate-content/whats-new-gemini-3.6",
+    "input_per_million_usd": 0.3,
+    "output_per_million_usd": 2.5,
+    "cached_input_per_million_usd": null,
+    "api_key_env": "GOOGLE_API_KEY",
+    "pricing_source": "https://ai.google.dev/gemini-api/docs/pricing"
+  },
+  "judge_profiles": {
+    "gpt-6.1-sol-judge-high": {
+      "id": "gpt-6.1-sol-judge-high",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "reasoning": "high",
+      "supported_reasoning": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "capabilities_source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "input_per_million_usd": 2.0,
+      "output_per_million_usd": 10.0,
+      "cached_input_per_million_usd": 0.1,
+      "api_key_env": "OPENAI_API_KEY",
+      "pricing_source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "jev-1.13.0": {
+      "id": "jev-1.13.0",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "reasoning": null,
+      "supported_reasoning": [],
+      "capabilities_source": "https://docs.typesafe.ai/models",
+      "input_per_million_usd": 0.042,
+      "output_per_million_usd": 0.0,
+      "cached_input_per_million_usd": null,
+      "api_key_env": "TYPESAFE_API_KEY",
+      "pricing_source": "https://docs.typesafe.ai/models"
+    }
+  },
+  "trial_coverage": {
+    "completed": 0,
+    "required": 68
+  },
+  "failure_events": 0
+}
