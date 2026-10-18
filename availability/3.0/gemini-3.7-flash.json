@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "benchmark_version": "3.0",
+  "checked_at": "2026-10-18T20:00:06.204617+00:00",
+  "requested_model": "gemini-3.7-flash",
+  "requested_reasoning": "high",
+  "status": "unavailable_as_requested",
+  "scope": "availability_preflight",
+  "reason": "Provider documents that this historical alias sends generation requests to Gemini 3.8 Flash, so it cannot provide a separately labelled Gemini 3.7 benchmark.",
+  "documented_replacement": "gemini-3.8-flash",
+  "generation_requests": 0,
+  "generation_identity_observed": false,
+  "scores": null,
+  "replacement_run_performed": false,
+  "profile_enabled": false,
+  "provider_registry_sha256": "70e71537a3aaa1cfd3eea7cd07362b3768696ac40a8a32eb7c76cdb67e5fc6a6",
+  "metadata_evidence": "gemini-3.7-flash-metadata.json",
+  "sources": [
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash",
+      "page_last_updated": "2026-10-12",
+      "finding": "The provider describes this model as deprecated and says requests using this name are redirected to Gemini 3.8 Flash."
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/deprecations",
+      "page_last_updated": "2026-10-12",
+      "finding": "The deprecation table retains the endpoint as a redirect rather than an independent model."
+    }
+  ],
+  "limitations": [
+    "The native metadata GET returned a historical 3.7 model card with HTTP 200. That does not contradict or verify the documented generation redirect.",
+    "No generation call was made to verify the routed model identity; the redirect conclusion relies on provider documentation.",
+    "This is a setup availability outcome, not an inference result or evidence of model quality."
+  ]
+}

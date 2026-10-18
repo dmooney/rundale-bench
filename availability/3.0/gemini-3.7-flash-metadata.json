@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-10-18T19:59:09.401553+00:00",
+  "requested_model": "gemini-3.7-flash",
+  "method": "GET",
+  "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash",
+  "generation_requests": 0,
+  "http_status": 200,
+  "response": {
+    "name": "models/gemini-3.7-flash",
+    "version": "3.7-flash-08-2026",
+    "displayName": "Gemini 3.7 Flash",
+    "description": "Gemini 3.7 Flash",
+    "supportedGenerationMethods": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ],
+    "inputTokenLimit": 1048576,
+    "outputTokenLimit": 65536
+  }
+}
