@@ -31,8 +31,10 @@ def parser() -> argparse.ArgumentParser:
     qs = q.add_subparsers(dest='qualify_command', required=True)
     qc = qs.add_parser('collect', help='run qualification trials using the fixed $10 cap')
     qc.add_argument('--env-file',type=Path)
+    qc.add_argument('--amend-controls', '--repair-grade-order', dest='repair_grade_order', action='store_true', help='explicitly amend calibration controls under the same durable $10 ledger; reuse all unchanged paid requests')
     qe = qs.add_parser('evaluate', help='evaluate collected judgments against owner reference ratings')
     qe.add_argument('--ratings',type=Path,required=True)
+    qs.add_parser('screen', help='offline automated screening for explicitly provisional scores; no human ratings or paid calls')
     c = sub.add_parser('compare',help='paired case-level comparison of two published runs')
     c.add_argument('left_run_id')
     c.add_argument('right_run_id')
@@ -70,11 +72,14 @@ def main(argv=None) -> int:
         if args.command == 'qualify':
             from .qualification import collect, evaluate
             if args.qualify_command == 'collect':
-                receipt=collect(PACKAGE,{**__import__('os').environ,**_load_env(args.env_file)})
+                receipt=collect(PACKAGE,{**__import__('os').environ,**_load_env(args.env_file)},repair_grade_order=args.repair_grade_order)
+            elif args.qualify_command == 'screen':
+                from .provisional import screen
+                receipt=screen(PACKAGE)
             else:
                 receipt=evaluate(PACKAGE,args.ratings)
             print(json.dumps(receipt,indent=2,ensure_ascii=False))
-            return 0 if receipt.get('status') in ('collected','qualified') else 1
+            return 0 if receipt.get('status') in ('collected','qualified','provisional') else 1
         if args.command == 'compare':
             left_id,right_id=safe_id(args.left_run_id),safe_id(args.right_run_id)
             left_path=PACKAGE/'results'/'3.0'/'runs'/(left_id+'.json')

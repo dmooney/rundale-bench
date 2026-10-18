@@ -2,14 +2,13 @@
 
 Benchmark 3.0 evaluates Rundale dialogue, six-turn play, and Gaeilge with fixed,
 versioned cases. These are product-specific evaluation scores, not measures of
-general intelligence. English judge qualification requires the owner's blind
-reference ratings; the Gaeilge evaluation uses source-backed objective checks
+general intelligence. The Gaeilge evaluation uses source-backed objective checks
 and makes no Irish fluency claim.
 
-Version 3.0 is under implementation. Judge qualification is pending the human
-review of 16 English cases in total. The current suite covers three
-evaluations: dialogue, multi-turn, and Gaeilge. No qualified ranking is available
-yet.
+Version 3.0 publishes provisional scores after automated judge screening. Human
+agreement and accuracy have not been measured; no manual review is required to
+run it. The implementation is awaiting independent review and live launch runs.
+No completed candidate scores are published yet.
 
 ## Requirements and installation
 

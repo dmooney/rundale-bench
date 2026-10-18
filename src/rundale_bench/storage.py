@@ -63,13 +63,13 @@ def rebuild_index(root: Path) -> dict:
                 latest[key] = dict(r, notice=None, latest_attempt_id=r['run_id'])
         rows = sorted(latest.values(), key=lambda x: (x.get('overall') is None, -(x.get('overall') or 0), x['model']))
         # Site index excludes verbose raw evidence; immutable detail stays in run files.
-        fields = ('model','reasoning','run_id','status','overall','scores','completed_at','cost_usd','notice','latest_attempt_id','failure_cause','reason','budget_usd','budget_status','spending_exposure_usd','coverage','uncertainty','variability','evidence_path')
+        fields = ('model','reasoning','run_id','status','overall','scores','completed_at','cost_usd','notice','latest_attempt_id','failure_cause','reason','budget_usd','budget_status','spending_exposure_usd','coverage','uncertainty','variability','evidence_path','qualification_status','score_status','validation_basis')
         compact = lambda r: {k:r.get(k) for k in fields}
         qualification=previous.get(version,{}).get('qualification',{'status':'pending','reason':'Judge qualification evidence is missing.'})
         qpath=root.parent/'qualification'/version/'status.json'
         if qpath.exists():
             q=json.loads(qpath.read_text())
-            qualification={'status':q['status'],'reason':q.get('reason'),'suite_hash':q.get('suite_hash')}
+            qualification={'status':q['status'],'reason':q.get('reason'),'suite_hash':q.get('suite_hash'),'validation_basis':q.get('validation_basis')}
         versions.append({'version':version, 'qualification': qualification, 'rows':[compact(r) for r in rows], 'runs':[compact(r) for r in all_runs]})
     data = {'schema_version':1, 'versions':versions}
     atomic_json(root/'index.json', data)

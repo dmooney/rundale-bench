@@ -12,6 +12,13 @@ export function findRun(version, runId) {
 export function qualificationCopy(version) {
   const status = String(version?.qualification?.status || 'pending').toLowerCase();
   const reason = version?.qualification?.reason || '';
+  if (status === 'provisional') {
+    return {
+      status,
+      title: `Version ${version?.version} scores are provisional.`,
+      description: reason || 'Automated judge checks passed. Human agreement and scoring accuracy have not been measured.',
+    };
+  }
   const title = status === 'qualified'
     ? `Version ${version?.version} is qualified.`
     : `Version ${version?.version} qualification ${status}.`;
@@ -19,6 +26,33 @@ export function qualificationCopy(version) {
     ? 'Qualification evidence is complete. Results below reproduce published run records.'
     : 'No qualified results are available yet.');
   return { status, title, description };
+}
+
+export function scoreStatusLabel(row) {
+  const status = String(row?.score_status || '').toLowerCase();
+  if (status === 'provisional') return 'Provisional score';
+  if (status === 'human_validated') return 'Human validated score';
+  return status ? status.replaceAll('_', ' ') : 'Score status unreported';
+}
+
+export function rowQualificationLabel(row) {
+  const status = String(row?.qualification_status || '').toLowerCase();
+  if (status === 'provisional') return 'Provisional';
+  if (status === 'human_validated') return 'Human validated';
+  if (status === 'qualified') return 'Qualified';
+  return status ? status.replaceAll('_', ' ') : 'Unreported';
+}
+
+export function qualificationEvidenceLinks(version, baseUrl) {
+  const value = String(version?.version || '');
+  if (!/^[A-Za-z0-9._-]+$/.test(value)) return [];
+  const base = String(baseUrl || '').replace(/\/$/, '');
+  const root = `${base}/evidence/qualification/${encodeURIComponent(value)}`;
+  return [
+    { label: 'Qualification status', href: `${root}/status.json` },
+    { label: 'Automated checks', href: `${root}/controls.json` },
+    { label: 'Raw judgments', href: `${root}/judgments.json` },
+  ];
 }
 
 export function runStatusLabel(row) {

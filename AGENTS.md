@@ -1,3 +1,5 @@
 # Rundale Benchmark agent guide
 
 Read docs/specification.md before changing scoring or runtime behavior. Never claim model or judge qualification without its pinned evidence. Native provider APIs only; no OpenRouter. Do not make paid calls in CI. Run `python3 -m unittest discover -s tests -v` before committing and pushing. For site changes also run `pnpm install --frozen-lockfile`, `pnpm run test`, `pnpm run check`, and `pnpm run build` in site/. Changes must go through PR review; do not merge your own PR. Preserve immutable run history, cost reservations, and source attribution. Never commit credentials or private reviewer identifiers.
+
+Build-suite tests must use temporary fixture directories. The suite builder refuses to overwrite a ready manifest; never reset pinned judges or validation evidence to draft while testing. Provisional automated screening permits execution but never establishes human validation.
