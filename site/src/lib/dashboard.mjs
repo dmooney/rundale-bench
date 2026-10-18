@@ -114,6 +114,31 @@ export function budgetLabel(run) {
   return typeof cap === 'number' && Number.isFinite(cap) ? `${status} ($${cap.toFixed(2)} cap)` : String(status);
 }
 
+function formatDollars(value) {
+  return typeof value === 'number' && Number.isFinite(value) ? `$${value.toFixed(4)}` : null;
+}
+
+export function recordedCostLabel(run) {
+  const amount = formatDollars(run?.cost_usd);
+  if (String(run?.budget_status || '').toLowerCase() === 'billing_uncertain') {
+    return amount ? `≥ ${amount} · billing uncertain` : 'Unknown · billing uncertain';
+  }
+  return amount || '—';
+}
+
+export function aggregateCostLabel(runs) {
+  const history = Array.isArray(runs) ? runs : [];
+  const entries = history.map((run) => run?.cost_usd).filter((value) => typeof value === 'number' && Number.isFinite(value));
+  const uncertain = history.some((run) => String(run?.budget_status || '').toLowerCase() === 'billing_uncertain');
+  const exposure = history.map((run) => run?.spending_exposure_usd)
+    .filter((value) => typeof value === 'number' && Number.isFinite(value));
+  const total = entries.reduce((sum, value) => sum + value, 0);
+  const label = uncertain
+    ? (entries.length ? `≥ ${formatDollars(total)} · billing uncertain` : 'Unknown · billing uncertain')
+    : (entries.length ? formatDollars(total) : '—');
+  return (uncertain || history.some((run) => run?.budget_status === 'cap_reached')) && exposure.length ? `${label} · exposure ${formatDollars(exposure.reduce((sum, value) => sum + value, 0))}` : label;
+}
+
 export function aggregateCoverage(rows) {
   const totals = Object.fromEntries(CATEGORIES.map((category) => [category, { completed: 0, required: 0 }]));
   let hasCoverage = false;

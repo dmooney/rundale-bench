@@ -5,7 +5,7 @@ import Base from '../layouts/Base.astro';
 <main>
   <section class="hero"><p class="eyebrow">MODEL EVALUATION · ROSCOMMON, 1820</p><h1>How well can a model inhabit Rundale?</h1><p>Dialogue, multi-turn play, and Gaeilge evaluation records, with source evidence attached to every run.</p><p class="pending" id="qualification-banner"><strong id="qualification-title">Qualification status pending.</strong> <span id="qualification-description">Waiting for the published evaluation record.</span></p><p class="separate" id="qualification-evidence" hidden></p></section>
   <section class="toolbar"><label>Evaluation version <select id="version-filter" aria-label="Evaluation version"></select></label><span id="version-note" class="muted"></span><a class="button secondary" href="/rundale-bench/archive/">Previous records</a></section>
-  <section class="stats" aria-label="Version summary"><div><span>Run history</span><strong id="run-count">—</strong></div><div><span>Qualification</span><strong id="qualification">—</strong><small id="qualification-reason"></small></div><div><span>Cost recorded</span><strong id="total-cost">—</strong></div><div><span>Evaluation coverage</span><strong id="coverage">—</strong></div></section>
+  <section class="stats" aria-label="Version summary"><div><span>Run history</span><strong id="run-count">—</strong></div><div><span>Qualification</span><strong id="qualification">—</strong><small id="qualification-reason"></small></div><div><span>Cost / billing status</span><strong id="total-cost">—</strong></div><div><span>Evaluation coverage</span><strong id="coverage">—</strong></div></section>
   <section class="section-head"><div><p class="eyebrow">EVALUATION RECORDS</p><h2>Latest model results</h2></div><p>Score status applies to overall and component scores. DNF and missing scores remain explicit.</p></section>
   <div class="table-wrap"><table><thead><tr><th>Model / reasoning</th><th>Overall</th><th>Dialogue</th><th>Multi-turn</th><th>Gaeilge</th><th>Run date</th><th>Performance · p95</th><th>Cost</th><th>Budget</th><th>Coverage</th><th>Run status</th><th>Quality qualification</th><th>Notice / reason</th><th>Evidence</th></tr></thead><tbody id="runs"><tr><td colspan="14">Loading published run index…</td></tr></tbody></table></div>
   <p class="separate">Irish-style impressions are provisional and separate from evaluated scores.</p>
@@ -14,10 +14,10 @@ import Base from '../layouts/Base.astro';
 <script>
 // @ts-nocheck
 import {
-  aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
+  aggregateCostLabel, aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
   qualificationEvidenceLinks,
   performanceLabel, qualificationCopy, rowQualificationLabel, runNoticeLabel,
-  runStatusLabel, scoreLabel, scoreStatusLabel,
+  recordedCostLabel, runStatusLabel, scoreLabel, scoreStatusLabel,
 } from '../lib/dashboard.mjs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -87,8 +87,7 @@ function show() {
   const history = Array.isArray(version.runs) ? version.runs : [];
   const rows = latestRows(version);
   byId('run-count').textContent = String(history.length);
-  const totalCost = history.reduce((sum, run) => sum + (Number(run.cost_usd) || 0), 0);
-  byId('total-cost').textContent = history.some((run) => run.cost_usd != null) ? fmtCost(totalCost) : '—';
+  byId('total-cost').textContent = aggregateCostLabel(history);
   byId('coverage').textContent = aggregateCoverage(rows);
 
   byId('runs').innerHTML = rows.length ? rows.map((row) => {
@@ -104,7 +103,7 @@ function show() {
       <td>${esc(scoreLabel(row.scores?.gaeilge, 'complete'))}<small>${esc(scoreStatusLabel(row))}</small></td>
       <td>${esc(fmtDate(row.completed_at))}</td>
       <td>${esc(performanceLabel(row.uncertainty))}</td>
-      <td>${esc(fmtCost(row.cost_usd))}</td>
+      <td>${esc(recordedCostLabel(row))}</td>
       <td>${esc(fmtBudget(row))}</td>
       <td>${esc(coverageLabel(row.coverage))}</td>
       <td>${esc(runStatusLabel(row))}</td>
