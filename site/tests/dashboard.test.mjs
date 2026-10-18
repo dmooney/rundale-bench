@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun,
+  aggregateCostLabel, aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun,
   latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
-  rowQualificationLabel, runNoticeLabel, runStatusLabel, scoreLabel, scoreStatusLabel,
+  recordedCostLabel, rowQualificationLabel, runNoticeLabel, runStatusLabel,
+  scoreLabel, scoreStatusLabel,
 } from '../src/lib/dashboard.mjs';
 
 const version = {
@@ -47,6 +48,20 @@ test('DNF, reason, category coverage, and capped budget have readable labels', (
   assert.equal(runStatusLabel(budgetDnf), 'DNF (budget)');
   assert.equal(runNoticeLabel(budgetDnf), 'Budget cap reached');
   assert.equal(runNoticeLabel({ ...row, reason: undefined, notice: 'A later attempt failed; this score is retained.' }), 'A later attempt failed; this score is retained.');
+});
+
+test('billing-uncertain DNF cost stays a lower bound and exposes uncertain billing in row and total', () => {
+  const billingUncertainDnf = {
+    model: 'Example', status: 'dnf', overall: null, cost_usd: 0,
+    budget_status: 'billing_uncertain', spending_exposure_usd: 0.0185515,
+  };
+  assert.equal(recordedCostLabel(billingUncertainDnf), '≥ $0.0000 · billing uncertain');
+  assert.equal(aggregateCostLabel([billingUncertainDnf]), '≥ $0.0000 · billing uncertain · exposure $0.0186');
+  assert.equal(aggregateCostLabel([
+    { cost_usd: 0.3, budget_status: 'within_cap', spending_exposure_usd: 0.3 }, billingUncertainDnf,
+  ]), '≥ $0.3000 · billing uncertain · exposure $0.3186');
+  assert.equal(recordedCostLabel({ ...billingUncertainDnf, cost_usd: null }), 'Unknown · billing uncertain');
+  assert.equal(aggregateCostLabel([{ cost_usd: 0.3, budget_status: 'within_cap', spending_exposure_usd: 0.3 }]), '$0.3000');
 });
 
 test('qualification and performance summaries follow published status and p95 values', () => {
