@@ -1,0 +1,3 @@
+# Rundale Benchmark agent guide
+
+Read docs/specification.md before changing scoring or runtime behavior. Never claim model or judge qualification without its pinned evidence. Native provider APIs only; no OpenRouter. Do not make paid calls in CI. Run `python3 -m unittest discover -s tests -v` before committing and pushing. For site changes also run `npm ci`, `npm run check`, and `npm run build` in site/. Changes must go through PR review; do not merge your own PR. Preserve immutable run history, cost reservations, and source attribution. Never commit credentials or private reviewer identifiers.
