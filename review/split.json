@@ -1,0 +1,24 @@
+{
+  "selection": [
+    "R-34f930c1a4",
+    "R-894cbc5dd8",
+    "R-92f8cb886f",
+    "R-a52722cfb9",
+    "R-01a7731881",
+    "R-10dea41287",
+    "R-1c00c344e0",
+    "R-523aeb913a"
+  ],
+  "validation": [
+    "R-aeb44bb132",
+    "R-d00bc62bcc",
+    "R-d6f91d223e",
+    "R-e8fda4c381",
+    "R-64393b3c07",
+    "R-6a4d87c820",
+    "R-980d6e39c8",
+    "R-e7c3f2ea54"
+  ],
+  "development": "Previously scored synthetic pilot; excluded from reference validation",
+  "status": "awaiting owner ratings"
+}

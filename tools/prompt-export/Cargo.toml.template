@@ -1,0 +1,9 @@
+[package]
+name = "bench3-prompt-export"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+limerick-core = { path = "__ENGINE_CHECKOUT__/limerick/crates/limerick-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

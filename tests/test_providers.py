@@ -1,0 +1,194 @@
+import json
+import io
+import urllib.error
+import unittest
+from unittest.mock import patch
+from pathlib import Path
+
+from rundale_bench.providers import NativeClient, ProviderError, _UrllibTransport, load_profiles, resolve_profile
+
+
+class FakeTransport:
+    def __init__(self, data, status=200): self.data, self.status, self.calls = data, status, []
+    def post(self, url, headers, body, timeout=180):
+        self.calls.append((url, headers, json.loads(body), timeout))
+        return self.status, json.dumps(self.data).encode()
+
+
+class FakeStream:
+    status = 200
+    def __init__(self, lines, error=None): self.lines, self.error, self.closed = lines, error, False
+    def __enter__(self): return self
+    def __exit__(self, *exc): self.closed = True
+    def __iter__(self):
+        for line in self.lines: yield line
+        if self.error: raise self.error
+
+
+class FakeStreamingTransport:
+    def __init__(self, lines, error=None): self.stream = FakeStream(lines, error); self.calls = []
+    def stream_post(self, url, headers, body, timeout=180):
+        self.calls.append((url, headers, json.loads(body), timeout))
+        return self.stream
+
+
+class ProviderTests(unittest.TestCase):
+    def profile(self, provider="openai", **extra):
+        return {"id":"test", "provider":provider, "model":"test-model", "reasoning":"high", "api_key_env":"TEST_KEY", **extra}
+
+    def test_profiles_exact_reasoning_snapshots_and_pricing(self):
+        registry = load_profiles(Path(__file__).parents[1] / "config/providers.json")
+        self.assertEqual(resolve_profile("gpt-6.1-sol", registry=registry)["reasoning"], "max")
+        self.assertEqual(resolve_profile("gpt-6.1-sol", "high", registry)["id"], "gpt-6.1-sol-judge-high")
+        with self.assertRaises(ValueError): resolve_profile("gemini-3.5-flash-lite", "max", registry)
+        self.assertIsNone(registry["claude-sonnet-4-6"]["input_per_million_usd"])
+        self.assertEqual(registry["gpt-6.1-sol-judge-high"]["supported_reasoning"], ["low", "medium", "high", "xhigh", "max"])
+        self.assertEqual(registry["jev-1.13.0"]["input_per_million_usd"], 0.042)
+        self.assertEqual(registry["gemini-3.5-flash-lite"]["supported_reasoning"], ["minimal", "low", "medium", "high"])
+        with self.assertRaisesRegex(ValueError, "disabled"): resolve_profile("gemini-3.7-flash", registry=registry)
+
+    def test_openai_native_response_usage_and_request(self):
+        fake = FakeTransport({"model":"gpt-6.1-sol", "output_text":"hello", "usage":{"input_tokens":10,"input_tokens_details":{"cached_tokens":4},"output_tokens":7,"output_tokens_details":{"reasoning_tokens":3}}})
+        result = NativeClient({"TEST_KEY":"secret"}, fake).generate(self.profile(), [{"role":"user","content":"hi"}], 50)
+        self.assertEqual(result.text, "hello")
+        self.assertEqual(result.usage, {"input_tokens":10,"cached_input_tokens":4,"output_tokens":7,"reasoning_tokens":3})
+        url, headers, body, _ = fake.calls[0]
+        self.assertEqual(url, "https://api.openai.com/v1/responses")
+        self.assertEqual(body["reasoning"], {"effort":"high"})
+        self.assertEqual(headers["Authorization"], "Bearer secret")
+
+    def test_google_gemini_usage_and_cache_pricing_fields(self):
+        fake = FakeTransport({"model":"gemini-3.7-flash","candidates":[{"content":{"parts":[{"text":"ok"}]}}],"usageMetadata":{"promptTokenCount":100,"cachedContentTokenCount":40,"candidatesTokenCount":20,"thoughtsTokenCount":5}})
+        profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
+        result = NativeClient({"TEST_KEY":"s"}, fake).generate(profile, [{"role":"user","content":"x"}], 30)
+        self.assertEqual(result.usage["cached_input_tokens"], 40)
+        self.assertEqual(result.usage["output_tokens"], 25)
+        self.assertEqual(result.raw["usageMetadata"]["thoughtsTokenCount"], 5)
+        self.assertEqual(result.usage["reasoning_tokens"], 5)
+        self.assertIsNone(result.ttft_ms)  # This fake deliberately exercises nonstream fallback.
+        self.assertEqual(fake.calls[0][2]["generationConfig"]["thinkingConfig"], {"thinkingLevel":"high"})
+
+    def test_google_sse_measures_first_non_thought_nonempty_text(self):
+        lines = [
+            b'data: {"candidates":[{"content":{"parts":[{"text":"private thought","thought":true}]}}]}\n',
+            b'data: {"candidates":[{"content":{"parts":[{"text":""}]}}]}\n',
+            b'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}\n',
+            b'data: {"modelVersion":"gemini-3.7-flash","candidates":[{"finishReason":"STOP","content":{"parts":[{"text":" world"}]}}],"usageMetadata":{"promptTokenCount":100,"cachedContentTokenCount":40,"candidatesTokenCount":20,"thoughtsTokenCount":5}}\n',
+        ]
+        transport = FakeStreamingTransport(lines)
+        profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
+        with patch("rundale_bench.providers.time.monotonic", side_effect=[10.0, 11.5, 14.0]):
+            result = NativeClient({"TEST_KEY":"key"}, transport).generate(profile, [{"role":"user","content":"x"}], 30)
+        self.assertEqual(result.text, "Hello world")
+        self.assertEqual(result.ttft_ms, 1500.0)
+        self.assertEqual(result.elapsed_ms, 4000.0)
+        self.assertEqual(result.usage["output_tokens"], 25)
+        self.assertEqual(len(result.raw["stream_chunks"]), 4)
+        self.assertEqual(result.model, "gemini-3.7-flash")
+        url, headers, body, timeout = transport.calls[0]
+        self.assertTrue(url.endswith(":streamGenerateContent?alt=sse"))
+        self.assertEqual(headers["x-goog-api-key"], "key")
+        self.assertEqual(timeout, 180)
+        self.assertEqual(body["generationConfig"]["thinkingConfig"], {"thinkingLevel":"high"})
+        self.assertTrue(transport.stream.closed)
+
+    def test_google_stream_failure_preserves_chunks_and_marks_billing_uncertain_without_retry(self):
+        lines = [b'data: {"candidates":[{"content":{"parts":[{"text":"partial"}]}}],"usageMetadata":{"promptTokenCount":20,"candidatesTokenCount":3,"thoughtsTokenCount":1}}\n']
+        transport = FakeStreamingTransport(lines, OSError("stream stopped"))
+        profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, transport).generate(profile, [{"role":"user","content":"x"}], 30)
+        self.assertEqual(caught.exception.kind, "transport")
+        self.assertTrue(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["partial_text"], "partial")
+        self.assertEqual(len(caught.exception.payload["chunks"]), 1)
+        self.assertEqual(caught.exception.payload["usage"]["thoughtsTokenCount"], 1)
+        self.assertEqual(len(transport.calls), 1)
+
+    def test_google_missing_thought_usage_is_uncertain_not_zero_cost(self):
+        fake = FakeTransport({"model":"gemini-3.7-flash","candidates":[{"content":{"parts":[{"text":"ok"}]}}],"usageMetadata":{"promptTokenCount":100,"candidatesTokenCount":20}})
+        profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"s"}, fake).generate(profile, [{"role":"user","content":"x"}], 30)
+        self.assertTrue(caught.exception.billing_uncertain)
+
+    def test_domain_allowlist_rejects_openrouter_before_transport(self):
+        fake = FakeTransport({})
+        p = self.profile(base_url="https://openrouter.ai/api")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"secret"}, fake).generate(p, [], 10)
+        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertFalse(fake.calls)
+
+    def test_api_key_is_not_in_error_payload_or_message(self):
+        fake = FakeTransport({"error":{"message":"bad","api_key":"leak"}}, status=401)
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"secret"}, fake).generate(self.profile(), [], 10)
+        self.assertNotIn("secret", str(caught.exception))
+        self.assertNotIn("leak", json.dumps(caught.exception.payload))
+
+    def test_api_key_echo_is_redacted_from_generated_text(self):
+        fake = FakeTransport({"model":"test-model","output_text":"The key is secret","usage":{"input_tokens":1,"output_tokens":2}})
+        response = NativeClient({"TEST_KEY":"secret"}, fake).generate(self.profile(), [], 10)
+        self.assertEqual(response.text, "The key is [REDACTED]")
+        self.assertNotIn("secret", json.dumps(response.raw))
+
+    def test_missing_usage_marks_billing_uncertain(self):
+        fake = FakeTransport({"output_text":"answer"})
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"secret"}, fake).generate(self.profile(), [], 10)
+        self.assertTrue(caught.exception.billing_uncertain)
+
+    def test_anthropic_messages_native_wire_and_cache_usage(self):
+        fake = FakeTransport({"model":"claude-sonnet-4-6","content":[{"type":"text","text":"hello"}],"stop_reason":"end_turn","usage":{"input_tokens":12,"cache_read_input_tokens":8,"cache_creation_input_tokens":3,"output_tokens":5}})
+        profile = self.profile("anthropic", model="claude-sonnet-4-6")
+        result = NativeClient({"TEST_KEY":"s"}, fake).generate(profile, [{"role":"system","content":"rules"},{"role":"user","content":"hi"}], 44)
+        url, headers, body, _ = fake.calls[0]
+        self.assertEqual(url, "https://api.anthropic.com/v1/messages")
+        self.assertEqual(headers["anthropic-version"], "2023-06-01")
+        self.assertEqual(body["system"], "rules")
+        self.assertEqual(body["output_config"]["effort"], "high")
+        self.assertEqual(result.usage["cached_input_tokens"], 8)
+        self.assertEqual(result.usage["cache_write_input_tokens"], 3)
+        self.assertEqual(result.usage["input_tokens"], 23)
+
+    def test_actual_provider_refusal_not_plain_text_npc_refusal(self):
+        fake = FakeTransport({"error":{"code":"content_filter","message":"blocked"}}, status=400)
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"secret"}, fake).generate(self.profile(), [], 10)
+        self.assertEqual(caught.exception.kind, "provider_refusal")
+        response = {"model":"x","output_text":"I refuse to open the door.","usage":{"input_tokens":1,"output_tokens":1}}
+        self.assertEqual(NativeClient._parse("openai", response)[0], "I refuse to open the door.")
+
+    def test_incomplete_response_is_malformed_not_refusal_and_keeps_usage(self):
+        response = {"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[],"usage":{"input_tokens":7,"output_tokens":9}}
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient._parse("openai", response)
+        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertFalse(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["usage"]["output_tokens"], 9)
+
+    def test_typesafe_cannot_be_used_as_candidate_text_generator(self):
+        fake = FakeTransport({})
+        profile = self.profile("typesafe", model="jev-1.13.0")
+        with self.assertRaises(ProviderError): NativeClient({"TEST_KEY":"secret"}, fake).generate(profile, [], 10)
+        self.assertEqual(fake.calls, [])
+
+    def test_http_redirect_is_not_followed(self):
+        state = {}
+        class FakeOpener:
+            def open(self, request, timeout=None):
+                handler = state["handler"]()
+                state["redirect_request"] = handler.redirect_request(request, None, 307, "Redirect", {"Location":"https://attacker.example"}, "https://attacker.example")
+                raise urllib.error.HTTPError(request.full_url, 307, "Redirect", {"Location":"https://attacker.example"}, io.BytesIO(b"{}"))
+        def build_opener(handler):
+            state["handler"] = handler
+            return FakeOpener()
+        with patch("urllib.request.build_opener", side_effect=build_opener):
+            status, body = _UrllibTransport().post("https://api.openai.com/v1/responses", {"Authorization":"Bearer key"}, b"{}")
+        self.assertEqual(status, 307)
+        self.assertEqual(body, b"{}")
+        self.assertIsNone(state["redirect_request"])
+
+
+if __name__ == "__main__": unittest.main()

@@ -1,5 +1,34 @@
 # Rundale Benchmark
 
-Versioned evaluation of Rundale dialogue inference: dialogue, multiturn, and Gaeilge.
+Benchmark 3.0 evaluates Rundale dialogue, six-turn play, and Gaeilge with fixed,
+versioned cases. These are product-specific evaluation scores, not measures of
+general intelligence. English judge qualification requires the owner's blind
+reference ratings; the Gaeilge evaluation uses source-backed objective checks
+and makes no Irish fluency claim.
 
-Benchmark 3.0 is under implementation. No model or judge is qualified yet.
+Version 3.0 is under implementation. Judge qualification is pending the human
+review of 16 English cases in total. The current suite covers three
+evaluations: dialogue, multi-turn, and Gaeilge. No qualified ranking is available
+yet.
+
+## Requirements and installation
+
+Install Node.js 24 and Python 3.12. From this repository, install the Python
+package and site dependencies:
+
+```sh
+python3.12 -m pip install -e .
+cd site && pnpm install --frozen-lockfile
+```
+
+Check suite and qualification readiness with:
+
+```sh
+rundale-bench validate-suite
+rundale-bench status
+```
+
+Read the [benchmark specification](docs/specification.md), [running guide](docs/running.md),
+[provider details](docs/providers.md), and [data provenance](docs/data-provenance.md)
+before working on scoring or execution. Published records are shown at
+[dmooney.github.io/rundale-bench](https://dmooney.github.io/rundale-bench/).

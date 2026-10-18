@@ -1,0 +1,16 @@
+{
+  "schema_version": "review-v2",
+  "status": "ready for human review; no judge scores for this revision",
+  "pack_sha256": "e65d225a1a5d076ffa38c81ec61bb58639352ad0f9f779ce45e3bd86295f336a",
+  "hashes": {
+    "pack.json": "e65d225a1a5d076ffa38c81ec61bb58639352ad0f9f779ce45e3bd86295f336a",
+    "rubric.json": "3713a20465b4fbfd0657b8797e53957a4188d07659bf7b116761d6a702a0be1e",
+    "provenance.json": "8121f7221c90837ab92fb9776e9986022b62b72cdece535355f36e684ed09bc3"
+  },
+  "review_counts": {
+    "owner": 16,
+    "fluent_irish": 8
+  },
+  "reference_labels_completed": 0,
+  "holdout": false
+}
