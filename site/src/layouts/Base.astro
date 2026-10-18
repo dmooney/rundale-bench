@@ -1,0 +1,9 @@
+---
+import '../styles/site.css';
+const { title = 'Rundale Bench' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content="Transparent, evidence-linked evaluations of models for Rundale." /><title>{title}</title></head>
+  <body><header class="top"><a class="brand" href="/rundale-bench/">Rundale <span>Bench</span></a><nav><a href="/rundale-bench/">Results</a><a href="/rundale-bench/archive/">Archive</a><a href="/rundale-bench/review/index.html">Blind English review</a></nav></header><slot /><footer>Published evaluation records with linked evidence. Scores are reported as recorded; no ranking or qualification is inferred by this site.</footer></body>
+</html>

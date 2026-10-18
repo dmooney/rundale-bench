@@ -1,0 +1,13 @@
+{
+  "status": "pending",
+  "reason": "Owner English reference ratings and native API judge qualification are incomplete.",
+  "judges": {
+    "dialogue": {
+      "qualified": false
+    },
+    "multiturn": {
+      "qualified": false
+    }
+  },
+  "irish_scope": "Source-backed objective grammar, meaning, and code-switch checks; no fluency or style qualification."
+}

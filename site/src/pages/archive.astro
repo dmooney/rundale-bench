@@ -1,0 +1,7 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Rundale Bench · Archive"><main><section class="hero"><p class="eyebrow">ARCHIVE</p><h1>Earlier evaluation records</h1><p>Historical benchmark records are preserved separately from the current evaluation. Select an archived version to inspect its reported run values.</p></section><section><h2>Before version 3.0</h2><p>Historical results use different coverage and rubrics and are not comparable to 3.0.</p><ul><li><a href="/rundale-bench/archive/pre-3.0/dialogue-qualification.json">Cloud dialogue qualification records</a></li><li><a href="/rundale-bench/archive/pre-3.0/leaderboard.jsonl">Preliminary local leaderboard</a></li><li><a href="/rundale-bench/archive/pre-3.0/provenance.json">Source revisions and hashes</a></li></ul></section><section id="archive-list" class="archive-list"><p>Loading archived versions…</p></section></main><script>
+// @ts-nocheck
+const root='/rundale-bench';let data;try{data=await(await fetch(`${root}/results.json`)).json()}catch{data={versions:[]}}const items=(data.versions||[]).filter(v=>v.version!=='3.0');const host=document.getElementById('archive-list');host.innerHTML=items.length?items.map(v=>`<a class="archive-card" href="${root}/?version=${encodeURIComponent(v.version)}"><span>Version ${v.version}</span><strong>${(v.runs||[]).length} run records</strong><small>Qualification: ${v.qualification?.status||'archived'}</small></a>`).join(''):'<p>No archived versions are currently published.</p>';
+</script></Base>

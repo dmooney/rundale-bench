@@ -1,0 +1,132 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Rundale Bench · Results">
+<main>
+  <section class="hero"><p class="eyebrow">MODEL EVALUATION · ROSCOMMON, 1820</p><h1>How well can a model inhabit Rundale?</h1><p>Dialogue, multi-turn play, and Gaeilge evaluation records, with source evidence attached to every run.</p><p class="pending" id="qualification-banner"><strong id="qualification-title">Qualification status pending.</strong> <span id="qualification-description">Waiting for the published evaluation record.</span></p></section>
+  <section class="toolbar"><label>Evaluation version <select id="version-filter" aria-label="Evaluation version"></select></label><span id="version-note" class="muted"></span><a class="button secondary" href="/rundale-bench/archive/">Previous records</a></section>
+  <section class="stats" aria-label="Version summary"><div><span>Run history</span><strong id="run-count">—</strong></div><div><span>Qualification</span><strong id="qualification">—</strong><small id="qualification-reason"></small></div><div><span>Cost recorded</span><strong id="total-cost">—</strong></div><div><span>Evaluation coverage</span><strong id="coverage">—</strong></div></section>
+  <section class="section-head"><div><p class="eyebrow">EVALUATION RECORDS</p><h2>Latest model results</h2></div><p>Only values present in the published records appear here. DNF and missing scores remain explicit.</p></section>
+  <div class="table-wrap"><table><thead><tr><th>Model / reasoning</th><th>Overall</th><th>Dialogue</th><th>Multi-turn</th><th>Gaeilge</th><th>Run date</th><th>Performance · p95</th><th>Cost</th><th>Budget</th><th>Coverage</th><th>Run status</th><th>Quality qualification</th><th>Notice / reason</th><th>Evidence</th></tr></thead><tbody id="runs"><tr><td colspan="14">Loading published run index…</td></tr></tbody></table></div>
+  <p class="separate">Irish-style impressions are provisional and separate from evaluated scores.</p>
+  <section id="run-detail" class="run-detail" hidden><div class="section-head"><div><p class="eyebrow">SOURCE RECORD</p><h2 id="detail-title">Run details</h2></div><a id="download-run" class="button" download>Download raw run JSON</a></div><div id="detail-links" class="evidence-links"></div><details><summary>Raw run record</summary><pre id="raw-record"></pre></details></section>
+</main>
+<script>
+// @ts-nocheck
+import {
+  aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
+  performanceLabel, qualificationCopy, runNoticeLabel, runStatusLabel, scoreLabel,
+} from '../lib/dashboard.mjs';
+
+const base = '/rundale-bench';
+const byId = (id) => document.getElementById(id);
+const esc = escapeHtml;
+const fmtDate = (value) => {
+  if (!value) return '—';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+};
+const fmtCost = (value) => typeof value === 'number' && Number.isFinite(value) ? `$${value.toFixed(4)}` : '—';
+const fmtBudget = (row) => {
+  const label = budgetLabel(row);
+  const exposure = row?.spending_exposure_usd;
+  return typeof exposure === 'number' && Number.isFinite(exposure)
+    ? `${label} · exposure ${fmtCost(exposure)}`
+    : label;
+};
+let data = { versions: [] };
+try { data = await (await fetch(`${base}/results.json`)).json(); } catch {}
+const selector = byId('version-filter');
+for (const version of data.versions || []) {
+  const option = document.createElement('option');
+  option.value = version.version;
+  option.textContent = `Version ${version.version}`;
+  selector.append(option);
+}
+const requestedVersion = new URLSearchParams(location.search).get('version');
+if (requestedVersion && [...selector.options].some((option) => option.value === requestedVersion)) selector.value = requestedVersion;
+
+function show() {
+  const version = (data.versions || []).find((item) => item.version === selector.value);
+  if (!version) {
+    byId('runs').innerHTML = '<tr><td colspan="14">No published evaluation records yet.</td></tr>';
+    byId('run-count').textContent = '0';
+    byId('qualification').textContent = 'Pending';
+    byId('qualification-reason').textContent = 'Awaiting qualification evidence';
+    byId('total-cost').textContent = '—';
+    byId('coverage').textContent = 'No coverage recorded';
+    byId('qualification-title').textContent = 'Qualification status pending.';
+    byId('qualification-banner').classList.remove('qualified');
+    byId('qualification-description').textContent = 'No published evaluation records are available yet.';
+    return;
+  }
+
+  const qualification = qualificationCopy(version);
+  byId('qualification-title').textContent = qualification.title;
+  byId('qualification-banner').classList.toggle('qualified', qualification.status === 'qualified');
+  byId('qualification-description').textContent = qualification.description;
+  byId('qualification').textContent = qualification.status;
+  byId('qualification-reason').textContent = qualification.description;
+  byId('version-note').textContent = version.version === '3.0' ? 'Current evaluation' : 'Archived evaluation record';
+
+  const history = Array.isArray(version.runs) ? version.runs : [];
+  const rows = latestRows(version);
+  byId('run-count').textContent = String(history.length);
+  const totalCost = history.reduce((sum, run) => sum + (Number(run.cost_usd) || 0), 0);
+  byId('total-cost').textContent = history.some((run) => run.cost_usd != null) ? fmtCost(totalCost) : '—';
+  byId('coverage').textContent = aggregateCoverage(rows);
+
+  byId('runs').innerHTML = rows.length ? rows.map((row) => {
+    const notice = runNoticeLabel(row);
+    const attemptButton = row.latest_attempt_id && row.latest_attempt_id !== row.run_id
+      ? ` <button class="text-button" data-run="${esc(row.latest_attempt_id)}">Inspect latest attempt</button>`
+      : '';
+    return `<tr>
+      <td><strong>${esc(row.model)}</strong><small>${esc(row.reasoning || 'Reasoning unspecified')}</small></td>
+      <td>${esc(scoreLabel(row.overall, row.status))}</td>
+      <td>${esc(scoreLabel(row.scores?.dialogue, 'complete'))}</td>
+      <td>${esc(scoreLabel(row.scores?.multiturn, 'complete'))}</td>
+      <td>${esc(scoreLabel(row.scores?.gaeilge, 'complete'))}</td>
+      <td>${esc(fmtDate(row.completed_at))}</td>
+      <td>${esc(performanceLabel(row.uncertainty))}</td>
+      <td>${esc(fmtCost(row.cost_usd))}</td>
+      <td>${esc(fmtBudget(row))}</td>
+      <td>${esc(coverageLabel(row.coverage))}</td>
+      <td>${esc(runStatusLabel(row))}</td>
+      <td>${esc(qualification.status)}</td>
+      <td>${esc(notice)}${attemptButton}</td>
+      <td><button class="text-button" data-run="${esc(row.run_id)}">Open evidence</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="14">No latest model records published for this version yet.</td></tr>';
+  for (const button of document.querySelectorAll('[data-run]')) {
+    button.addEventListener('click', () => openRun(version, button.dataset.run));
+  }
+  byId('run-detail').hidden = true;
+}
+
+async function openRun(version, runId) {
+  const run = findRun(version, runId);
+  if (!run) return;
+  let evidencePath = run.evidence_path || `${version.version}/runs/${runId}.json`;
+  if (!/^[A-Za-z0-9._-]+\/runs\/[A-Za-z0-9._-]+\.json$/.test(evidencePath)) evidencePath = `${version.version}/runs/${runId}.json`;
+  const url = `${base}/evidence/${evidencePath.split('/').map(encodeURIComponent).join('/')}`;
+  let raw;
+  try { raw = await (await fetch(url)).json(); }
+  catch { raw = { error: 'Raw evidence file is not available yet.', evidence_url: url }; }
+  byId('detail-title').textContent = `${run.model} · ${run.run_id}`;
+  byId('raw-record').textContent = JSON.stringify(raw, null, 2);
+  byId('download-run').href = url;
+  byId('detail-links').innerHTML = `<a href="${esc(url)}" download>Raw request, response, and judgment record</a> <span>·</span> <span>Composite: ${esc(scoreLabel(run.overall, run.status))} · Dialogue ${esc(scoreLabel(run.scores?.dialogue, 'complete'))} · Multi-turn ${esc(scoreLabel(run.scores?.multiturn, 'complete'))} · Gaeilge ${esc(scoreLabel(run.scores?.gaeilge, 'complete'))}</span>`;
+  byId('run-detail').hidden = false;
+  byId('run-detail').scrollIntoView({ behavior: 'smooth' });
+}
+
+selector.addEventListener('change', () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('version', selector.value);
+  history.replaceState(null, '', url);
+  show();
+});
+show();
+</script>
+</Base>

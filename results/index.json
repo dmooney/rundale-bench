@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "versions": [
+    {
+      "version": "3.0",
+      "qualification": {
+        "status": "pending",
+        "reason": "Owner English reference ratings and native API judge qualification are incomplete.",
+        "suite_hash": null
+      },
+      "rows": [],
+      "runs": []
+    }
+  ]
+}

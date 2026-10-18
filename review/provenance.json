@@ -1,0 +1,156 @@
+{
+  "items": {
+    "R-92f8cb886f": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-07-27__kimi-k2-0905.json",
+      "source_sha256": "e4f54d1aa51bd966e9aee380cd01d953bb1c98f33cbee544c18954b7932a362e",
+      "source_call_id": "performance-2",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-e8fda4c381": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-08-08__gemini-3.5-flash-lite-low-reasoning-2048.json",
+      "source_sha256": "5d6963f2c4d34cc66393f9cfcce4dccab7da4bff3185ecb2bc8ba99a8337c4e4",
+      "source_call_id": "preflight-8",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-34f930c1a4": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-08-08__gpt-5.6-luna-no-reasoning.json",
+      "source_sha256": "67c98ca2023eb396c01d35e92a9ed2f854e3ab0d7c46d43c6bb67f148ab51d47",
+      "source_call_id": "performance-4",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-894cbc5dd8": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-07-27__kimi-k2-0905.json",
+      "source_sha256": "e4f54d1aa51bd966e9aee380cd01d953bb1c98f33cbee544c18954b7932a362e",
+      "source_call_id": "performance-7",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-d00bc62bcc": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-08-08__deepseek-v4-flash-0731-medium-reasoning-4096.json",
+      "source_sha256": "1c4db6c4ce5ac77b85dab78878e7a1b2644735879f43974d0899bac7a7410fd5",
+      "source_call_id": "performance-3",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-aeb44bb132": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-07-27__kimi-k2-0905.json",
+      "source_sha256": "e4f54d1aa51bd966e9aee380cd01d953bb1c98f33cbee544c18954b7932a362e",
+      "source_call_id": "performance-6",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-a52722cfb9": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-08-13__gemini-3.7-flash-medium-reasoning.json",
+      "source_sha256": "4a336547b388582ac59b17e46ac147ad0818d26523875d563407f1bfc1458fdf",
+      "source_call_id": "performance-1",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-d6f91d223e": {
+      "origin": "recorded",
+      "source_path": "promptfoo/bench-site/public/qualification-calls/2026-08-08__gpt-5.6-sol-no-reasoning.json",
+      "source_sha256": "14a335bfc3d3277052b4c1ff775e0520919b190e1680bf1b33b1cc66cbc6da1c",
+      "source_call_id": "performance-2",
+      "review_focus": "Distinct in-world request; judge against full original system/user. Compact review_context is verbatim excerpts only.",
+      "review_context_excerpt": "system[0:500] and user[final up-to-2900 chars before live-turn response instruction]",
+      "fluent_review_required": false
+    },
+    "R-980d6e39c8": {
+      "origin": "synthetic",
+      "review_focus": "relevance and certainty; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-01a7731881": {
+      "origin": "synthetic",
+      "review_focus": "instruction handling; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-6a4d87c820": {
+      "origin": "synthetic",
+      "review_focus": "memory and uncertainty; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-10dea41287": {
+      "origin": "synthetic",
+      "review_focus": "relevance and certainty; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-523aeb913a": {
+      "origin": "synthetic",
+      "review_focus": "instruction handling; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-64393b3c07": {
+      "origin": "synthetic",
+      "review_focus": "memory and uncertainty; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-1c00c344e0": {
+      "origin": "synthetic",
+      "review_focus": "relevance and certainty; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-e7c3f2ea54": {
+      "origin": "synthetic",
+      "review_focus": "instruction handling; history contains established, unknown, or quoted material that must be distinguished.",
+      "fluent_review_required": false
+    },
+    "R-343d312415": {
+      "origin": "synthetic",
+      "review_focus": "Irish-only answer; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-8290762e54": {
+      "origin": "synthetic",
+      "review_focus": "Irish-only answer; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-2f3db02848": {
+      "origin": "synthetic",
+      "review_focus": "Irish-only answer; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-37ef22636a": {
+      "origin": "synthetic",
+      "review_focus": "Irish-only answer; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-f34cbc701d": {
+      "origin": "synthetic",
+      "review_focus": "explicit language switch or translation; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-640a67462a": {
+      "origin": "synthetic",
+      "review_focus": "explicit language switch or translation; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-7e3906cae1": {
+      "origin": "synthetic",
+      "review_focus": "explicit language switch or translation; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    },
+    "R-14ad3902ca": {
+      "origin": "synthetic",
+      "review_focus": "explicit language switch or translation; assess requested language pattern, task meaning where applicable, and Irish form. No answer is designated as gold.",
+      "fluent_review_required": true
+    }
+  }
+}
