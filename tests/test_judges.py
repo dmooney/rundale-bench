@@ -44,6 +44,30 @@ class JudgeTests(unittest.TestCase):
         self.assertEqual(fake.calls[0][0], "https://api.typesafe.ai/v1/systemone")
         self.assertEqual(result["usage"]["input_tokens"], 40)
 
+    def test_grade_order_changes_presentation_but_preserves_grade_keys(self):
+        order = [5, 4, 3, 2, 1]
+        fake = FakeTransport({"model":"gpt-6.1-sol","output_text":json.dumps(
+            {"axes":{"voice":3,"continuity":4},"rationales":{"voice":"x","continuity":"y"}}),
+            "usage":{"input_tokens":30,"output_tokens":10}})
+        profile = {"provider":"openai","model":"gpt-6.1-sol","reasoning":"high","api_key_env":"T"}
+        judge_response(NativeClient({"T":"key"}, fake), profile, self.item, self.rubric, grade_order=order)
+        body = fake.calls[0][2]
+        self.assertEqual(body["text"]["format"]["schema"]["properties"]["axes"]["properties"]["voice"]["enum"], order)
+        rubric_rows = json.loads(body["input"][1]["content"])["rubric"]["voice"]
+        self.assertEqual([row["grade"] for row in rubric_rows], order)
+        jev = FakeTransport({"model":"jev-1.13.0","answers":{"voice":{"choice":"3"},"continuity":{"choice":"4"}},"usage":{"input_tokens":40}})
+        judge_response(NativeClient({"T":"key"}, jev), {"provider":"typesafe","model":"jev-1.13.0","api_key_env":"T"}, self.item, self.rubric, grade_order=order)
+        self.assertEqual(list(jev.calls[0][2]["questions"]["voice"]["criteria"]), ["5","4","3","2","1"])
+        self.assertEqual(list(jev.calls[0][2]["state"]["rubric"]["voice"]), ["5","4","3","2","1"])
+        default = FakeTransport({"model":"jev-1.13.0","answers":{"voice":{"choice":"3"},"continuity":{"choice":"4"}},"usage":{"input_tokens":40}})
+        judge_response(NativeClient({"T":"key"}, default), {"provider":"typesafe","model":"jev-1.13.0","api_key_env":"T"}, self.item, self.rubric)
+        self.assertEqual(list(default.calls[0][2]["state"]["rubric"]["voice"]), ["1","2","3","4","5"])
+        self.assertEqual(list(default.calls[0][2]["questions"]["voice"]["criteria"]), ["1","2","3","4","5"])
+
+    def test_rejects_invalid_grade_order(self):
+        with self.assertRaises(ValueError):
+            judge_response(None, {}, self.item, self.rubric, grade_order=[1, 1, 2, 3, 4])
+
     def test_invalid_judgment_preserves_paid_receipt_without_uncertain_billing(self):
         data = {"model":"gpt-6.1-sol","output_text":"not json","usage":{"input_tokens":35,"output_tokens":8}}
         fake = FakeTransport(data)

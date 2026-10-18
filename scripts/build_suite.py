@@ -132,6 +132,9 @@ def rubrics() -> dict:
     return {group: {axis: {"description": axes[axis][0], "anchors": {str(n): text for n, text in enumerate(axes[axis][1], 1)}} for axis in names} for group, names in {"dialogue": ["character", "period_authenticity", "responsiveness", "grounding", "craft", "mood_fidelity"], "multiturn": ["memory_consistency", "persona_consistency", "conversational_relevance"]}.items()}
 
 def main() -> None:
+    existing = OUT / "manifest.json"
+    if existing.exists() and json.loads(existing.read_text()).get("status") == "ready":
+        raise ValueError("Ready suite is frozen; build a new benchmark version instead")
     OUT.mkdir(parents=True, exist_ok=True)
     cases = build_cases()
     case_bytes = b"".join((json.dumps(c, ensure_ascii=False, sort_keys=True) + "\n").encode() for c in cases)

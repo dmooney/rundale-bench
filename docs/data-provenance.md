@@ -55,6 +55,7 @@ MIT-licensed and publishes an Irish (`GA_IE`) config. Its visible subjects are
 game-relevant subset, so no EU-MMLU items or answer keys are included.
 
 The manifest pins canonical cases, rubrics, captures, and source hashes; it
-reports repeat IDs and leaves judge selection empty. Suite status remains
-`draft` because English judge qualification is pending. Rebuild the frozen
-authored pack with `python3 scripts/build_suite.py`.
+reports repeat IDs. The builder produces an unselected draft; automated
+screening pins the judge policy and permits an explicitly provisional launch.
+`python3 scripts/build_suite.py` refuses to overwrite a ready suite. Tests build
+in temporary directories, preserving the active manifest and evidence.

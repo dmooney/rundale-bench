@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun,
-  latestRows, performanceLabel, qualificationCopy, runNoticeLabel, runStatusLabel, scoreLabel,
+  latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
+  rowQualificationLabel, runNoticeLabel, runStatusLabel, scoreLabel, scoreStatusLabel,
 } from '../src/lib/dashboard.mjs';
 
 const version = {
@@ -54,6 +55,36 @@ test('qualification and performance summaries follow published status and p95 va
   assert.equal(performanceLabel(version.rows[0].uncertainty), 'Dialogue: latency 1.8 s, TTFT 450 ms');
   assert.equal(qualificationCopy({ version: '2.0', qualification: { status: 'qualified' } }).title, 'Version 2.0 is qualified.');
   assert.equal(scoreLabel(null, 'complete'), '—');
+});
+
+test('provisional scoring status is explicit and each row uses its own validation record', () => {
+  const provisional = {
+    version: '3.0',
+    qualification: {
+      status: 'provisional',
+      validation_basis: 'automated_checks_only',
+      reason: 'Owner authorized provisional publication.',
+    },
+  };
+  assert.deepEqual(qualificationCopy(provisional), {
+    status: 'provisional',
+    title: 'Version 3.0 scores are provisional.',
+    description: 'Owner authorized provisional publication.',
+  });
+  assert.equal(scoreStatusLabel({ score_status: 'provisional' }), 'Provisional score');
+  assert.equal(scoreStatusLabel({ score_status: 'human_validated' }), 'Human validated score');
+  assert.equal(rowQualificationLabel({ qualification_status: 'provisional' }), 'Provisional');
+  assert.equal(rowQualificationLabel({ qualification_status: 'human_validated' }), 'Human validated');
+  assert.equal(rowQualificationLabel({ qualification_status: 'qualified' }), 'Qualified');
+  assert.equal(rowQualificationLabel({}), 'Unreported');
+  // A qualified version receipt must not confer validation on a row without its own status.
+  assert.equal(rowQualificationLabel({ score_status: 'provisional' }), 'Unreported');
+  assert.deepEqual(qualificationEvidenceLinks({ version: '3.0' }, '/rundale-bench/'), [
+    { label: 'Qualification status', href: '/rundale-bench/evidence/qualification/3.0/status.json' },
+    { label: 'Automated checks', href: '/rundale-bench/evidence/qualification/3.0/controls.json' },
+    { label: 'Raw judgments', href: '/rundale-bench/evidence/qualification/3.0/judgments.json' },
+  ]);
+  assert.deepEqual(qualificationEvidenceLinks({ version: '../private' }, '/rundale-bench/'), []);
 });
 
 test('untrusted display strings are escaped before table markup is assembled', () => {

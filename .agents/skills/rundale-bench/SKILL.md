@@ -1,6 +1,6 @@
 ---
 name: rundale-bench
-description: Run a budgeted Benchmark 3.0 model evaluation after judge qualification and publish its raw evidence for independent review. Use when asked to test a model or run an evaluation in this repository.
+description: Run a budgeted Benchmark 3.0 model evaluation after automated judge screening and publish its raw evidence for independent review. Use when asked to test a model or run an evaluation in this repository.
 ---
 
 # Test a model
@@ -17,13 +17,15 @@ acting. Follow their current interfaces; do not invent commands.
    paid call in CI.
 2. Run `rundale-bench run MODEL --dry-run` (and include `--reasoning SETTING` if
    the user selected one). This must be valid and have no blockers before paid
-   execution. A missing or unqualified judge, draft suite, or pending engine
-   capture is a stop condition; do not bypass the qualification guard.
-3. If qualification is requested and owner reference ratings are available, use
-   the existing `rundale-bench qualify collect` and `rundale-bench qualify
-   evaluate --ratings PATH` interfaces. Collection makes paid native API calls
-   under its $10 cap. Stop if its dry/preflight requirements are unmet. Do not
-   fabricate reference ratings or treat synthetic pilots as gold.
+   execution. Missing judge screening, a draft suite, or pending engine capture is a stop
+   condition. A matching provisional receipt permits execution and provisional
+   publication; preserve its label and never claim human validation.
+3. If calibration is requested, use `rundale-bench qualify collect` and then
+   `rundale-bench qualify screen`. Collection makes native API calls under a
+   durable $10 cap; screen is offline and needs no human ratings. Reuse completed
+   paid calls. Do not fabricate references or ask the owner for manual review.
+   Human feedback is deferred; the optional `qualify evaluate --ratings PATH`
+   workflow is only for actual future human references.
 4. Once the dry run is clear, run the actual model evaluation with at most $5,
    including judge calls. Use the CLI's existing `run` options and resumable run
    ID. Inspect the local raw run record and its request, response, judgment,
