@@ -83,15 +83,35 @@ class SuiteDataTests(unittest.TestCase):
         self.assertTrue(all(c["metadata"]["reference"].startswith("https://arxiv.org/html/2510.20957v1#S3.2.") for c in ga))
         self.assertTrue(all(c["metadata"]["license"] == "CC BY 4.0" for c in ga))
         self.assertTrue(all(c["metadata"]["attribution"].startswith("McGiff et al.") for c in ga))
-        for subcategory in ("grammar", "meaning"):
+        for subcategory in ("grammar", "meaning", "code_switch"):
             items = [c for c in ga if c["subcategory"] == subcategory]
-            answer_counts = {letter: sum(c["answer"]["expected"] == letter for c in items) for letter in "AB"}
+            letter_for = lambda c: c["answer"]["expected"] if subcategory != "code_switch" else c["answer"]["expected"]["irish_meaning_choice"]
+            answer_counts = {letter: sum(letter_for(c) == letter for c in items) for letter in "AB"}
             self.assertEqual(answer_counts, {"A": 4, "B": 4})
             for case in items:
                 prompt = case["messages"][0]["content"]
-                correct = case["metadata"].get("correct_sentence", case["metadata"].get("source_gloss"))
-                self.assertIsNotNone(correct)
-                self.assertIn(f"{case['answer']['expected']}: {correct}", prompt)
+                if subcategory == "code_switch":
+                    expected = case["answer"]["expected"]
+                    self.assertEqual(prompt.count(case["metadata"]["source_gloss"]), 1)
+                    self.assertIn(f"{case['metadata']['answer_letter']}: {case['metadata']['source_gloss']}", prompt)
+                    self.assertEqual(expected["irish_meaning_choice"], case["metadata"]["answer_letter"])
+                    self.assertEqual({k: v for k, v in expected.items() if k != "irish_meaning_choice"}, case["metadata"]["english_facts"])
+                    self.assertIn("Mixed-language report:", prompt)
+                    self.assertNotIn("Published English gloss:", prompt)
+                else:
+                    correct = case["metadata"].get("correct_sentence", case["metadata"].get("source_gloss"))
+                    self.assertIsNotNone(correct)
+                    self.assertIn(f"{case['answer']['expected']}: {correct}", prompt)
+        switches = [c for c in ga if c["subcategory"] == "code_switch"]
+        ochtar = next(c for c in switches if c["id"] == "g22")
+        self.assertEqual(ochtar["answer"]["expected"]["gate_state"], "closed")
+        report = ochtar["messages"][0]["content"].lower().split("irish meaning options:", 1)[0]
+        self.assertNotIn("eight men", report)
+        coverage = self.manifest["source_coverage"]
+        self.assertEqual(coverage["published_irish_examples"], 8)
+        self.assertEqual(coverage["probe_groups_per_example"], 3)
+        self.assertEqual(coverage["independent_irish_source_items"], 8)
+        self.assertFalse(coverage["observations_are_independent"])
         self.assertTrue(all(c["max_output_tokens"] == 4096 for c in self.cases))
         rubrics = json.loads((SUITE / "rubrics.json").read_text())
         for groups in rubrics.values():

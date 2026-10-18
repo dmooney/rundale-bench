@@ -170,7 +170,7 @@ def evaluate(root:Path, references:Path) -> dict:
         if old.get('status')=='qualified':
             stable=lambda x:{k:v for k,v in x.items() if k!='qualified_at'}
             if stable(old)!=stable(receipt):raise ValueError('Qualified configuration is frozen; create a new benchmark version')
-            return old
+            receipt=old
     if qualified:
         # Both writes are atomic individually; any interruption fails closed on hash mismatch.
         atomic_json(manifest_path,manifest)

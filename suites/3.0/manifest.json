@@ -1,5 +1,5 @@
 {
-  "cases_sha256": "e3fd99762691316d01ae3d814be279550824c43960e33ff69a8c3844f652b1b8",
+  "cases_sha256": "34a14fbda571213e90bb3886e12519c77544687a4b63b3e699e2de32972984f3",
   "counts": {
     "dialogue": 24,
     "gaeilge": 24,
@@ -87,6 +87,14 @@
         "11_adverbs_modifiers"
       ]
     }
+  },
+  "source_coverage": {
+    "independent_irish_source_items": 8,
+    "note": "The same eight published examples support grammar, meaning, and code-switch probes; 24 observations are not 24 independent Irish source items.",
+    "observations_are_independent": false,
+    "probe_groups_per_example": 3,
+    "probe_observations": 24,
+    "published_irish_examples": 8
   },
   "sources": {
     "irish_blimp_paper": {

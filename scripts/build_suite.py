@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build the frozen, authored v3.0 benchmark pack and its integrity manifest.
+"""Build the v3.0 benchmark pack and its integrity manifest.
 
-These are evaluation fixtures, not captured production transcripts. The suite
-remains launch-blocked until current engine prompts are captured and reviewed.
+Dialogue envelopes come from a pinned production engine capture. Multi-turn and
+Gaeilge cases are authored or source-backed fixtures, not observed gameplay.
 """
 from __future__ import annotations
 
@@ -92,20 +92,29 @@ def build_cases() -> list[dict]:
         cases.append({"id": f"g{8+i:02}", "eval": "gaeilge", "subcategory": "meaning", "messages": msg(prompt), "max_output_tokens": MAX_OUTPUT_TOKENS, "answer": {"type": "choice", "expected": answer}, "metadata": {"source": "Irish-BLiMP paper worked example gloss", "reference": f"{paper_ref}#S{section}", "license": paper_license, "attribution": f"McGiff et al., Irish-BLiMP (2025), Section {section}", "source_gloss": en, "shuffle_seed": 11, "repeat": i in {2}}})
 
     switches = [
-        ("Baineadh geit aisti ar maidin.", "She got a fright in the morning.", "The sealed parcel is under the bench.", {"parcel_location": "under the bench"}),
-        ("Cailín bocht.", "Poor girl.", "The blue cup is beside the hearth.", {"cup_color": "blue", "cup_location": "beside the hearth"}),
-        ("An duine is ciúine.", "The quietest person.", "The narrow gate is open.", {"gate_state": "open", "gate_width": "narrow"}),
-        ("Sin ár n-arán-na.", "That's our bread.", "We have two loaves for the road.", {"loaves": "two", "purpose": "for the road"}),
-        ("Ar an lampa.", "On the lamp.", "The key is in the drawer.", {"key_location": "in the drawer"}),
-        ("Ochtar fear.", "Eight men.", "Eight men are waiting at the bridge.", {"people": "eight men", "location": "at the bridge"}),
-        ("Is cluichire mé.", "I am a gamer.", "The small boat belongs to me.", {"boat_size": "small", "boat_owner": "speaker"}),
-        ("Labhróidh Liam amárach.", "Liam will speak tomorrow.", "The fair begins at noon tomorrow.", {"event": "fair begins", "time": "noon tomorrow"}),
+        ("Baineadh geit aisti ar maidin.", "She got a fright in the morning.", "The sealed parcel is under the bench.", "The parcel is sealed.", {"parcel_location": "under the bench", "parcel_condition": "sealed"}),
+        ("Cailín bocht.", "Poor girl.", "The blue cup is beside the hearth.", "The cup is green and beside the hearth.", {"cup_color": "blue", "cup_location": "beside the hearth"}),
+        ("An duine is ciúine.", "The quietest person.", "The narrow gate is open.", "The wide gate is open.", {"gate_state": "open", "gate_width": "narrow"}),
+        ("Sin ár n-arán-na.", "That's our bread.", "We have two loaves for the road.", "We have two loaves for supper.", {"loaves": "two", "purpose": "for the road"}),
+        ("Ar an lampa.", "On the lamp.", "The key is in the drawer.", "The key is under the drawer.", {"key_location": "in the drawer"}),
+        ("Ochtar fear.", "Eight men.", "The gate by the chapel is closed.", "Eight women.", {"gate_state": "closed"}),
+        ("Is cluichire mé.", "I am a gamer.", "The small boat belongs to me.", "The large boat belongs to me.", {"boat_size": "small", "boat_owner": "speaker"}),
+        ("Labhróidh Liam amárach.", "Liam will speak tomorrow.", "The fair begins at noon tomorrow.", "The fair begins at dusk tomorrow.", {"event": "fair begins", "time": "noon tomorrow"}),
     ]
-    for i, (ga, gloss, english, fact_keys) in enumerate(switches, 1):
-        expected = {"irish_fragment_meaning": gloss, **fact_keys}
-        prompt = f"Source fragment (published Irish example): {ga}\nPublished English gloss: {gloss}\nEnglish report: {english}\nExtract the meaning of the Irish fragment and the stated English facts. Return exactly one JSON object with string values and these keys: {', '.join(expected)}."
+    switch_shuffle = random.Random(17)
+    answer_letters = ["A"] * 4 + ["B"] * 4
+    switch_shuffle.shuffle(answer_letters)
+    for i, (ga, gloss, english, contrast, fact_keys) in enumerate(switches, 1):
+        answer = answer_letters[i - 1]
+        options = [("A", gloss if answer == "A" else contrast), ("B", gloss if answer == "B" else contrast)]
+        expected = {"irish_meaning_choice": answer, **fact_keys}
+        prompt = (f"Mixed-language report: {ga} {english}\n"
+                  "Choose the option that gives the meaning of the Irish phrase. Also extract only facts stated in English. "
+                  "Return exactly one JSON object with string values, using these keys: "
+                  f"{', '.join(expected)}.\nIrish meaning options:\n" +
+                  "\n".join(f"{letter}: {text}" for letter, text in options))
         section = paper_sections[i - 1]
-        cases.append({"id": f"g{16+i:02}", "eval": "gaeilge", "subcategory": "code_switch", "messages": msg(prompt), "max_output_tokens": MAX_OUTPUT_TOKENS, "answer": {"type": "exact_json", "expected": expected}, "metadata": {"source": "Irish-BLiMP paper gloss plus authored English facts", "reference": f"{paper_ref}#S{section}", "license": paper_license, "attribution": f"McGiff et al., Irish-BLiMP (2025), Section {section}; English facts authored for this test", "repeat": i in {1}}})
+        cases.append({"id": f"g{16+i:02}", "eval": "gaeilge", "subcategory": "code_switch", "messages": msg(prompt), "max_output_tokens": MAX_OUTPUT_TOKENS, "answer": {"type": "exact_json", "expected": expected}, "metadata": {"source": "Irish-BLiMP paper Irish example and gloss plus authored English facts and contrast", "reference": f"{paper_ref}#S{section}", "license": paper_license, "attribution": f"McGiff et al., Irish-BLiMP (2025), Section {section}; English facts and contrast authored for this test", "source_gloss": gloss, "authored_contrast": contrast, "english_facts": fact_keys, "answer_letter": answer, "shuffle_seed": 17, "repeat": i in {1}}})
     return cases
 
 def rubrics() -> dict:
@@ -164,6 +173,14 @@ def main() -> None:
                 "example_choice_shuffle_seed": 3,
                 "gloss_choice_shuffle_seed": 11,
             }
+        },
+        "source_coverage": {
+            "published_irish_examples": 8,
+            "probe_groups_per_example": 3,
+            "independent_irish_source_items": 8,
+            "probe_observations": 24,
+            "observations_are_independent": False,
+            "note": "The same eight published examples support grammar, meaning, and code-switch probes; 24 observations are not 24 independent Irish source items.",
         },
         "selection": {
             "irish_blimp": {

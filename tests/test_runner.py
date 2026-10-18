@@ -66,7 +66,8 @@ class RunnerTests(unittest.TestCase):
             again=run('fake',root=root,output=root/'output',budget=5,client=client,resume='x')
             self.assertEqual(again['status'],'complete'); self.assertEqual(client.calls,before)
             self.assertEqual(result['coverage']['multiturn'],{'completed':1,'required':1})
-            self.assertIsNotNone(result['uncertainty']['gaeilge']['accuracy']['interval_95'])
+            self.assertIsNone(result['uncertainty']['gaeilge']['accuracy']['interval_95'])
+            self.assertIsNotNone(result['uncertainty']['gaeilge']['subcategories']['grammar']['interval_95'])
             final_turn=next(x['request']['messages'] for x in result['requests'] if x['id']=='m:0:candidate:5')
             self.assertIn('Captured initial scene context',final_turn[1]['content'])
             self.assertEqual(sum(m['role']=='user' for m in final_turn),6)
@@ -224,3 +225,13 @@ class RunnerTests(unittest.TestCase):
 
 
 if __name__ == '__main__': unittest.main()
+
+class PerformanceTests(unittest.TestCase):
+    def test_timings_use_actual_generation_records_and_keep_unavailable_ttft_null(self):
+        from rundale_bench.runner import _performance_summary
+        records=[{'elapsed_ms':x,'ttft_ms':None} for x in (100,200,300,400)]
+        out=_performance_summary([{'case_id':'m1','trial':0,'eval':'multiturn','score':75,'response_records':records}],[{'id':'m1','eval':'multiturn'}])
+        self.assertEqual(out['multiturn']['latency_ms']['p50'],200)
+        self.assertEqual(out['multiturn']['latency_ms']['p95'],400)
+        self.assertEqual(out['multiturn']['ttft_ms']['n'],0)
+        self.assertIsNone(out['multiturn']['ttft_ms']['p95'])

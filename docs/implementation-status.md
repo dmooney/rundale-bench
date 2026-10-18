@@ -5,7 +5,7 @@ budget accounting, resume protection, objective Gaeilge checks, a blind owner
 review, failure issue preparation/filing, immutable results, and a Pages site.
 It does not contain new qualified model scores.
 
-Offline verification: 61 Python tests pass; four dashboard tests, the site check, and build pass.
+Offline verification: 62 Python tests pass; four dashboard tests, the site check, and build pass.
 The engine exporter was built and run against the pinned engine commit, producing
 24 exact request captures. Browser checks exercised review navigation and local
 save/resume using explicitly labelled UI-only skipped ratings; those are not

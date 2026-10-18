@@ -167,7 +167,7 @@ def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
                             ji={**case,'candidate_response':json.dumps(projected,ensure_ascii=False),'transcript':projected}
                             estimated += upper_cost(jp,[{'role':'user','content':json.dumps(ji,ensure_ascii=False)}],JUDGE_MAX_OUTPUT_TOKENS,{'rubric':rubrics[case['eval']]})
             result['estimated_max_usd'] = estimated
-            if estimated > budget: result['blockers'].append(f'Conservative estimate ${estimated:.4f} exceeds ${budget:.2f} cap.')
+            if estimated > budget: result['budget_warning']=f'Worst-case full-suite reservation ${estimated:.4f} exceeds ${budget:.2f}; per-call reservations enforce the cap and may end the run as budget DNF.'
     except Exception as exc: result['blockers'].append(f'Pricing or suite error: {exc}')
     return result
 
@@ -222,9 +222,16 @@ def _performance_summary(results: list[dict], cases: list[dict]) -> dict:
                  'median_score':__import__('statistics').median(values) if values else None,
                  'stddev_score':__import__('statistics').pstdev(values) if values else None,
                  'min_score':min(values) if values else None,'max_score':max(values) if values else None}
+        records=[rec for row in rows for rec in row.get('response_records',[])]
+        def timing(key):
+            import math
+            vals=sorted(r[key] for r in records if isinstance(r.get(key),(int,float)) and not isinstance(r[key],bool) and math.isfinite(r[key]) and r[key]>=0)
+            return {'n':len(vals),'p50':vals[max(0,math.ceil(len(vals)*.5)-1)] if vals else None,'p95':vals[max(0,math.ceil(len(vals)*.95)-1)] if vals else None,'unit':'generation request; nearest-rank percentile'}
+        entry['latency_ms']=timing('elapsed_ms')
+        entry['ttft_ms']=timing('ttft_ms')
         if category == 'gaeilge':
             correct = sum(v == 100 for v in values)
-            entry['accuracy'] = {'correct':correct,'count':len(values),'interval_95':wilson(correct,len(values))}
+            entry['accuracy'] = {'correct':correct,'count':len(values),'interval_95':None,'dependency_note':'The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed.'}
             entry['subcategories'] = {}
             for group in ('grammar','meaning','code_switch'):
                 group_rows=[r for r in rows if by_id.get(r['case_id'],{}).get('subcategory')==group]

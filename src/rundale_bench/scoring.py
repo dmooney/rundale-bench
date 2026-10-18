@@ -22,9 +22,13 @@ def objective_score(text: str, answer: dict) -> float:
             value = obj.get('answer') if isinstance(obj, dict) else obj
         except json.JSONDecodeError:
             pass
+        if not isinstance(value,str) or value not in ('A','B'):
+            raise ValueError('Expected one unambiguous A/B choice')
         return 100.0 if value == answer['expected'] else 0.0
     if answer['type'] == 'exact_json':
         obj = json.loads(text)
+        if not isinstance(obj,dict) or set(obj)!=set(answer['expected']) or any(not isinstance(v,str) for v in obj.values()):
+            raise ValueError('Expected a JSON object with exactly the requested string fields')
         return 100.0 if obj == answer['expected'] else 0.0
     raise ValueError('Unknown reference answer type')
 

@@ -25,10 +25,15 @@ The paper reports that the authors manually constructed the examples and had
 each pair reviewed by at least two fluent Irish speakers. The grammar cases
 preserve its accepted/unaccepted labels. The meaning cases use its English
 glosses verbatim as balanced multiple-choice keys, with an authored contrast as
-the distractor. Code-switch cases pair a published Irish example and its
-published gloss with a newly authored English fact; the gold key includes only
-the published gloss and directly stated English facts. This 24-item probe is
-not a full Irish-BLiMP benchmark result.
+the distractor. Code-switch cases place a published Irish phrase in a mixed
+Irish-English report alongside newly authored English facts. They do not show
+the Irish gloss to the model: a balanced A/B choice asks for the Irish meaning,
+and exact JSON keys score that choice plus the independently stated English
+facts. English contrast options and report facts are authored and attributed as
+such. The same eight published Irish examples are reused across grammar,
+meaning, and code-switch, so the 24 Gaeilge observations are dependent probes
+from eight independent source sentences, not 24 independent Irish examples.
+This 24-item probe is not a full Irish-BLiMP benchmark result.
 
 The [Irish-BLiMP repository](https://github.com/ReML-AI/Irish-BLiMP) and its
 MIT-licensed Hugging Face dataset are separate sources. Their revisions,

@@ -12,7 +12,9 @@ class ScoreTests(unittest.TestCase):
  def test_axes_and_exact_keys(self):
   self.assertEqual(rubric_score({'a':3},{'a':{}}),50)
   with self.assertRaises(ValueError):rubric_score({'a':True},{'a':{}})
-  self.assertEqual(objective_score('AB',{'type':'choice','expected':'A'}),0)
+  with self.assertRaises(ValueError):objective_score('AB',{'type':'choice','expected':'A'})
+  with self.assertRaises(ValueError):objective_score('[]',{'type':'exact_json','expected':{'fact':'x'}})
+  self.assertEqual(objective_score('B',{'type':'choice','expected':'A'}),0)
   self.assertEqual(objective_score('{"answer":"A"}',{'type':'choice','expected':'A'}),100)
  def test_uncertainty_units(self):
   self.assertIsNone(wilson(0,0));self.assertLess(wilson(0,8)[1],1)
