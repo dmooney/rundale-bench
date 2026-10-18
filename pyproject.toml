@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rundale-bench"
+version = "3.0.0"
+description = "Reproducible native-cloud dialogue evaluations for Rundale"
+requires-python = ">=3.11"
+
+[project.scripts]
+rundale-bench = "rundale_bench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
