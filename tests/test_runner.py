@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from rundale_bench.runner import run, dry_run, validate_suite
 from rundale_bench.accounting import Ledger, upper_cost
+from rundale_bench.providers import NativeClient
 
 
 def fixture(root):
@@ -47,9 +48,31 @@ class FakeClient:
         from rundale_bench.providers import ProviderResponse, ProviderError
         self.calls += 1
         kind=self.failures.get(self.calls,self.fail_kind if self.calls==self.fail_at else None)
-        if kind: raise ProviderError('bad output',kind=kind,billing_uncertain=False)
+        if kind:
+            payload={'usage':{'input_tokens':5,'cached_input_tokens':0,'output_tokens':3,'reasoning_tokens':0}} if kind in ('provider_refusal','output_limit') else {}
+            raise ProviderError('bad output',kind=kind,billing_uncertain=False,payload=payload)
         text='A' if messages[-1]['content']=='choose' else f'reply {self.calls}'
         return ProviderResponse(text,{'input_tokens':5,'cached_input_tokens':0,'output_tokens':3,'reasoning_tokens':0},'fake',1,None,{'safe':True})
+
+
+class PartialUsageDisconnectClient:
+    def __init__(self): self.calls=0
+    def generate(self, profile, messages, max_output_tokens, response_schema=None):
+        from rundale_bench.providers import ProviderError
+        self.calls += 1
+        raise ProviderError('stream disconnected',kind='transport',billing_uncertain=True,
+            payload={'usage':{'input_tokens':5,'cached_input_tokens':0,'output_tokens':3,'reasoning_tokens':0}})
+
+
+class NativeOpenAITransport:
+    def __init__(self, first_response=None, first_status=200):
+        self.first_response=first_response; self.first_status=first_status; self.calls=0
+    def post(self, url, headers, body, timeout=180):
+        self.calls += 1
+        data = self.first_response if self.calls == 1 and self.first_response is not None else {
+            'output_text':'A','usage':{'input_tokens':5,'output_tokens':3}}
+        status = self.first_status if self.calls == 1 else 200
+        return status, json.dumps(data).encode()
 
 
 class RunnerTests(unittest.TestCase):
@@ -181,6 +204,170 @@ class RunnerTests(unittest.TestCase):
                        client=FakeClient(failures={1:'provider_refusal',2:'provider_refusal'}),run_id='two-refusals')
             self.assertEqual(result['status'],'dnf'); self.assertEqual(result['failure_events'],2)
             self.assertEqual(sum(e['kind']=='npc_contract' for e in result['errors']),0)
+
+    def test_known_usage_refusal_is_zero_then_second_failure_dnfs(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); cases,_=fixture(root)
+            cases[0]['messages'].insert(0,{'role':'system','content':'You MUST respond with a JSON object.'})
+            cp=root/'suites'/'3.0'/'cases.jsonl'; cp.write_text(''.join(json.dumps(c)+'\n' for c in cases)); rehash(root)
+            def judge(_client,_profile,item,_rubric):
+                axis='voice' if item['eval']=='dialogue' else 'memory'
+                return {'axes':{axis:4},'usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1,'reasoning_tokens':0},'raw':{'ok':True}}
+            with patch('rundale_bench.runner.judge_response',side_effect=judge):
+                first=run('fake',root=root,output=root/'output',budget=5,client=FakeClient(fail_at=1,fail_kind='provider_refusal'),run_id='known-one')
+            self.assertEqual(first['status'],'complete')
+            self.assertEqual(first['failure_events'],1)
+            self.assertEqual(first['case_results'][0]['score'],0)
+            self.assertAlmostEqual(first['requests'][0]['cost_usd'],0.000008)
+            with patch('rundale_bench.runner.judge_response',side_effect=judge):
+                second=run('fake',root=root,output=root/'output',budget=5,client=FakeClient(failures={1:'provider_refusal',2:'provider_refusal'}),run_id='known-two')
+            self.assertEqual(second['status'],'dnf')
+            self.assertEqual(second['failure_events'],2)
+            self.assertAlmostEqual(sum(x['cost_usd'] or 0 for x in second['requests'] if ':candidate:' in x['id']),0.000016)
+
+    def test_replayed_cached_refusal_does_not_count_same_call_twice(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root); output=root/'output'
+            def judge(_client,_profile,item,_rubric):
+                axis='voice' if item['eval']=='dialogue' else 'memory'
+                return {'axes':{axis:4},'usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1,'reasoning_tokens':0},'raw':{'ok':True}}
+            with patch('rundale_bench.runner.judge_response',side_effect=judge):
+                first=run('fake',root=root,output=output,budget=5,client=FakeClient(fail_at=1,fail_kind='provider_refusal'),run_id='cached-refusal')
+            self.assertEqual(first['failure_events'],1)
+            state_path=output/'cached-refusal'/'run.json'
+            state=json.loads(state_path.read_text()); state['status']='running'
+            state['case_results']=[r for r in state['case_results'] if r['case_id']!='d']
+            state_path.write_text(json.dumps(state))
+            with patch('rundale_bench.runner.judge_response',side_effect=judge), patch('rundale_bench.runner.publish_run'):
+                resumed=run('fake',root=root,output=output,budget=5,client=FakeClient(),resume='cached-refusal')
+            self.assertEqual(resumed['failure_events'],1)
+            self.assertEqual(sum(e['kind']=='provider_refusal' for e in resumed['errors']),1)
+
+    def test_fresh_retry_preserves_same_call_identity_error_again(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root); output=root/'output'
+            first=run('fake',root=root,output=output,budget=5,client=FakeClient(fail_at=1,fail_kind='provider'),run_id='fresh-retry')
+            state_path=output/'fresh-retry'/'run.json'
+            state=json.loads(state_path.read_text()); state['status']='running'
+            state_path.write_text(json.dumps(state))
+            with patch('rundale_bench.runner.publish_run'):
+                second=run('fake',root=root,output=output,budget=5,client=FakeClient(fail_at=1,fail_kind='provider'),resume='fresh-retry')
+            self.assertEqual(first['status'],'dnf')
+            self.assertEqual(second['status'],'dnf')
+            self.assertEqual(sum(e['case_id']=='d' and e['kind']=='provider' for e in second['errors']),2)
+
+    def test_known_output_limit_is_setup_dnf_with_metered_cost(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root)
+            result=run('fake',root=root,output=root/'output',budget=5,client=FakeClient(fail_at=1,fail_kind='output_limit'),run_id='limit')
+            self.assertEqual(result['status'],'dnf')
+            self.assertEqual(result['failure_cause'],'setup')
+            self.assertEqual(result['failure_events'],0)
+            self.assertEqual(result['budget_status'],'within_cap')
+            self.assertAlmostEqual(result['cost_usd'],0.000008)
+            self.assertEqual(result['requests'][0]['cost_usd'],0.000008)
+
+    def test_judge_output_limit_is_setup_dnf_with_metered_cost(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root)
+            result=run('fake',root=root,output=root/'output',budget=5,client=FakeClient(failures={2:'output_limit'}),run_id='judge-limit')
+            self.assertEqual(result['status'],'dnf')
+            self.assertEqual(result['failure_cause'],'setup')
+            self.assertEqual(result['failure_events'],0)
+            self.assertEqual(result['budget_status'],'within_cap')
+            self.assertAlmostEqual(result['cost_usd'],0.000016)
+            self.assertAlmostEqual(result['requests'][0]['cost_usd'],0.000008)
+            self.assertAlmostEqual(result['requests'][1]['cost_usd'],0.000008)
+            self.assertEqual(result['errors'][0]['step'],'judge')
+            self.assertEqual(result['reason'],'Configured output token limit reached')
+
+    def test_native_provider_refusal_and_output_limit_usage_reach_runner(self):
+        refusal={'output':[{'type':'refusal','refusal':'blocked'}],
+                 'usage':{'input_tokens':5,'input_tokens_details':{'cached_tokens':0},'output_tokens':3}}
+        def judge(_client,_profile,item,_rubric):
+            axis='voice' if item['eval']=='dialogue' else 'memory'
+            return {'axes':{axis:4},'usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1,'reasoning_tokens':0},'raw':{'ok':True}}
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root); transport=NativeOpenAITransport(refusal)
+            client=NativeClient({'FAKE_KEY':'test'},transport)
+            with patch('rundale_bench.runner.judge_response',side_effect=judge):
+                result=run('fake',root=root,output=root/'output',budget=5,client=client,run_id='native-refusal')
+            self.assertEqual(result['status'],'complete')
+            self.assertEqual(result['failure_events'],1)
+            self.assertEqual(result['case_results'][0]['score'],0)
+            self.assertAlmostEqual(result['requests'][0]['cost_usd'],0.000008)
+            self.assertEqual(result['requests'][0]['response']['usage'],{'input_tokens':5,'cached_input_tokens':0,'output_tokens':3,'reasoning_tokens':0})
+            self.assertEqual(result['case_results'][0]['response_records'][0]['usage'],result['requests'][0]['response']['usage'])
+            self.assertGreater(transport.calls,1)
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root)
+            truncated={'status':'incomplete','incomplete_details':{'reason':'max_output_tokens'},'output':[],
+                       'usage':{'input_tokens':5,'output_tokens':3}}
+            transport=NativeOpenAITransport(truncated)
+            result=run('fake',root=root,output=root/'output',budget=5,
+                       client=NativeClient({'FAKE_KEY':'test'},transport),run_id='native-limit')
+            self.assertEqual(result['status'],'dnf')
+            self.assertEqual(result['failure_cause'],'setup')
+            self.assertEqual(result['failure_events'],0)
+            self.assertAlmostEqual(result['cost_usd'],0.000008)
+            self.assertAlmostEqual(result['requests'][0]['cost_usd'],0.000008)
+            self.assertEqual(transport.calls,1)
+
+    def test_invalid_cached_refusal_usage_is_unknown_and_preserves_previous_latest(self):
+        from rundale_bench.storage import publish_run
+        refusal={'output':[{'type':'refusal','refusal':'blocked'}],
+                 'usage':{'input_tokens':5,'input_tokens_details':{'cached_tokens':8},'output_tokens':3}}
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root)
+            publish_run(root/'results', {'version':'3.0','run_id':'previous','model':'fake','reasoning':'high',
+                'status':'complete','failure_cause':None,'overall':80,'scores':{},'completed_at':'2026-01-01T00:00:00+00:00',
+                'cost_usd':0.1,'errors':[]})
+            transport=NativeOpenAITransport(refusal)
+            result=run('fake',root=root,output=root/'output',budget=5,
+                       client=NativeClient({'FAKE_KEY':'test'},transport),run_id='invalid-cache')
+            self.assertEqual(result['status'],'dnf')
+            self.assertEqual(result['failure_cause'],'unknown')
+            self.assertEqual(result['budget_status'],'billing_uncertain')
+            self.assertEqual(result['failure_events'],0)
+            self.assertEqual(transport.calls,1)
+            latest=json.loads((root/'results'/'index.json').read_text())['versions'][0]['rows'][0]
+            self.assertEqual(latest['run_id'],'previous')
+            self.assertEqual(latest['latest_attempt_id'],'invalid-cache')
+
+    def test_native_http_401_and_429_without_usage_cancel_ledger(self):
+        import sqlite3
+        for status, expected_cause in ((401,'setup'),(429,'infrastructure')):
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as td:
+                root=Path(td); fixture(root)
+                transport=NativeOpenAITransport({'error':{'message':'request rejected'}},first_status=status)
+                client=NativeClient({'FAKE_KEY':'test'},transport)
+                result=run('fake',root=root,output=root/'output',budget=5,client=client,run_id=f'http-{status}')
+                self.assertEqual(result['status'],'dnf')
+                self.assertEqual(result['failure_cause'],expected_cause)
+                self.assertEqual(result['budget_status'],'within_cap')
+                self.assertEqual(result['cost_usd'],0)
+                self.assertEqual(result['spending_exposure_usd'],0)
+                self.assertEqual(transport.calls,1)
+                self.assertNotIn('usage',result['requests'][0]['response'])
+                db=sqlite3.connect(root/'output'/f'http-{status}'/'ledger.sqlite')
+                try: self.assertEqual(db.execute('SELECT state FROM calls').fetchone()[0],'cancelled')
+                finally: db.close()
+
+    def test_uncertain_partial_usage_keeps_reservation_and_stops_calls(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root); client=PartialUsageDisconnectClient()
+            result=run('fake',root=root,output=root/'output',budget=5,client=client,run_id='partial-disconnect')
+            self.assertEqual(result['status'],'dnf')
+            self.assertEqual(result['failure_cause'],'unknown')
+            self.assertEqual(result['cost_usd'],0)
+            self.assertEqual(result['budget_status'],'billing_uncertain')
+            self.assertGreater(result['spending_exposure_usd'],result['cost_usd'])
+            self.assertIsNone(result['requests'][0]['cost_usd'])
+            self.assertEqual(client.calls,1)
+            import sqlite3
+            db=sqlite3.connect(root/'output'/'partial-disconnect'/'ledger.sqlite')
+            try: self.assertEqual(db.execute('SELECT state FROM calls').fetchone()[0],'uncertain')
+            finally: db.close()
 
     def test_budget_stop_keeps_completed_eval_score_and_coverage(self):
         with tempfile.TemporaryDirectory() as td:

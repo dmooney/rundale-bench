@@ -9,18 +9,23 @@ HTTPS hostname. There is no arbitrary router URL support.
 Set the selected profile's `api_key_env` variable or pass credentials to
 `NativeClient(credentials={"OPENAI_API_KEY": "…"})`. Credentials are never included
 in response records or error payloads. `ProviderError.kind` distinguishes transport,
-authentication, provider, explicit API refusal, and malformed-response errors. The
-adapter does not retry. A transport failure or a malformed response after HTTP 2xx is
-marked `billing_uncertain`; callers must not blindly repeat a potentially billed call.
+authentication, provider, explicit API refusal, malformed-response, and `output_limit`
+errors. The adapter does not retry. `output_limit` means the configured generation
+limit stopped the response; the runner records a setup DNF and does not grade partial
+text. Authentication 4xx responses are known not to have incurred generation charges.
 
 The native Google transport uses `streamGenerateContent` with SSE. `ttft_ms` measures
 from request start through receipt and parsing of the first non-empty, non-thought text
 part. The complete raw event list and latest final `usageMetadata` are retained in
 `ProviderResponse.raw`. A stream interrupted before completion preserves partial chunks
-and metering in `ProviderError.payload`, then marks billing uncertain. Other native
-providers use non-streaming endpoints and return `ttft_ms: null`; injected transports
-without `stream_post` use the non-streaming Google fallback and also return null rather
-than estimating TTFT.
+and any usage reported so far in `ProviderError.payload`, then marks billing uncertain;
+earlier chunk usage is not a final bill. A completed stream or complete HTTP error body
+can carry final usage for cost settlement; a Google stream is complete only after a
+terminal `finishReason`. A protocol error or disconnect remains uncertain even when
+earlier chunks included all usage fields. Other native providers use
+non-streaming endpoints and return `ttft_ms: null`; injected transports without
+`stream_post` use the non-streaming Google fallback and also return null rather than
+estimating TTFT.
 
 Usage normalizes to input, cached input, output, and reasoning tokens. Provider
 reasoning tokens are a subset of output tokens. For pricing, count output tokens once:
@@ -31,12 +36,13 @@ uncached_input * input_rate + cached_input * cached_input_rate
 ```
 
 The Google rate for cached input is null where the Standard tier does not offer input
-caching; never estimate it from another tier. A missing input/output usage count makes
-the response billing-uncertain. Prices are USD per million tokens and reflect the
-Standard tier at profile creation; the Gemini 3.7 Flash introductory rates are stated
-by Google to end 2026-12-31. Recheck the linked official price pages before a new
-benchmark campaign. A null rate means pricing is not established and must block cost
-reservation until updated from an official source.
+caching; never estimate it from another tier. Missing input/output usage or interrupted
+stream billing makes the call `billing_uncertain`; this explicit uncertainty takes
+precedence over partial usage when settling reservations. Prices are USD per million
+tokens and reflect the Standard tier at profile creation; Google states that Gemini
+3.7 Flash introductory rates end 2026-12-31. Recheck the linked official price pages
+before a new benchmark campaign. A null rate means pricing is not established and
+must block cost reservation until updated from an official source.
 
 `resolve_profile` returns a pinned profile snapshot. Request a specific reasoning
 level to select that exact snapshot; otherwise it returns the highest registered level

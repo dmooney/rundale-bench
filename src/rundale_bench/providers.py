@@ -54,6 +54,19 @@ def _line_bytes(line: bytes | str) -> bytes:
     return line if isinstance(line, bytes) else line.encode("utf-8")
 
 
+def _transport_diagnostics(exc: BaseException) -> dict[str, Any]:
+    """Return safe transport failure metadata without exposing exception text."""
+    reason = getattr(exc, "reason", None)
+    underlying = reason if isinstance(reason, BaseException) else exc
+    code = getattr(underlying, "errno", None)
+    result = {"exception_type": type(exc).__name__}
+    if underlying is not exc:
+        result["reason_type"] = type(underlying).__name__
+    if type(code) is int:
+        result["errno"] = code
+    return result
+
+
 def load_profiles(path: Path) -> dict[str, dict]:
     data = json.loads(Path(path).read_text())
     return {p["id"]: p for p in data["profiles"]}
@@ -96,7 +109,8 @@ class _UrllibTransport:
             try: return exc.code, exc.read()
             finally: exc.close()
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            raise ProviderError("Provider transport failed", kind="transport", billing_uncertain=True) from exc
+            raise ProviderError("Provider transport failed", kind="transport", billing_uncertain=True,
+                                payload={"transport": _transport_diagnostics(exc)}) from exc
 
     def stream_post(self, url: str, headers: dict, body: bytes, timeout: float = 180):
         req = urllib.request.Request(url, data=body, headers=headers, method="POST")
@@ -109,7 +123,8 @@ class _UrllibTransport:
         except urllib.error.HTTPError as exc:
             return _UrllibStream(exc, status=exc.code)
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            raise ProviderError("Provider streaming transport failed", kind="transport", billing_uncertain=True) from exc
+            raise ProviderError("Provider streaming transport failed", kind="transport", billing_uncertain=True,
+                                payload={"transport": _transport_diagnostics(exc)}) from exc
 
 
 class _UrllibStream:
@@ -163,16 +178,25 @@ class NativeClient:
         safe = _redact_secret(_redact(data), key)
         if status >= 300:
             kind = "auth" if status in (401, 403) else "provider_refusal" if status == 400 and _is_refusal(data) else "provider"
+            usage = _canonical_usage(provider, data)
+            payload = {"raw": safe}
+            if _usage_is_known(usage): payload["usage"] = usage
             raise ProviderError("Provider returned an error", kind=kind, status=status,
-                                billing_uncertain=status >= 500 or 300 <= status < 400, payload=safe)
+                                billing_uncertain=(status >= 500 or 300 <= status < 400) and not _usage_is_known(usage),
+                                payload=payload)
         try:
             text, usage = self._parse(provider, data)
         except ProviderError as exc:
+            canonical = _canonical_usage(provider, data)
+            if _usage_is_known(canonical):
+                exc.payload = {**exc.payload, "usage": canonical}
+                exc.billing_uncertain = False
             exc.payload = _redact_secret(exc.payload, key)
             raise
         except Exception as exc:
+            usage = _canonical_usage(provider, data)
             raise ProviderError("Provider response has an unsupported shape", kind="malformed", status=status,
-                                billing_uncertain=True, payload=safe) from exc
+                                billing_uncertain=not _usage_is_known(usage), payload={"raw": safe, "usage": usage}) from exc
         return ProviderResponse(_redact_secret(text, key), usage, data.get("model", profile["model"]), elapsed, None, safe)
 
     def _generate_google_stream(self, profile: dict, body: dict, url: str, headers: dict, key: str) -> ProviderResponse:
@@ -194,9 +218,12 @@ class NativeClient:
                     safe_error = _redact_secret(_redact(error_data), key)
                     status = response.status
                     kind = "auth" if status in (401, 403) else "provider_refusal" if status == 400 and _is_refusal(error_data) else "provider"
+                    usage = _canonical_usage("google", error_data)
+                    payload = {"raw": safe_error, "chunks": []}
+                    if _usage_is_known(usage): payload["usage"] = usage
                     raise ProviderError("Provider returned an error", kind=kind, status=status,
-                                        billing_uncertain=status >= 500 or 300 <= status < 400,
-                                        payload={"raw": safe_error, "chunks": []})
+                                        billing_uncertain=(status >= 500 or 300 <= status < 400) and not _usage_is_known(usage),
+                                        payload=payload)
                 for line in response:
                     line_text = _line_text(line)
                     if not line_text or line_text.startswith(":") or not line_text.startswith("data:"):
@@ -207,33 +234,78 @@ class NativeClient:
                     raw_chunks.append(event_text)
                     try: event = json.loads(event_text)
                     except json.JSONDecodeError as exc:
+                        usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
                         raise ProviderError("Gemini stream contained malformed JSON", kind="malformed", billing_uncertain=True,
-                                            payload={"chunks": raw_chunks}) from exc
+                                            payload={"chunks": raw_chunks, "usage": usage}) from exc
+                    if not isinstance(event, dict):
+                        usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                        raise ProviderError("Gemini stream returned a non-object event", kind="malformed", billing_uncertain=True,
+                                            payload={"chunks": raw_chunks, "usage": usage})
                     if isinstance(event.get("usageMetadata"), dict):
                         final_usage = event["usageMetadata"]
                     if isinstance(event.get("promptFeedback"), dict):
                         prompt_feedback = event["promptFeedback"]
                     model = event.get("modelVersion", event.get("model", model))
-                    for candidate in event.get("candidates", []):
+                    candidates = event.get("candidates", [])
+                    if not isinstance(candidates, list):
+                        usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                        raise ProviderError("Gemini stream candidates had an unsupported shape", kind="malformed", billing_uncertain=True,
+                                            payload={"chunks": raw_chunks, "usage": usage})
+                    for candidate in candidates:
+                        if not isinstance(candidate, dict):
+                            usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                            raise ProviderError("Gemini stream candidate had an unsupported shape", kind="malformed", billing_uncertain=True,
+                                                payload={"chunks": raw_chunks, "usage": usage})
                         if candidate.get("index", 0) == 0:
-                            finish_reason = candidate.get("finishReason", finish_reason)
-                            parts = candidate.get("content", {}).get("parts", [])
+                            candidate_finish_reason = candidate.get("finishReason", finish_reason)
+                            if candidate_finish_reason is not None and not isinstance(candidate_finish_reason, str):
+                                usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                                raise ProviderError("Gemini stream finish reason had an unsupported shape", kind="malformed", billing_uncertain=True,
+                                                    payload={"chunks": raw_chunks, "usage": usage})
+                            finish_reason = candidate_finish_reason
+                            content = candidate.get("content", {})
+                            if not isinstance(content, dict) or not isinstance(content.get("parts", []), list):
+                                usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                                raise ProviderError("Gemini stream content had an unsupported shape", kind="malformed", billing_uncertain=True,
+                                                    payload={"chunks": raw_chunks, "usage": usage})
+                            parts = content.get("parts", [])
                             for part in parts:
+                                if not isinstance(part, dict):
+                                    usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+                                    raise ProviderError("Gemini stream part had an unsupported shape", kind="malformed", billing_uncertain=True,
+                                                        payload={"chunks": raw_chunks, "usage": usage})
                                 text = part.get("text")
                                 if isinstance(text, str) and text and not part.get("thought", False):
                                     if ttft_ms is None:
                                         ttft_ms = (time.monotonic() - start) * 1000
                                     visible.append(text)
         except ProviderError as exc:
-            exc.payload = _redact_secret({**exc.payload, "chunks": raw_chunks,
-                                          "usage": final_usage or {}}, key)
+            usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+            if not _usage_is_known(usage) and isinstance(exc.payload.get("usage"), dict):
+                usage = exc.payload["usage"]
+            payload = {**exc.payload, "chunks": raw_chunks}
+            if _usage_is_known(usage) or exc.kind in {"transport", "malformed"}:
+                payload["usage"] = usage
+            else:
+                payload.pop("usage", None)
+            exc.payload = _redact_secret(payload, key)
+            if exc.kind in {"transport", "malformed"}:
+                exc.billing_uncertain = True
+            elif _usage_is_known(usage):
+                exc.billing_uncertain = False
             raise
         except Exception as exc:
             elapsed = (time.monotonic() - start) * 1000
+            usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
             raise ProviderError("Provider streaming transport failed", kind="transport", billing_uncertain=True,
                                 payload={"chunks": _redact_secret(raw_chunks, key), "partial_text": _redact_secret("".join(visible), key),
-                                         "usage": _redact_secret(final_usage or {}, key), "elapsed_ms": elapsed}) from exc
+                                         "usage": usage, "elapsed_ms": elapsed, "transport": _transport_diagnostics(exc)}) from exc
         elapsed = (time.monotonic() - start) * 1000
+        if finish_reason is None and not prompt_feedback.get("blockReason"):
+            usage = _canonical_usage("google", {"usageMetadata": final_usage or {}})
+            raise ProviderError("Gemini stream ended without a terminal finish reason", kind="malformed", billing_uncertain=True,
+                                payload={"chunks": _redact_secret(raw_chunks, key), "partial_text": _redact_secret("".join(visible), key),
+                                         "usage": usage, "elapsed_ms": elapsed})
         raw = {"modelVersion": model, "promptFeedback": prompt_feedback,
                "candidates": [{"index": 0, "finishReason": finish_reason,
                                "content": {"parts": [{"text": "".join(visible)}]}}],
@@ -242,7 +314,7 @@ class NativeClient:
         try:
             text, usage = self._parse("google", raw)
         except ProviderError as exc:
-            exc.payload = _redact_secret({"raw": safe, "usage": final_usage or {}, "chunks": raw_chunks}, key)
+            exc.payload = _redact_secret({"raw": safe, "usage": _canonical_usage("google", {"usageMetadata": final_usage or {}}), "chunks": raw_chunks}, key)
             raise
         return ProviderResponse(_redact_secret(text, key), usage, model, elapsed, ttft_ms, safe)
 
@@ -298,43 +370,46 @@ class NativeClient:
 
     @staticmethod
     def _parse(provider, data):
+        if not isinstance(data, dict):
+            raise ProviderError("Provider returned a non-object response", kind="malformed",
+                                billing_uncertain=True, payload={"raw": data})
         if provider == "openai":
-            if any(o.get("type") == "refusal" for o in data.get("output", [])):
-                raise _provider_result_error("Provider refused the request", "provider_refusal", data, data.get("usage", {}))
+            if any(o.get("type") == "refusal" or any(c.get("type") == "refusal" for c in o.get("content", [])) for o in data.get("output", [])):
+                raise _provider_result_error("Provider refused the request", "provider_refusal", data, "openai")
             if data.get("status") == "incomplete":
-                u = data.get("usage", {})
-                usage_known = type(u.get("input_tokens")) is int and type(u.get("output_tokens")) is int
-                raise ProviderError("Provider response was incomplete", kind="malformed", billing_uncertain=not usage_known,
-                                    payload={"raw": _redact(data), "usage": _redact(u)})
+                usage = _canonical_usage("openai", data)
+                if data.get("incomplete_details", {}).get("reason") == "max_output_tokens":
+                    raise ProviderError("Configured output token limit reached", kind="output_limit", billing_uncertain=not _usage_is_known(usage),
+                                        payload={"raw": _redact(data), "usage": usage})
+                raise ProviderError("Provider response was incomplete", kind="malformed", billing_uncertain=not _usage_is_known(usage),
+                                    payload={"raw": _redact(data), "usage": usage})
             text = data.get("output_text") or "".join(c.get("text", "") for o in data.get("output", []) for c in o.get("content", []) if c.get("type") == "output_text")
-            u = data.get("usage", {}); det = u.get("input_tokens_details", {})
-            usage = {"input_tokens": u.get("input_tokens"), "cached_input_tokens": det.get("cached_tokens", 0), "output_tokens": u.get("output_tokens"), "reasoning_tokens": u.get("output_tokens_details", {}).get("reasoning_tokens", 0)}
+            usage = _canonical_usage("openai", data)
         elif provider == "google":
             if data.get("promptFeedback", {}).get("blockReason") or not data.get("candidates") or data["candidates"][0].get("finishReason") in {"SAFETY", "BLOCKLIST", "PROHIBITED_CONTENT"}:
-                raise _provider_result_error("Provider refused the request", "provider_refusal", data, data.get("usageMetadata", {}))
+                raise _provider_result_error("Provider refused the request", "provider_refusal", data, "google")
+            if data["candidates"][0].get("finishReason") == "MAX_TOKENS":
+                usage = _canonical_usage("google", data)
+                raise ProviderError("Configured output token limit reached", kind="output_limit", billing_uncertain=not _usage_is_known(usage),
+                                    payload={"raw": _redact(data), "usage": usage})
             text = "".join(p.get("text", "") for p in data["candidates"][0].get("content", {}).get("parts", []))
-            u = data.get("usageMetadata", {}); thoughts = u.get("thoughtsTokenCount")
-            candidates = u.get("candidatesTokenCount")
-            usage = {"input_tokens": u.get("promptTokenCount"), "cached_input_tokens": u.get("cachedContentTokenCount", 0),
-                     # Google bills reasoning/thought tokens as output; the separate
-                     # reasoning field is a subset used for analysis, not additive.
-                     "output_tokens": candidates + thoughts if isinstance(candidates, int) and isinstance(thoughts, int) else None,
-                     "reasoning_tokens": thoughts}
+            usage = _canonical_usage("google", data)
         elif provider == "anthropic":
-            if data.get("stop_reason") == "refusal": raise _provider_result_error("Provider refused the request", "provider_refusal", data, data.get("usage", {}))
+            if data.get("stop_reason") == "refusal": raise _provider_result_error("Provider refused the request", "provider_refusal", data, "anthropic")
+            if data.get("stop_reason") == "max_tokens":
+                usage = _canonical_usage("anthropic", data)
+                raise ProviderError("Configured output token limit reached", kind="output_limit", billing_uncertain=not _usage_is_known(usage),
+                                    payload={"raw": _redact(data), "usage": usage})
             text = "".join(c.get("text", "") for c in data.get("content", []) if c.get("type") == "text")
-            u = data.get("usage", {}); cache_read = u.get("cache_read_input_tokens", 0); cache_write = u.get("cache_creation_input_tokens", 0)
-            usage = {"input_tokens": u.get("input_tokens") + cache_read + cache_write if isinstance(u.get("input_tokens"), int) and isinstance(cache_read, int) and isinstance(cache_write, int) else None,
-                     "cached_input_tokens": cache_read, "cache_write_input_tokens": cache_write,
-                     "output_tokens": u.get("output_tokens"), "reasoning_tokens": 0}
+            usage = _canonical_usage("anthropic", data)
         elif provider == "typesafe":
             answers = data.get("answers", {})
             ans = answers.get("answer", {}) if isinstance(answers, dict) else {}
             text = ans.get("answer", ans.get("choice", "")) if isinstance(ans, dict) else str(ans)
-            usage = {"input_tokens": data.get("usage", {}).get("input_tokens"), "cached_input_tokens": 0, "output_tokens": data.get("usage", {}).get("output_tokens"), "reasoning_tokens": 0}
+            usage = _canonical_usage("typesafe", data)
         else:
             choice = data["choices"][0]; text = choice["message"].get("content", "")
-            u = data.get("usage", {}); usage = {"input_tokens": u.get("prompt_tokens"), "cached_input_tokens": u.get("prompt_tokens_details", {}).get("cached_tokens", 0), "output_tokens": u.get("completion_tokens"), "reasoning_tokens": u.get("completion_tokens_details", {}).get("reasoning_tokens", 0)}
+            usage = _canonical_usage(provider, data)
         if not isinstance(text, str): raise ValueError("text missing")
         if any(not isinstance(usage[k], int) for k in ("input_tokens", "output_tokens")):
             metering = data.get("usage", data.get("usageMetadata", {}))
@@ -346,16 +421,70 @@ class NativeClient:
 
 
 def _is_refusal(data):
-    error = data.get("error", {}) if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        return False
+    error = data.get("error", {})
     code = str(error.get("code", "")).lower() if isinstance(error, dict) else ""
     typ = str(error.get("type", "")).lower() if isinstance(error, dict) else ""
-    return code in {"content_filter", "safety", "refusal", "blocked", "prompt_blocked"} or typ in {"content_filter", "safety_violation", "refusal"} or bool(data.get("promptFeedback", {}).get("blockReason"))
+    feedback = data.get("promptFeedback", {})
+    block_reason = feedback.get("blockReason") if isinstance(feedback, dict) else None
+    return code in {"content_filter", "safety", "refusal", "blocked", "prompt_blocked"} or typ in {"content_filter", "safety_violation", "refusal"} or bool(block_reason)
 
 
-def _provider_result_error(message: str, kind: str, raw: dict, usage: dict) -> ProviderError:
-    input_key = "promptTokenCount" if "usageMetadata" in raw else "input_tokens"
-    output_key = "candidatesTokenCount" if input_key == "promptTokenCount" else "output_tokens"
-    known = type(usage.get(input_key)) is int and type(usage.get(output_key)) is int
-    if input_key == "promptTokenCount": known = known and type(usage.get("thoughtsTokenCount")) is int
-    return ProviderError(message, kind=kind, billing_uncertain=not known,
-                         payload={"raw": _redact(raw), "usage": _redact(usage)})
+def _canonical_usage(provider: str, data: Any) -> dict:
+    """Extract usage into the same billing schema on success and error paths."""
+    if not isinstance(data, dict):
+        return {"input_tokens": None, "cached_input_tokens": 0,
+                "output_tokens": None, "reasoning_tokens": 0}
+    if provider == "openai":
+        u = data.get("usage", {})
+        if not isinstance(u, dict): u = {}
+        details = u.get("input_tokens_details", {})
+        output_details = u.get("output_tokens_details", {})
+        if not isinstance(details, dict): details = {}
+        if not isinstance(output_details, dict): output_details = {}
+        return {"input_tokens": u.get("input_tokens"),
+                "cached_input_tokens": details.get("cached_tokens", 0),
+                "output_tokens": u.get("output_tokens"),
+                "reasoning_tokens": output_details.get("reasoning_tokens", 0)}
+    if provider == "google":
+        u = data.get("usageMetadata", {})
+        if not isinstance(u, dict): u = {}
+        candidates, thoughts = u.get("candidatesTokenCount"), u.get("thoughtsTokenCount")
+        output = candidates + thoughts if type(candidates) is int and type(thoughts) is int else None
+        return {"input_tokens": u.get("promptTokenCount"), "cached_input_tokens": u.get("cachedContentTokenCount", 0),
+                "output_tokens": output, "reasoning_tokens": thoughts if type(thoughts) is int else 0}
+    if provider == "anthropic":
+        u = data.get("usage", {})
+        if not isinstance(u, dict): u = {}
+        cache_read, cache_write = u.get("cache_read_input_tokens", 0), u.get("cache_creation_input_tokens", 0)
+        input_tokens = u.get("input_tokens")
+        total_input = input_tokens + cache_read + cache_write if all(type(x) is int for x in (input_tokens, cache_read, cache_write)) else None
+        return {"input_tokens": total_input, "cached_input_tokens": cache_read if type(cache_read) is int else 0,
+                "cache_write_input_tokens": cache_write if type(cache_write) is int else 0,
+                "output_tokens": u.get("output_tokens"), "reasoning_tokens": 0}
+    if provider == "typesafe":
+        u = data.get("usage", {})
+        if not isinstance(u, dict): u = {}
+        return {"input_tokens": u.get("input_tokens"), "cached_input_tokens": 0,
+                "output_tokens": u.get("output_tokens"), "reasoning_tokens": 0}
+    # DeepSeek exposes OpenAI-compatible Chat Completions usage names.
+    u = data.get("usage", {})
+    if not isinstance(u, dict): u = {}
+    prompt_details, completion_details = u.get("prompt_tokens_details", {}), u.get("completion_tokens_details", {})
+    if not isinstance(prompt_details, dict): prompt_details = {}
+    if not isinstance(completion_details, dict): completion_details = {}
+    return {"input_tokens": u.get("prompt_tokens"),
+            "cached_input_tokens": prompt_details.get("cached_tokens", 0),
+            "output_tokens": u.get("completion_tokens"),
+            "reasoning_tokens": completion_details.get("reasoning_tokens", 0)}
+
+
+def _usage_is_known(usage: dict) -> bool:
+    return all(type(usage.get(k)) is int and usage[k] >= 0 for k in ("input_tokens", "output_tokens"))
+
+
+def _provider_result_error(message: str, kind: str, raw: dict, provider: str) -> ProviderError:
+    usage = _canonical_usage(provider, raw)
+    return ProviderError(message, kind=kind, billing_uncertain=not _usage_is_known(usage),
+                         payload={"raw": _redact(raw), "usage": usage})

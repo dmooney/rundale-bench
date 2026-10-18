@@ -73,6 +73,18 @@ does not indicate poor model quality. A confirmed model DNF replaces that model'
 score; infrastructure, budget, or unknown failures retain the previous result
 with a dated incomplete-attempt notice.
 
+A provider-reported output token limit is a configured-resource stop for both
+candidate and judge calls. It ends the run as a setup DNF, does not count as a
+confirmed model refusal/malformed-output event, and retains an earlier result.
+Preserve any known final usage cost; an interrupted stream's prior usage is
+not final and must remain billing-uncertain. Do not grade truncated text, change
+the token limit, or retry automatically. The same policy applies to native
+OpenAI, Google, and Anthropic termination signals.
+
+Budget status describes the ledger independently of failure attribution. A run
+with an unknown failure but no outstanding reservation remains `within_cap`;
+only unresolved reserved exposure makes its billing uncertain.
+
 ## Publication
 
 The public repository is [`dmooney/rundale-bench`](https://github.com/dmooney/rundale-bench)

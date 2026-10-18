@@ -1,5 +1,6 @@
 import json
 import io
+import socket
 import urllib.error
 import unittest
 from unittest.mock import patch
@@ -16,8 +17,7 @@ class FakeTransport:
 
 
 class FakeStream:
-    status = 200
-    def __init__(self, lines, error=None): self.lines, self.error, self.closed = lines, error, False
+    def __init__(self, lines, error=None, status=200): self.lines, self.error, self.status, self.closed = lines, error, status, False
     def __enter__(self): return self
     def __exit__(self, *exc): self.closed = True
     def __iter__(self):
@@ -26,7 +26,7 @@ class FakeStream:
 
 
 class FakeStreamingTransport:
-    def __init__(self, lines, error=None): self.stream = FakeStream(lines, error); self.calls = []
+    def __init__(self, lines, error=None, status=200): self.stream = FakeStream(lines, error, status); self.calls = []
     def stream_post(self, url, headers, body, timeout=180):
         self.calls.append((url, headers, json.loads(body), timeout))
         return self.stream
@@ -92,7 +92,7 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(body["generationConfig"]["thinkingConfig"], {"thinkingLevel":"high"})
         self.assertTrue(transport.stream.closed)
 
-    def test_google_stream_failure_preserves_chunks_and_marks_billing_uncertain_without_retry(self):
+    def test_google_stream_failure_with_usage_preserves_metering_without_retry(self):
         lines = [b'data: {"candidates":[{"content":{"parts":[{"text":"partial"}]}}],"usageMetadata":{"promptTokenCount":20,"candidatesTokenCount":3,"thoughtsTokenCount":1}}\n']
         transport = FakeStreamingTransport(lines, OSError("stream stopped"))
         profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
@@ -102,8 +102,76 @@ class ProviderTests(unittest.TestCase):
         self.assertTrue(caught.exception.billing_uncertain)
         self.assertEqual(caught.exception.payload["partial_text"], "partial")
         self.assertEqual(len(caught.exception.payload["chunks"]), 1)
-        self.assertEqual(caught.exception.payload["usage"]["thoughtsTokenCount"], 1)
+        self.assertEqual(caught.exception.payload["usage"], {"input_tokens":20,"cached_input_tokens":0,"output_tokens":4,"reasoning_tokens":1})
         self.assertEqual(len(transport.calls), 1)
+
+    def test_google_stream_malformed_chunk_after_usage_stays_uncertain(self):
+        lines = [
+            b'data: {"candidates":[{"content":{"parts":[{"text":"partial"}]}}],"usageMetadata":{"promptTokenCount":20,"candidatesTokenCount":3,"thoughtsTokenCount":1}}\n',
+            b'data: {"candidates":\n',
+        ]
+        transport = FakeStreamingTransport(lines)
+        profile = self.profile("google", model="gemini-3.7-flash", reasoning="high")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, transport).generate(profile, [], 30)
+        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertTrue(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["usage"], {"input_tokens":20,"cached_input_tokens":0,"output_tokens":4,"reasoning_tokens":1})
+
+    def test_non_object_native_http_errors_remain_provider_errors(self):
+        profile = self.profile()
+        for status, body, kind in ((401, ["bad body"], "auth"), (429, None, "provider")):
+            with self.subTest(status=status):
+                with self.assertRaises(ProviderError) as caught:
+                    NativeClient({"TEST_KEY":"key"}, FakeTransport(body, status)).generate(profile, [], 10)
+                self.assertEqual(caught.exception.kind, kind)
+                self.assertFalse(caught.exception.billing_uncertain)
+                self.assertNotIn("usage", caught.exception.payload)
+
+    def test_non_object_success_body_is_malformed_and_billing_uncertain(self):
+        for body in ([], "bad body", None):
+            with self.subTest(body=body):
+                with self.assertRaises(ProviderError) as caught:
+                    NativeClient({"TEST_KEY":"key"}, FakeTransport(body)).generate(self.profile(), [], 10)
+                self.assertEqual(caught.exception.kind, "malformed")
+                self.assertTrue(caught.exception.billing_uncertain)
+
+    def test_google_stream_non_object_http_errors_remain_provider_errors(self):
+        profile = self.profile("google", model="gemini-3.7-flash")
+        for status, body, kind in ((401, ["bad body"], "auth"), (429, None, "provider")):
+            with self.subTest(status=status):
+                with self.assertRaises(ProviderError) as caught:
+                    NativeClient({"TEST_KEY":"key"}, FakeStreamingTransport([json.dumps(body).encode()], status=status)).generate(profile, [], 10)
+                self.assertEqual(caught.exception.kind, kind)
+                self.assertFalse(caught.exception.billing_uncertain)
+                self.assertNotIn("usage", caught.exception.payload)
+
+    def test_google_stream_non_object_event_is_malformed_and_uncertain(self):
+        transport = FakeStreamingTransport([b'data: []\n'])
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, transport).generate(self.profile("google", model="gemini-3.7-flash"), [], 10)
+        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertTrue(caught.exception.billing_uncertain)
+
+    def test_google_stream_without_terminal_finish_reason_is_not_success(self):
+        lines = [b'data: {"candidates":[{"content":{"parts":[{"text":"partial"}]}}],"usageMetadata":{"promptTokenCount":20,"candidatesTokenCount":3,"thoughtsTokenCount":1}}\n']
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, FakeStreamingTransport(lines)).generate(self.profile("google", model="gemini-3.7-flash"), [], 10)
+        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertTrue(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["partial_text"], "partial")
+
+    def test_stream_transport_error_has_safe_dns_diagnostics(self):
+        class FailedOpener:
+            def open(self, request, timeout=None):
+                raise urllib.error.URLError(socket.gaierror(8, "private endpoint secret"))
+        with patch("urllib.request.build_opener", return_value=FailedOpener()):
+            with self.assertRaises(ProviderError) as caught:
+                _UrllibTransport().stream_post("https://api.example.test/private", {}, b"{}")
+        self.assertTrue(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["transport"], {"exception_type":"URLError","reason_type":"gaierror","errno":8})
+        self.assertNotIn("private endpoint secret", json.dumps(caught.exception.payload))
+        self.assertNotIn("api.example.test", json.dumps(caught.exception.payload))
 
     def test_google_missing_thought_usage_is_uncertain_not_zero_cost(self):
         fake = FakeTransport({"model":"gemini-3.7-flash","candidates":[{"content":{"parts":[{"text":"ok"}]}}],"usageMetadata":{"promptTokenCount":100,"candidatesTokenCount":20}})
@@ -164,7 +232,70 @@ class ProviderTests(unittest.TestCase):
         response = {"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[],"usage":{"input_tokens":7,"output_tokens":9}}
         with self.assertRaises(ProviderError) as caught:
             NativeClient._parse("openai", response)
-        self.assertEqual(caught.exception.kind, "malformed")
+        self.assertEqual(caught.exception.kind, "output_limit")
+        self.assertFalse(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["usage"], {"input_tokens":7,"cached_input_tokens":0,"output_tokens":9,"reasoning_tokens":0})
+
+    def test_refusal_usage_is_canonical_across_native_provider_shapes(self):
+        shapes = [
+            ("openai", {"output":[{"type":"message","content":[{"type":"refusal","refusal":"blocked"}]}],
+                         "usage":{"input_tokens":7,"input_tokens_details":{"cached_tokens":2},"output_tokens":9}},
+             {"input_tokens":7,"cached_input_tokens":2,"output_tokens":9,"reasoning_tokens":0}),
+            ("google", {"promptFeedback":{"blockReason":"SAFETY"},
+                         "usageMetadata":{"promptTokenCount":7,"cachedContentTokenCount":2,"candidatesTokenCount":6,"thoughtsTokenCount":3}},
+             {"input_tokens":7,"cached_input_tokens":2,"output_tokens":9,"reasoning_tokens":3}),
+            ("anthropic", {"stop_reason":"refusal","usage":{"input_tokens":5,"cache_read_input_tokens":1,"cache_creation_input_tokens":1,"output_tokens":9}},
+             {"input_tokens":7,"cached_input_tokens":1,"cache_write_input_tokens":1,"output_tokens":9,"reasoning_tokens":0}),
+        ]
+        for provider, response, expected in shapes:
+            with self.subTest(provider=provider):
+                with self.assertRaises(ProviderError) as caught: NativeClient._parse(provider, response)
+                self.assertEqual(caught.exception.kind, "provider_refusal")
+                self.assertFalse(caught.exception.billing_uncertain)
+                self.assertEqual(caught.exception.payload["usage"], expected)
+
+    def test_google_stream_refusal_usage_is_canonical(self):
+        lines = [b'data: {"promptFeedback":{"blockReason":"SAFETY"},"candidates":[{"finishReason":"SAFETY"}],"usageMetadata":{"promptTokenCount":7,"cachedContentTokenCount":2,"candidatesTokenCount":6,"thoughtsTokenCount":3}}\n']
+        transport = FakeStreamingTransport(lines)
+        profile = self.profile("google", model="gemini-3.7-flash")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, transport).generate(profile, [], 20)
+        self.assertEqual(caught.exception.kind, "provider_refusal")
+        self.assertFalse(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["usage"], {"input_tokens":7,"cached_input_tokens":2,"output_tokens":9,"reasoning_tokens":3})
+
+    def test_google_stream_prompt_feedback_block_without_candidates_is_final_refusal(self):
+        line = b'data: {"promptFeedback":{"blockReason":"SAFETY"},"usageMetadata":{"promptTokenCount":7,"cachedContentTokenCount":2,"candidatesTokenCount":6,"thoughtsTokenCount":3}}\n'
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, FakeStreamingTransport([line])).generate(
+                self.profile("google", model="gemini-3.7-flash"), [], 20)
+        self.assertEqual(caught.exception.kind, "provider_refusal")
+        self.assertFalse(caught.exception.billing_uncertain)
+        self.assertEqual(caught.exception.payload["usage"], {"input_tokens":7,"cached_input_tokens":2,"output_tokens":9,"reasoning_tokens":3})
+
+    def test_output_limit_is_uniform_across_provider_shapes(self):
+        shapes = [
+            ("openai", {"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},
+                         "usage":{"input_tokens":7,"output_tokens":9}}),
+            ("google", {"candidates":[{"finishReason":"MAX_TOKENS","content":{"parts":[{"text":"partial"}]}}],
+                         "usageMetadata":{"promptTokenCount":7,"candidatesTokenCount":6,"thoughtsTokenCount":3}}),
+            ("anthropic", {"stop_reason":"max_tokens","content":[{"type":"text","text":"partial"}],
+                            "usage":{"input_tokens":7,"output_tokens":9}}),
+        ]
+        for provider, response in shapes:
+            with self.subTest(provider=provider), self.assertRaises(ProviderError) as caught:
+                NativeClient._parse(provider, response)
+            self.assertEqual(caught.exception.kind, "output_limit")
+            self.assertFalse(caught.exception.billing_uncertain)
+            self.assertEqual(caught.exception.payload["usage"]["input_tokens"], 7)
+
+    def test_google_stream_output_limit_keeps_canonical_usage(self):
+        lines = [b'data: {"candidates":[{"finishReason":"MAX_TOKENS","content":{"parts":[{"text":"partial"}]}}],"usageMetadata":{"promptTokenCount":7,"candidatesTokenCount":6,"thoughtsTokenCount":3}}\n']
+        transport = FakeStreamingTransport(lines)
+        profile = self.profile("google", model="gemini-3.7-flash")
+        with self.assertRaises(ProviderError) as caught:
+            NativeClient({"TEST_KEY":"key"}, transport).generate(profile, [], 20)
+        self.assertEqual(caught.exception.kind, "output_limit")
         self.assertFalse(caught.exception.billing_uncertain)
         self.assertEqual(caught.exception.payload["usage"]["output_tokens"], 9)
 

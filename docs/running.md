@@ -64,3 +64,10 @@ waits for CI, and starts an independent gatekeeper. The gatekeeper decides wheth
 to merge; Pages deploys main. For a DNF, call
 `rundale_bench.publication.file_failure_issue(root, run)` and verify its receipt.
 Neither helper claims an unconfirmed external action succeeded.
+
+An infrastructure DNF whose response has final usage is charged and cached;
+resuming replays that failure instead of making another paid call. Diagnose the
+issue before starting a new run. An interrupted or unmetered request retains its
+reservation and blocks further paid work until billing is reconciled. Gemini
+usage without an explicit thinking-token count also remains uncertain rather
+than assuming that count is zero.

@@ -177,6 +177,9 @@ def _response_record(resp) -> dict:
 
 
 def _settle_error(ledger: Ledger, call_id: str, profile: dict, exc: ProviderError) -> bool:
+    if exc.billing_uncertain:
+        ledger.fail(call_id, uncertain=True)
+        return True
     usage = exc.payload.get('usage') if isinstance(exc.payload, dict) else None
     if isinstance(usage, dict):
         try:
@@ -186,8 +189,20 @@ def _settle_error(ledger: Ledger, call_id: str, profile: dict, exc: ProviderErro
             return True
         ledger.commit(call_id, {'error':str(exc),'kind':exc.kind,'payload':exc.payload,'usage':usage}, cost)
         return False
-    ledger.fail(call_id, uncertain=exc.billing_uncertain)
-    return exc.billing_uncertain
+    ledger.fail(call_id, uncertain=False)
+    return False
+
+
+def _recorded_failure(errors: list[dict], case_id: str, trial: int, step: int | str, kind: str) -> bool:
+    return any(e.get('case_id') == case_id and e.get('trial', 0) == trial
+               and e.get('step') == step and e.get('kind') == kind for e in errors)
+
+
+def _error_cost(profile: dict, payload: dict) -> float | None:
+    usage = payload.get('usage') if isinstance(payload, dict) else None
+    if not isinstance(usage, dict): return None
+    try: return actual_cost(profile, usage)
+    except UncertainBilling: return None
 
 
 def _dialogue_contract(messages: list[dict]) -> bool:
@@ -340,12 +355,20 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                     if 'error' in record:
                         error_kind=record.get('kind','provider_refusal')
                         err = {'kind':error_kind,'reason':record['error'],'raw':record.get('payload',{}),'billing_uncertain':False}
-                        errors.append({'case_id':case['id'],'trial':trial,'step':step,**err})
+                        new_error = not _recorded_failure(errors, case['id'], trial, step, error_kind)
+                        if new_error:
+                            errors.append({'case_id':case['id'],'trial':trial,'step':step,**err})
+                        if error_kind == 'output_limit':
+                            run_data['failure_cause']='setup'
+                            run_data['reason']='Configured output token limit reached.'
+                            atomic_json(state_path,run_data)
+                            raise RuntimeError('Configured output token limit reached')
                         run_data['failure_cause']='model' if error_kind=='provider_refusal' else ('setup' if error_kind=='auth' else 'infrastructure')
                         if error_kind != 'provider_refusal':
                             atomic_json(state_path,run_data)
                             raise RuntimeError(f'Provider failure ({error_kind})')
-                        failures += 1; run_data['failure_events']=failures
+                        if new_error: failures += 1
+                        run_data['failure_events']=failures
                         atomic_json(state_path,run_data)
                         if failures >= 2: raise RuntimeError('Repeated confirmed model failures')
                         candidate_failed=True
@@ -375,20 +398,24 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                         run_data['requests'].append({'id':call_id,'request':request,'response':record,'cost_usd':cost})
                     except ProviderError as exc:
                         settled_uncertain = _settle_error(ledger, call_id, profile, exc)
-                        errors.append({'case_id':case['id'],'trial':trial,'step':step,'kind':exc.kind,'reason':str(exc),'raw':exc.payload,'billing_uncertain':exc.billing_uncertain})
-                        run_data['requests'].append({'id':call_id,'request':request,'response':exc.payload,'cost_usd':None})
-                        if exc.kind == 'auth' and not exc.billing_uncertain: run_data['failure_cause']='setup'
-                        elif exc.billing_uncertain: run_data['failure_cause']='unknown'
+                        errors.append({'case_id':case['id'],'trial':trial,'step':step,'kind':exc.kind,'reason':str(exc),'raw':exc.payload,'billing_uncertain':exc.billing_uncertain or settled_uncertain})
+                        run_data['requests'].append({'id':call_id,'request':request,'response':exc.payload,'cost_usd':None if settled_uncertain else _error_cost(profile, exc.payload)})
+                        if exc.billing_uncertain or settled_uncertain: run_data['failure_cause']='unknown'
+                        elif exc.kind in ('auth', 'output_limit'): run_data['failure_cause']='setup'
                         elif exc.kind == 'provider_refusal': run_data['failure_cause']='model'
                         else: run_data['failure_cause']='infrastructure'
                         if exc.billing_uncertain or settled_uncertain: raise UncertainBilling(str(exc))
+                        if exc.kind == 'output_limit':
+                            run_data['reason']='Configured output token limit reached.'
+                            atomic_json(state_path,run_data)
+                            raise RuntimeError('Configured output token limit reached')
                         if exc.kind != 'provider_refusal': raise RuntimeError(f'Provider failure ({exc.kind})')
                         failures += 1
                         run_data['failure_events']=failures
                         atomic_json(state_path,run_data)
                         if failures >= 2: raise RuntimeError('Repeated confirmed model failures')
                         candidate_failed = True
-                        record = {'text':'','usage':{'input_tokens':0,'output_tokens':0},'raw':exc.payload,'model':profile['model'],'elapsed_ms':None,'ttft_ms':None}
+                        record = {'text':'','usage':exc.payload.get('usage',{}),'raw':exc.payload,'model':profile['model'],'elapsed_ms':None,'ttft_ms':None}
                 last_response = record
                 npc_text, contract_error = ('',None) if candidate_failed else _npc_text(record.get('text',''), prompt_messages)
                 if contract_error:
@@ -427,6 +454,15 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                     if not any(x.get('id') == judge_id for x in run_data['requests']):
                         run_data['requests'].append({'id':judge_id,'request':judge_request,'response':judged,
                             'cost_usd':actual_cost(judge_profile,judged['usage']) if judged.get('usage') else None})
+                    if 'error' in judged:
+                        kind = judged.get('kind', 'malformed')
+                        if not _recorded_failure(errors, case['id'], trial, 'judge', kind):
+                            errors.append({'case_id':case['id'],'trial':trial,'step':'judge','kind':kind,'reason':judged['error'],
+                                           'raw':judged.get('payload',{}),'billing_uncertain':False})
+                        run_data['failure_cause']='setup' if kind in ('auth','output_limit') else 'infrastructure'
+                        if kind == 'output_limit': run_data['reason']='Configured output token limit reached.'
+                        atomic_json(state_path,run_data)
+                        raise RuntimeError('Configured output token limit reached' if kind == 'output_limit' else f'Judge failure ({kind})')
                 else:
                     jm = [{'role':'user','content':json.dumps(judge_item,ensure_ascii=False)}]
                     reserve = upper_cost(judge_profile,jm,JUDGE_MAX_OUTPUT_TOKENS,{'rubric':rubrics[category],'candidate':judge_item})
@@ -438,11 +474,12 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                         run_data['requests'].append({'id':judge_id,'request':judge_request,'response':judged,'cost_usd':cost})
                     except ProviderError as exc:
                         settled_uncertain = _settle_error(ledger, judge_id, judge_profile, exc)
-                        errors.append({'case_id':case['id'],'trial':trial,'kind':exc.kind,'reason':str(exc),'raw':exc.payload,'billing_uncertain':exc.billing_uncertain})
-                        run_data['requests'].append({'id':judge_id,'request':judge_request,'response':exc.payload,'cost_usd':None})
-                        run_data['failure_cause']='unknown' if exc.billing_uncertain else ('setup' if exc.kind=='auth' else 'infrastructure')
+                        errors.append({'case_id':case['id'],'trial':trial,'step':'judge','kind':exc.kind,'reason':str(exc),'raw':exc.payload,'billing_uncertain':exc.billing_uncertain or settled_uncertain})
+                        run_data['requests'].append({'id':judge_id,'request':judge_request,'response':exc.payload,'cost_usd':None if settled_uncertain else _error_cost(judge_profile, exc.payload)})
+                        run_data['failure_cause']='unknown' if exc.billing_uncertain or settled_uncertain else ('setup' if exc.kind in ('auth','output_limit') else 'infrastructure')
                         if exc.billing_uncertain or settled_uncertain: raise UncertainBilling(str(exc))
-                        raise RuntimeError(f'Judge failure ({exc.kind})')
+                        if exc.kind == 'output_limit': run_data['reason']='Configured output token limit reached.'
+                        raise RuntimeError('Configured output token limit reached' if exc.kind == 'output_limit' else f'Judge failure ({exc.kind})')
                 if judged.get('axes'):
                     score = rubric_score(judged['axes'], rubrics[category])
                 judgments.append({'case_id':case['id'],'trial':trial,**judged})
@@ -482,7 +519,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
         run_data['failure_events']=failures
         run_data['cost_usd']=ledger.spent
         run_data['spending_exposure_usd']=ledger.exposure
-        if run_data.get('failure_cause')=='unknown' or ledger.exposure > ledger.spent + 1e-12 and run_data.get('failure_cause')=='unknown':
+        if ledger.exposure > ledger.spent + 1e-12:
             run_data['budget_status']='billing_uncertain'
         elif run_data.get('failure_cause')=='budget' or ledger.exposure >= budget - 1e-12:
             run_data['budget_status']='cap_reached'
