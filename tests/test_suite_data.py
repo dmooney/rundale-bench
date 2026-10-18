@@ -3,6 +3,8 @@ import json
 import subprocess
 import sys
 import unittest
+import tempfile
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,20 +14,28 @@ SUITE = ROOT / "suites/3.0"
 class SuiteDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        subprocess.run([sys.executable, str(ROOT / "scripts/build_suite.py")], check=True)
-        cls.manifest = json.loads((SUITE / "manifest.json").read_text())
-        cls.cases_bytes = (SUITE / "cases.jsonl").read_bytes()
+        cls.temp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.temp.cleanup)
+        sandbox = Path(cls.temp.name)
+        (sandbox / "scripts").mkdir()
+        cls.suite = sandbox / "suites/3.0"
+        cls.suite.mkdir(parents=True)
+        shutil.copy2(ROOT / "scripts/build_suite.py", sandbox / "scripts/build_suite.py")
+        shutil.copy2(SUITE / "engine_capture.jsonl", cls.suite / "engine_capture.jsonl")
+        subprocess.run([sys.executable, str(sandbox / "scripts/build_suite.py")], check=True)
+        cls.manifest = json.loads((cls.suite / "manifest.json").read_text())
+        cls.cases_bytes = (cls.suite / "cases.jsonl").read_bytes()
         cls.cases = [json.loads(line) for line in cls.cases_bytes.splitlines()]
 
     def test_manifest_hashes_and_counts(self):
         self.assertEqual(hashlib.sha256(self.cases_bytes).hexdigest(), self.manifest["cases_sha256"])
-        self.assertEqual(hashlib.sha256((SUITE / "rubrics.json").read_bytes()).hexdigest(), self.manifest["rubrics_sha256"])
+        self.assertEqual(hashlib.sha256((self.suite / "rubrics.json").read_bytes()).hexdigest(), self.manifest["rubrics_sha256"])
         self.assertEqual(len(self.cases), 56)
         self.assertEqual(self.manifest["counts"], {"dialogue": 24, "multiturn": 8, "gaeilge": 24})
         self.assertEqual(self.manifest["status"], "draft")
         self.assertEqual(self.manifest["launch_blocker"], "English judge qualification pending")
         self.assertIn("manually gated", " ".join(self.manifest["diagnostic_blockers"]))
-        capture = (SUITE / "engine_capture.jsonl").read_bytes()
+        capture = (self.suite / "engine_capture.jsonl").read_bytes()
         self.assertEqual(hashlib.sha256(capture).hexdigest(), self.manifest["engine"]["capture_sha256"])
         self.assertEqual(self.manifest["generation"]["max_output_tokens"], 4096)
         self.assertEqual(self.manifest["engine"]["capture_function"], "limerick-core::ipc::handlers::prepare_npc_conversation_turn")
@@ -33,7 +43,7 @@ class SuiteDataTests(unittest.TestCase):
         self.assertIsNone(self.manifest["selection"]["irish_blimp"]["qualification_plan"]["actual_split_disjointness_verified"])
 
     def test_captured_dialogue_envelopes_and_current_engine_pin(self):
-        captures = [json.loads(line) for line in (SUITE / "engine_capture.jsonl").read_text().splitlines()]
+        captures = [json.loads(line) for line in (self.suite / "engine_capture.jsonl").read_text().splitlines()]
         dialogue = [c for c in self.cases if c["eval"] == "dialogue"]
         self.assertEqual(len(captures), 24)
         self.assertTrue(all(c["engine_revision"] == self.manifest["engine"]["commit"] for c in captures))
@@ -113,7 +123,7 @@ class SuiteDataTests(unittest.TestCase):
         self.assertEqual(coverage["independent_irish_source_items"], 8)
         self.assertFalse(coverage["observations_are_independent"])
         self.assertTrue(all(c["max_output_tokens"] == 4096 for c in self.cases))
-        rubrics = json.loads((SUITE / "rubrics.json").read_text())
+        rubrics = json.loads((self.suite / "rubrics.json").read_text())
         for groups in rubrics.values():
             for rubric in groups.values():
                 self.assertEqual(set(rubric["anchors"]), {"1", "2", "3", "4", "5"})

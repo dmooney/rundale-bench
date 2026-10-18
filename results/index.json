@@ -4,9 +4,10 @@
     {
       "version": "3.0",
       "qualification": {
-        "status": "pending",
-        "reason": "Owner English reference ratings and native API judge qualification are incomplete.",
-        "suite_hash": null
+        "status": "provisional",
+        "reason": "Automated judge checks passed. Scores are provisional; human agreement and accuracy have not been measured.",
+        "suite_hash": "5c822a68082241a2c514685293bee7a527662abd6cf3628a9711eed095394fda",
+        "validation_basis": "automated_checks_only"
       },
       "rows": [],
       "runs": []

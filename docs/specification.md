@@ -21,32 +21,57 @@ conversation, and 4 Gaeilge repeat trials. The engine revision is pinned to
 `5c14ea236022aed698e478837a6c754657239ae7`. The 24 dialogue requests were exported through the production
 `prepare_npc_conversation_turn` path at that revision and are frozen in
 `suites/3.0/engine_capture.jsonl`. The manifest records the capture and source
-hashes; engine capture is complete. English judge qualification still blocks
-a launch claim. Full sessions, intent, simulation,
+hashes; engine capture is complete. A matching automated-screening receipt
+permits a provisional launch. Full sessions, intent, simulation,
 reactions, local models, and app delivery are deferred.
 
-## Judge qualification
+## Judge screening and validation
 
-English judge qualification uses 16 blind cases in total, split
-deterministically into 8 selection cases and 8 validation cases, with four
-cases per evaluation in each split. The
-owner supplies reference ratings. Synthetic pilot ratings can help develop the
-process but are not qualification evidence. Freeze the suite and rubric before
-collecting the owner's ratings. The initial candidates are native API GPT-6.1 Sol
-at high reasoning and Jev 1.13.0. Codex subagent results do not establish native API
-cost or qualification.
+Owner decision, October 18, 2026: manual review is not a launch requirement.
+Publish a provisional leaderboard using automated judge screening, without a
+claim of human validation. Human feedback through MTurk or another service may
+be considered later; recruitment and spending on it are deferred.
 
-The initial acceptance gates are mean absolute error (MAE) no greater than 0.75,
-no owner rating of 1–2 judged as 4–5, and at least 90% of axes unchanged on
-controlled repeats. These are project startup choices, not industry standards.
-Choose the candidate with lower MAE; a difference under 0.1 is a tie, broken by
-measured cost. Each evaluation must pass its own validation split.
-Unknown or null reference axes stay unlabelled, and too little usable validation
-means qualification remains pending. Confidence intervals and judge agreement do
-not replace accuracy against the owner's references. Gaeilge objective scores use attributed published answer keys. An expanded
-Irish-BLiMP diagnostic qualification corpus remains pending dataset access; it
-does not qualify an Irish style judge. Synthetic Irish labels are never gold. Any judge change requires a new
-suite version.
+Native GPT-6.1 Sol at high reasoning and Jev 1.13.0 each score the frozen 16
+English calibration cases and six controlled variants. The earlier 8/8 split
+is retained for provenance; it no longer supplies a human validation holdout.
+All published calibration examples are exposed development evidence.
+
+For each English evaluation, require complete integer grades on exactly its
+rubric axes, at least 90% unchanged axes on the invariant controls, and at least
+two distinct original axis grades within each eval. Reject constant grading as
+a pre-launch development heuristic. This was added after inspecting the exposed
+calibration data; it is not independent validation and may reject legitimately
+uniform grades. Exclude
+the duplicated-response diagnostic from this invariance gate. Among passing
+judges, pin the one with the lower measured total calibration cost (profile ID
+breaks a tie). This chooses a low-cost judge passing these narrow checks; it does not
+establish accuracy, score sensitivity, or ranking quality. Publish controls, per-axis changes, costs, and inter-judge
+agreement, per-judge grade distributions, and ceiling fractions. Many calibration
+axes are already at grade 5; a constant high grader can pass invariance alone, and
+upward label preference cannot be observed on a ceiling axis. Recompute these diagnostics from raw grades; agreement between
+judges is not a reference answer and does not establish correctness.
+
+The receipt and every run must retain `provisional` status and
+`automated_checks_only` validation basis. Human agreement, accuracy, MAE against
+human ratings, and severe human-reference misses remain unmeasured. No synthetic
+or model-generated rating becomes a human reference. Failing automated checks
+still blocks paid execution; pending evidence is not a bypass flag.
+
+Optional future human validation can use the retained blind review workflow
+in a new benchmark version. Version 3.0 rejects human evaluation once its
+provisional policy is pinned, preserving both successful and failed evidence.
+References must be real, match the frozen pack/rubric, and contain no invented
+labels. The original human-reference gates (MAE <=0.75, no 1–2 reference rated
+4–5, selection then separate validation) remain available for that workflow in a new benchmark version;
+they are project thresholds, not industry guarantees. Future feedback collection
+needs its own sampling and adjudication design. Do not retroactively relabel old
+provisional runs as human validated. Changing a pinned judge or scoring policy
+requires a new benchmark version.
+
+Gaeilge scores use attributed objective answer keys. Expanded Irish-BLiMP
+qualification remains pending dataset access; Irish naturalness/style remains
+unqualified and excluded from ranking.
 
 ## Execution and cost
 
@@ -94,18 +119,18 @@ raw requests, responses, judgments, coverage, settings, actual or estimated cost
 timing, and any DNF reason. Do not publish generated strength summaries. Preserve
 immutable history and choose the displayed latest run using failure precedence.
 
-Scores require complete primary coverage and qualified judges. Raw or provisional
-grades may be shown, but must not appear as qualified rankings. Keep versions in
+Scores require complete primary coverage and matching pinned judge-screening
+evidence. Provisional rankings are permitted, prominently labeled as automated
+and not human validated, including each historical run. Keep versions in
 separate tables. Report showcase-level paired bootstrap intervals and Wilson
-intervals for accuracy, with small sample sizes made clear. Owner ratings are
-references for product preferences, not population consensus. Once public,
+intervals for accuracy, with small sample sizes made clear. Future human ratings would be references for product preferences, not population consensus. Once public,
 validation data are no longer untouched holdouts.
 
 ## Completion
 
-Code, site, and readiness work may finish before owner ratings are available. A
-full launch additionally requires qualified English judges, mandatory
-reference-backed Gaeilge, one complete actual run, a second result or an honestly
-reported DNF, verified live evidence, a fresh independent agent workflow, and
-total spend no greater than $20. Do not claim completion while any required gate
-remains unmet.
+A provisional launch requires passing automated screening with its limitations
+published, mandatory reference-backed Gaeilge, one complete actual run, a second
+result or an honestly reported DNF, verified live evidence, a fresh independent
+agent workflow, and total spend no greater than $20. Human feedback is deferred;
+it is not a launch blocker. Do not claim human qualification or completion of
+any remaining required gate.

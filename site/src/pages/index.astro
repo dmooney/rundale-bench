@@ -3,10 +3,10 @@ import Base from '../layouts/Base.astro';
 ---
 <Base title="Rundale Bench · Results">
 <main>
-  <section class="hero"><p class="eyebrow">MODEL EVALUATION · ROSCOMMON, 1820</p><h1>How well can a model inhabit Rundale?</h1><p>Dialogue, multi-turn play, and Gaeilge evaluation records, with source evidence attached to every run.</p><p class="pending" id="qualification-banner"><strong id="qualification-title">Qualification status pending.</strong> <span id="qualification-description">Waiting for the published evaluation record.</span></p></section>
+  <section class="hero"><p class="eyebrow">MODEL EVALUATION · ROSCOMMON, 1820</p><h1>How well can a model inhabit Rundale?</h1><p>Dialogue, multi-turn play, and Gaeilge evaluation records, with source evidence attached to every run.</p><p class="pending" id="qualification-banner"><strong id="qualification-title">Qualification status pending.</strong> <span id="qualification-description">Waiting for the published evaluation record.</span></p><p class="separate" id="qualification-evidence" hidden></p></section>
   <section class="toolbar"><label>Evaluation version <select id="version-filter" aria-label="Evaluation version"></select></label><span id="version-note" class="muted"></span><a class="button secondary" href="/rundale-bench/archive/">Previous records</a></section>
   <section class="stats" aria-label="Version summary"><div><span>Run history</span><strong id="run-count">—</strong></div><div><span>Qualification</span><strong id="qualification">—</strong><small id="qualification-reason"></small></div><div><span>Cost recorded</span><strong id="total-cost">—</strong></div><div><span>Evaluation coverage</span><strong id="coverage">—</strong></div></section>
-  <section class="section-head"><div><p class="eyebrow">EVALUATION RECORDS</p><h2>Latest model results</h2></div><p>Only values present in the published records appear here. DNF and missing scores remain explicit.</p></section>
+  <section class="section-head"><div><p class="eyebrow">EVALUATION RECORDS</p><h2>Latest model results</h2></div><p>Score status applies to overall and component scores. DNF and missing scores remain explicit.</p></section>
   <div class="table-wrap"><table><thead><tr><th>Model / reasoning</th><th>Overall</th><th>Dialogue</th><th>Multi-turn</th><th>Gaeilge</th><th>Run date</th><th>Performance · p95</th><th>Cost</th><th>Budget</th><th>Coverage</th><th>Run status</th><th>Quality qualification</th><th>Notice / reason</th><th>Evidence</th></tr></thead><tbody id="runs"><tr><td colspan="14">Loading published run index…</td></tr></tbody></table></div>
   <p class="separate">Irish-style impressions are provisional and separate from evaluated scores.</p>
   <section id="run-detail" class="run-detail" hidden><div class="section-head"><div><p class="eyebrow">SOURCE RECORD</p><h2 id="detail-title">Run details</h2></div><a id="download-run" class="button" download>Download raw run JSON</a></div><div id="detail-links" class="evidence-links"></div><details><summary>Raw run record</summary><pre id="raw-record"></pre></details></section>
@@ -15,10 +15,12 @@ import Base from '../layouts/Base.astro';
 // @ts-nocheck
 import {
   aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
-  performanceLabel, qualificationCopy, runNoticeLabel, runStatusLabel, scoreLabel,
+  qualificationEvidenceLinks,
+  performanceLabel, qualificationCopy, rowQualificationLabel, runNoticeLabel,
+  runStatusLabel, scoreLabel, scoreStatusLabel,
 } from '../lib/dashboard.mjs';
 
-const base = '/rundale-bench';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const byId = (id) => document.getElementById(id);
 const esc = escapeHtml;
 const fmtDate = (value) => {
@@ -57,14 +59,27 @@ function show() {
     byId('coverage').textContent = 'No coverage recorded';
     byId('qualification-title').textContent = 'Qualification status pending.';
     byId('qualification-banner').classList.remove('qualified');
+    byId('qualification-banner').classList.remove('provisional');
     byId('qualification-description').textContent = 'No published evaluation records are available yet.';
+    byId('qualification-evidence').replaceChildren();
     return;
   }
 
   const qualification = qualificationCopy(version);
   byId('qualification-title').textContent = qualification.title;
   byId('qualification-banner').classList.toggle('qualified', qualification.status === 'qualified');
+  byId('qualification-banner').classList.toggle('provisional', qualification.status === 'provisional');
   byId('qualification-description').textContent = qualification.description;
+  const evidenceLinks = byId('qualification-evidence');
+  evidenceLinks.replaceChildren();
+  for (const [index, link] of qualificationEvidenceLinks(version, base).entries()) {
+    if (index) evidenceLinks.append(document.createTextNode(' · '));
+    const anchor = document.createElement('a');
+    anchor.href = link.href;
+    anchor.textContent = link.label;
+    evidenceLinks.append(anchor);
+  }
+  evidenceLinks.hidden = evidenceLinks.childElementCount === 0;
   byId('qualification').textContent = qualification.status;
   byId('qualification-reason').textContent = qualification.description;
   byId('version-note').textContent = version.version === '3.0' ? 'Current evaluation' : 'Archived evaluation record';
@@ -83,17 +98,17 @@ function show() {
       : '';
     return `<tr>
       <td><strong>${esc(row.model)}</strong><small>${esc(row.reasoning || 'Reasoning unspecified')}</small></td>
-      <td>${esc(scoreLabel(row.overall, row.status))}</td>
-      <td>${esc(scoreLabel(row.scores?.dialogue, 'complete'))}</td>
-      <td>${esc(scoreLabel(row.scores?.multiturn, 'complete'))}</td>
-      <td>${esc(scoreLabel(row.scores?.gaeilge, 'complete'))}</td>
+      <td>${esc(scoreLabel(row.overall, row.status))}<small>${esc(scoreStatusLabel(row))}</small></td>
+      <td>${esc(scoreLabel(row.scores?.dialogue, 'complete'))}<small>${esc(scoreStatusLabel(row))}</small></td>
+      <td>${esc(scoreLabel(row.scores?.multiturn, 'complete'))}<small>${esc(scoreStatusLabel(row))}</small></td>
+      <td>${esc(scoreLabel(row.scores?.gaeilge, 'complete'))}<small>${esc(scoreStatusLabel(row))}</small></td>
       <td>${esc(fmtDate(row.completed_at))}</td>
       <td>${esc(performanceLabel(row.uncertainty))}</td>
       <td>${esc(fmtCost(row.cost_usd))}</td>
       <td>${esc(fmtBudget(row))}</td>
       <td>${esc(coverageLabel(row.coverage))}</td>
       <td>${esc(runStatusLabel(row))}</td>
-      <td>${esc(qualification.status)}</td>
+      <td>${esc(rowQualificationLabel(row))}</td>
       <td>${esc(notice)}${attemptButton}</td>
       <td><button class="text-button" data-run="${esc(row.run_id)}">Open evidence</button></td>
     </tr>`;

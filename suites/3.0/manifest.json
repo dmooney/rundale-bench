@@ -22,10 +22,9 @@
     "prompt_contract": "Concise player-facing dialogue; token allowance permits provider reasoning or structured output without artificial truncation."
   },
   "judge_policy": {
-    "dialogue": null,
-    "multiturn": null
+    "dialogue": "jev-1.13.0",
+    "multiturn": "gpt-6.1-sol-judge-high"
   },
-  "launch_blocker": "English judge qualification pending",
   "repeat_ids": [
     "d02",
     "d08",
@@ -106,6 +105,41 @@
       "url": "https://arxiv.org/html/2510.20957v1"
     }
   },
-  "status": "draft",
-  "version": "3.0"
+  "status": "ready",
+  "version": "3.0",
+  "validation_mode": "provisional",
+  "judge_profiles": {
+    "gpt-6.1-sol-judge-high": {
+      "id": "gpt-6.1-sol-judge-high",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "reasoning": "high",
+      "supported_reasoning": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "capabilities_source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "input_per_million_usd": 2.0,
+      "output_per_million_usd": 10.0,
+      "cached_input_per_million_usd": 0.1,
+      "api_key_env": "OPENAI_API_KEY",
+      "pricing_source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "jev-1.13.0": {
+      "id": "jev-1.13.0",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "reasoning": null,
+      "supported_reasoning": [],
+      "capabilities_source": "https://docs.typesafe.ai/models",
+      "input_per_million_usd": 0.042,
+      "output_per_million_usd": 0.0,
+      "cached_input_per_million_usd": null,
+      "api_key_env": "TYPESAFE_API_KEY",
+      "pricing_source": "https://docs.typesafe.ai/models"
+    }
+  }
 }

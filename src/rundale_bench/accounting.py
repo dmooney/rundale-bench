@@ -76,7 +76,7 @@ class Ledger:
         row = self.db.execute('SELECT * FROM calls WHERE id=?', (request_id,)).fetchone()
         if row is None:
             return None
-        digest = hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        digest = self.request_digest(request)
         if row['digest'] != digest:
             raise BudgetError('Resume request differs from the paid request')
         if row['state'] == 'committed':
@@ -85,10 +85,29 @@ class Ledger:
             raise UncertainBilling('Previous request may have been billed; reconcile it before continuing')
         return None
 
+    @staticmethod
+    def request_digest(request: dict) -> str:
+        return hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+    def cached_request(self, request: dict) -> tuple[str, dict] | None:
+        """Find a committed receipt by request content, independent of its call ID."""
+        digest = self.request_digest(request)
+        rows = self.db.execute('SELECT id,state,response FROM calls WHERE digest=? ORDER BY id', (digest,)).fetchall()
+        if any(row['state'] in ('reserved', 'uncertain') for row in rows):
+            raise UncertainBilling('A matching request may have been billed; reconcile it before continuing')
+        for row in rows:
+            if row['state'] == 'committed':
+                return row['id'], json.loads(row['response'])
+        return None
+
+    def committed_calls(self) -> list[tuple[str, dict]]:
+        rows = self.db.execute("SELECT id,response FROM calls WHERE state='committed' ORDER BY id").fetchall()
+        return [(row['id'], json.loads(row['response'])) for row in rows]
+
     def reserve(self, request_id: str, request: dict, amount: float, future_judging: float = 0) -> None:
         if not all(math.isfinite(v) and v >= 0 for v in (amount, future_judging)):
             raise BudgetError('Invalid cost reservation')
-        digest = hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        digest = self.request_digest(request)
         self.db.execute('BEGIN IMMEDIATE')
         try:
             if self.db.execute("SELECT 1 FROM calls WHERE state IN ('reserved','uncertain')").fetchone():

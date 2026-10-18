@@ -45,14 +45,31 @@ def qualification_blockers(root: Path, manifest: dict, suite_hash: str) -> list[
     except Exception as exc:
         return [f'Provider profile registry is invalid: {exc}']
     pinned_profiles=manifest.get('judge_profiles',{})
-    if receipt.get('status') != 'qualified': blockers.append('Qualification status is not qualified.')
+    provisional = receipt.get('status') == 'provisional'
+    if receipt.get('status') not in ('qualified', 'provisional'):
+        blockers.append('Judge screening is neither qualified nor explicitly provisional.')
+    if provisional:
+        if (manifest.get('validation_mode') != 'provisional'
+                or receipt.get('validation_basis') != 'automated_checks_only'
+                or receipt.get('human_validated') is not False):
+            blockers.append('Provisional validation policy is missing or inconsistent.')
+        evidence_hashes = receipt.get('evidence_hashes', {})
+        if set(evidence_hashes) != {'collection.json', 'judgments.json', 'controls.json', 'bias-diagnostics.json'}:
+            blockers.append('Provisional calibration evidence hashes are missing.')
+        else:
+            for name, expected in evidence_hashes.items():
+                path = qpath.parent/name
+                if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                    blockers.append(f'Provisional calibration evidence changed: {name}.')
     if receipt.get('suite_hash') != suite_hash: blockers.append('Qualification receipt is for a different suite manifest.')
     for category in ('dialogue', 'multiturn'):
         policy = manifest.get('judge_policy', {}).get(category)
         evidence = receipt.get('judges', {}).get(category, {})
         if not policy: blockers.append(f'{category} judge is not pinned in the suite manifest.')
-        if not evidence.get('qualified') or evidence.get('profile_id') != policy:
-            blockers.append(f'{category} judge does not have matching qualified evidence.')
+        accepted = (evidence.get('automated_checks_passed') is True and evidence.get('qualified') is False
+                    if provisional else evidence.get('qualified') is True)
+        if not accepted or evidence.get('profile_id') != policy:
+            blockers.append(f'{category} judge does not have matching screening evidence.')
         if policy:
             if policy not in pinned_profiles:
                 blockers.append(f'{category} judge profile snapshot is missing from the suite manifest.')
@@ -281,6 +298,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
     if not validation['valid']: raise ValueError('Invalid suite: ' + ' '.join(validation['problems']))
     blockers = qualification_blockers(root, manifest, suite_hash)
     if blockers: raise ValueError('Paid launch blocked: ' + ' '.join(blockers))
+    qualification = json.loads((root/'qualification/3.0/status.json').read_text())
     selected_reasoning = profile.get('reasoning')
     run_id = safe_id(resume or run_id or uuid.uuid4().hex[:12])
     outroot = Path(output or root/'output')
@@ -304,6 +322,9 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
             'suite_hash':suite_hash,'uncertainty':{},'variability':{},'budget_usd':budget,
             'budget_status':'within_cap','spending_exposure_usd':0.0,
             'actual_cost_basis':'provider usage priced with the pinned profile rates',
+            'qualification_status':qualification['status'],
+            'score_status':'provisional' if qualification['status']=='provisional' else 'human_validated',
+            'validation_basis':qualification.get('validation_basis','owner_reference_ratings'),
             'candidate_profile':profile,
             'judge_profiles':{pid:profiles[pid] for pid in set(manifest.get('judge_policy',{}).values()) if pid in profiles}}
     run_data['budget_usd']=budget
