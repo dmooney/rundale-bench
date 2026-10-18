@@ -9,3 +9,8 @@ dist/
 .astro/
 output/
 *.egg-info/
+
+site/public/results.json
+site/public/evidence/
+site/public/review/
+site/public/archive/

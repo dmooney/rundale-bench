@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/dmooney/Rundale",
+  "source_commit": "5c14ea236022aed698e478837a6c754657239ae7",
+  "status": "Historical records copied unchanged; not Benchmark 3.0 evidence",
+  "files": [
+    {
+      "source_path": "promptfoo/leaderboard/dialogue-qualification.json",
+      "file": "dialogue-qualification.json",
+      "sha256": "78c7fcf6c0a5f6d4ea491dbfcb62d240b34c30dfd7a5a43f360c75015f61cf9f"
+    },
+    {
+      "source_path": "promptfoo/leaderboard/leaderboard.jsonl",
+      "file": "leaderboard.jsonl",
+      "sha256": "a2927f70b6b66a5490dc0eb9d5372050929e3ed69a1f548f3bbc9b9d93b63933"
+    },
+    {
+      "source_path": "promptfoo/leaderboard/README.md",
+      "file": "README.md",
+      "sha256": "772fcbc9b507cdbcd10d991c1456b165dca64a26a7da27444644664f2691a176"
+    }
+  ]
+}

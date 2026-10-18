@@ -1,0 +1,96 @@
+{
+  "dialogue": {
+    "character": {
+      "anchors": {
+        "1": "Speaks as an incompatible role or claims expertise explicitly forbidden by the system.",
+        "2": "Mostly departs from role or voice, with a major knowledge-boundary breach.",
+        "3": "Role is recognizable but includes one notable voice or knowledge mismatch.",
+        "4": "Role and voice fit; only a small mismatch.",
+        "5": "Distinctly fits the captured role, knowledge boundary, and voice."
+      },
+      "description": "Uses the captured NPC role, knowledge, and established voice."
+    },
+    "craft": {
+      "anchors": {
+        "1": "Incoherent, non-dialogue, or so overlong/repetitive that the turn fails.",
+        "2": "Several clarity problems, repeated phrasing, or substantial excess length.",
+        "3": "Understandable but noticeably repetitive, stiff, or overlong.",
+        "4": "Clear and concise with a small stylistic flaw.",
+        "5": "Natural, cleanly phrased dialogue of an appropriate length."
+      },
+      "description": "Produces concise, clear spoken dialogue suited to the captured prompt."
+    },
+    "grounding": {
+      "anchors": {
+        "1": "Invents consequential facts or presents unknown information as certain.",
+        "2": "Adds multiple unsupported claims or one consequential false certainty.",
+        "3": "Mostly grounded with one unsupported but low-impact claim.",
+        "4": "Grounded; any inference is clearly bounded.",
+        "5": "Uses established facts precisely and states uncertainty where the context is silent."
+      },
+      "description": "Uses only scene and character facts that are supplied or securely established."
+    },
+    "mood_fidelity": {
+      "anchors": {
+        "1": "Emotional tone directly contradicts the stated mood or relationship.",
+        "2": "Strongly mismatched warmth, hostility, or distress.",
+        "3": "Some tonal fit but a notable mismatch remains.",
+        "4": "Fits the current mood with only a small shift.",
+        "5": "Tone consistently reflects the stated mood and relationship."
+      },
+      "description": "Matches explicit mood and relationship cues in the captured system prompt."
+    },
+    "period_authenticity": {
+      "anchors": {
+        "1": "Clear modern anachronism or degrading stage-Irish caricature.",
+        "2": "Multiple period errors or a strong stereotyped portrayal.",
+        "3": "Mostly plausible with one noticeable anachronism or cultural mismatch.",
+        "4": "Fits the period and instructions with only a minor wording issue.",
+        "5": "Plausible to the setting and culturally respectful throughout."
+      },
+      "description": "Fits the captured 1820 rural Roscommon setting and cultural instructions."
+    },
+    "responsiveness": {
+      "anchors": {
+        "1": "Does not address the request or answers an unrelated one.",
+        "2": "Touches the topic but misses the player's central request.",
+        "3": "Partly answers, with a material omission or awkward redirection.",
+        "4": "Answers the request; a minor detail is missed.",
+        "5": "Directly answers the request and creates a natural next conversational step."
+      },
+      "description": "Addresses the player's current request in a way that can continue the exchange."
+    }
+  },
+  "multiturn": {
+    "conversational_relevance": {
+      "anchors": {
+        "1": "Ignores the current turn or ends the conversation with an unwarranted farewell.",
+        "2": "Mostly responds to a prior turn or drifts to an unrelated topic.",
+        "3": "Partly answers the current turn but misses a relevant contextual link.",
+        "4": "Answers the current turn and uses context with a minor omission.",
+        "5": "Directly answers the current turn and uses prior context only where relevant."
+      },
+      "description": "Responds to the current user turn while using relevant prior context."
+    },
+    "memory_consistency": {
+      "anchors": {
+        "1": "Contradicts or loses multiple central facts.",
+        "2": "Contradicts one central fact or invents certainty about an unknown.",
+        "3": "Retains most facts with one material omission or minor contradiction.",
+        "4": "Retains all central facts; only a minor omission.",
+        "5": "Accurately carries forward every relevant fact, change, and uncertainty."
+      },
+      "description": "Retains facts and uncertainty established over the six scripted turns."
+    },
+    "persona_consistency": {
+      "anchors": {
+        "1": "Switches to an incompatible identity or role.",
+        "2": "Several substantial voice/knowledge mismatches.",
+        "3": "Mostly consistent with one notable lapse.",
+        "4": "Consistent with a minor lapse.",
+        "5": "Consistently expresses the captured NPC's role and knowledge boundary."
+      },
+      "description": "Maintains the same captured NPC role, knowledge boundary, and voice throughout."
+    }
+  }
+}
