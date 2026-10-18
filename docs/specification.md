@@ -18,9 +18,11 @@ that a fluent Irish reviewer is available or that the system measures fluency.
 The initial fixed suite contains 24 dialogue cases, 8 six-turn conversations, and
 24 Gaeilge cases (8 in each Gaeilge subcategory). It includes 6 dialogue, 2
 conversation, and 4 Gaeilge repeat trials. The engine revision is pinned to
-`5c14ea236022aed698e478837a6c754657239ae7`. Existing prompt snapshots do not prove
-that they were captured from this revision. Until an engine capture is verified,
-the suite remains blocked from a launch claim. Full sessions, intent, simulation,
+`5c14ea236022aed698e478837a6c754657239ae7`. The 24 dialogue requests were exported through the production
+`prepare_npc_conversation_turn` path at that revision and are frozen in
+`suites/3.0/engine_capture.jsonl`. The manifest records the capture and source
+hashes; engine capture is complete. English judge qualification still blocks
+a launch claim. Full sessions, intent, simulation,
 reactions, local models, and app delivery are deferred.
 
 ## Judge qualification
