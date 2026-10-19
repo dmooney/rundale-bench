@@ -22,10 +22,26 @@ as superseded evidence.
 
 Scores and run records are explicitly provisional. Human agreement, accuracy,
 MAE against human references, and severe human-reference misses are unmeasured.
-There are no new completed candidate scores yet. The baseline dry run is valid
-and has no launch blockers.
+The first Gemini 3.5 Flash-Lite baseline attempt (`8bff4886b04a`) completed all
+24 dialogue cases and scored 93.92 on dialogue. It completed no multi-turn or
+Gaeilge cases (30 of 68 trials total), so it has no overall score and does not
+meet the complete-baseline gate. The run ended with an unknown DNF because a
+Google response omitted `thoughtsTokenCount`; billing remains uncertain in
+the immutable run record. Subsequent diagnosis identified our adapter as the
+cause: the final total exactly matched prompt plus candidate tokens, but the
+adapter required an explicit zero thinking count. A narrowly checked accounting
+fix was independently reviewed and merged in [#10](https://github.com/dmooney/rundale-bench/pull/10);
+this diagnosis does not rewrite the original run or settle its ledger. The runner recorded $0.159474 of known usage and $0.178445 of total spending
+exposure under its $4.98 cap. This is an automated provisional component score,
+not an accuracy-validated or full benchmark result. Its deduplicated failure
+issue is [#9](https://github.com/dmooney/rundale-bench/issues/9).
 
-Offline verification: 82 Python tests and six site tests pass. The engine
+The earlier run (`5e2177f168e2`) remains a separate unknown DNF. Its original
+run record, ledger, and $0.0185515 uncertain exposure are preserved; the
+separate provider-monitoring estimate does not reconcile or replace them.
+
+Publication verification: 119 Python tests and eleven site tests pass, together
+with the frozen dependency install, Astro checks, and static build. The engine
 exporter produced 24 exact production-path prompt captures at the pinned engine
 commit. Suite-building tests now use temporary directories and cannot reset a
 ready manifest or erase its pinned judges.
@@ -33,9 +49,10 @@ ready manifest or erase its pinned judges.
 Remaining launch gates:
 
 - Independent review and deployment verification.
-- One complete baseline and a second result or honest DNF under the approved
-  $20 setup allocation. Gemini 3.7 is disabled because Google routes its API name
-  to 3.8; do not silently substitute a different candidate.
+- One complete baseline and an additional result or honest DNF under the
+  approved $20 setup allocation. The first baseline attempt is incomplete;
+  Gemini 3.7 is disabled because Google routes its API name to 3.8, so do not
+  silently substitute a different candidate.
 - Working public raw-evidence/archive links and a fresh agent execution check.
 
 Gaeilge is a small objective probe backed by eight published source examples;
