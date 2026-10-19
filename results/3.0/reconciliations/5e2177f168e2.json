@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "run_id": "5e2177f168e2",
+  "recorded_at": "2026-10-19T10:25:49.360580+00:00",
+  "conclusion": "not_billed_based_on_provider_monitoring",
+  "monitoring_estimate_usd": 0,
+  "actual_cost_usd": null,
+  "basis": "Provider request-count monitoring showed no generation request from the locally checked key and project in the window.",
+  "limitations": [
+    "This is a monitoring-based estimate, not an invoice or request-specific billing receipt.",
+    "The original failure cause remains unknown; this reconciliation does not change it.",
+    "Identity mapping was checked locally against private provider originals, not independently verified; the review received redacted records.",
+    "Output-token absence is supporting evidence only and lacks a known-generation positive control.",
+    "The run did not record request-start time. The lower bound for query coverage is inferred as recorded completion minus the adapter's 180-second per-operation socket timeout; it is not an observed start timestamp or a total-request deadline.",
+    "Original run cost, budget status, spending exposure, run JSON, and ledger export remain unchanged."
+  ],
+  "original_artifacts": {
+    "run_sha256": "024909a8a4fae035f64a3f7543564ee79d1caab04c05d7e64fdc03ae40b3c300",
+    "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96",
+    "source_sqlite_ledger_sha256": "7aaeac0934bec644ecd12227b7ac5c3890e7f4fb573dca0b22c2b0a693eb5eec",
+    "monitoring_evidence_sha256": "e5f852e61c222d116c4e40ee519ff5120e212e0c2cbcfdb3188ce9c776012519",
+    "monitoring_evidence_canonical_sha256": "1d0b8624b3374401a27af425d93f3857d2a4676b3758bf6f4545e3e7868615bf"
+  },
+  "monitoring_evidence": {
+    "schema_version": 1,
+    "captured_at": "2026-10-18T23:15:28.631331+00:00",
+    "run_id": "5e2177f168e2",
+    "endpoint": "https://monitoring.googleapis.com/v3/projects/<redacted-project>/timeSeries",
+    "identity_binding": {
+      "checked_locally": true,
+      "independently_verified": false,
+      "lookup_project_number_sha256": "616e2357527244a0197ea0d8c3f2256894b280ab3191c7b37dfa4b2ef16a65cb",
+      "described_project_number_sha256": "616e2357527244a0197ea0d8c3f2256894b280ab3191c7b37dfa4b2ef16a65cb",
+      "described_project_id_sha256": "84d8c0e784b30b0b722d46fdd1e3b0d9b4b5aff44bec71953551f954de599402",
+      "key_resource_sha256": "37f4523d65b30c72b71fa743ebffa2068a5b0885ba77c7c8ade295171c2c65fd"
+    },
+    "queries": {
+      "request_count": {
+        "parameters": {
+          "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.labels.service=\"generativelanguage.googleapis.com\"",
+          "interval.startTime": "2026-10-18T17:30:00Z",
+          "interval.endTime": "2026-10-18T17:45:00Z",
+          "view": "FULL",
+          "pageSize": 1000
+        },
+        "http_status": 200,
+        "pagination_complete": true,
+        "raw_response_sha256": "fa5426e94d613bec2ca7db5d14f5c0103b4f04de57e256a6e14a4c8ed7626c13",
+        "pages": [
+          {
+            "timeSeries": [
+              {
+                "metric": {
+                  "labels": {
+                    "grpc_status_code": "0",
+                    "response_code_class": "2xx",
+                    "response_code": "200",
+                    "protocol": "https"
+                  },
+                  "type": "serviceruntime.googleapis.com/api/request_count"
+                },
+                "resource": {
+                  "type": "consumed_api",
+                  "labels": {
+                    "method": "google.ai.generativelanguage.v1beta.ModelService.GetModel",
+                    "service": "generativelanguage.googleapis.com",
+                    "version": "v1beta",
+                    "location": "us-east4",
+                    "credential_id": "key-resource-sha256:37f4523d65b30c72b71fa743ebffa2068a5b0885ba77c7c8ade295171c2c65fd",
+                    "project_id": "sha256:84d8c0e784b30b0b722d46fdd1e3b0d9b4b5aff44bec71953551f954de599402"
+                  }
+                },
+                "metricKind": "DELTA",
+                "valueType": "INT64",
+                "points": [
+                  {
+                    "interval": {
+                      "startTime": "2026-10-18T17:35:48.001Z",
+                      "endTime": "2026-10-18T17:36:48Z"
+                    },
+                    "value": {
+                      "int64Value": "1"
+                    }
+                  }
+                ]
+              }
+            ],
+            "unit": "1"
+          }
+        ]
+      },
+      "output_tokens": {
+        "parameters": {
+          "filter": "metric.type=\"generativelanguage.googleapis.com/generate_content_usage_output_token_count\"",
+          "interval.startTime": "2026-10-18T17:25:00Z",
+          "interval.endTime": "2026-10-18T17:50:00Z",
+          "view": "FULL",
+          "pageSize": 1000
+        },
+        "http_status": 200,
+        "pagination_complete": true,
+        "raw_response_sha256": "e0249fdf8eea5b8ee5ad9576c3eed890e4945f5ab0c5c4cc63dce27bece0ce97",
+        "pages": [
+          {
+            "unit": "1"
+          }
+        ]
+      }
+    },
+    "positive_control_origin": "The sole GetModel call was the subsequent non-generating native Gemini 3.5 Flash-Lite diagnostic GET, using the same benchmark key and environment; the runner does not call GetModel.",
+    "limitations": [
+      "Provider monitoring is not an invoice or request-specific billing receipt.",
+      "Identity mapping was checked locally against private provider originals; independent review received redacted records.",
+      "The original transport exception is unavailable. Later DNS reproduction does not prove the original precise cause.",
+      "Output-token absence lacks a known-generation positive control and is supporting evidence only."
+    ]
+  }
+}

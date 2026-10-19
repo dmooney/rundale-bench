@@ -136,7 +136,27 @@
           "evidence_path": "3.0/runs/5e2177f168e2.json",
           "qualification_status": "provisional",
           "score_status": "provisional",
-          "validation_basis": "automated_checks_only"
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": {
+            "recorded_at": "2026-10-19T10:25:49.360580+00:00",
+            "conclusion": "not_billed_based_on_provider_monitoring",
+            "monitoring_estimate_usd": 0,
+            "actual_cost_usd": null,
+            "basis": "Provider request-count monitoring showed no generation request from the locally checked key and project in the window.",
+            "limitations": [
+              "This is a monitoring-based estimate, not an invoice or request-specific billing receipt.",
+              "The original failure cause remains unknown; this reconciliation does not change it.",
+              "Identity mapping was checked locally against private provider originals, not independently verified; the review received redacted records.",
+              "Output-token absence is supporting evidence only and lacks a known-generation positive control.",
+              "The run did not record request-start time. The lower bound for query coverage is inferred as recorded completion minus the adapter's 180-second per-operation socket timeout; it is not an observed start timestamp or a total-request deadline.",
+              "Original run cost, budget status, spending exposure, run JSON, and ledger export remain unchanged."
+            ],
+            "evidence_path": "3.0/reconciliations/5e2177f168e2.json",
+            "evidence_sha256": "56bcb3ee843cad550334bbc6094d083bd4aeb9b989f526c53516ca0c9e4f6025",
+            "monitoring_evidence_sha256": "e5f852e61c222d116c4e40ee519ff5120e212e0c2cbcfdb3188ce9c776012519",
+            "ledger_evidence_path": "3.0/ledgers/5e2177f168e2.json",
+            "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96"
+          }
         }
       ],
       "runs": [
@@ -266,7 +286,27 @@
           "evidence_path": "3.0/runs/5e2177f168e2.json",
           "qualification_status": "provisional",
           "score_status": "provisional",
-          "validation_basis": "automated_checks_only"
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": {
+            "recorded_at": "2026-10-19T10:25:49.360580+00:00",
+            "conclusion": "not_billed_based_on_provider_monitoring",
+            "monitoring_estimate_usd": 0,
+            "actual_cost_usd": null,
+            "basis": "Provider request-count monitoring showed no generation request from the locally checked key and project in the window.",
+            "limitations": [
+              "This is a monitoring-based estimate, not an invoice or request-specific billing receipt.",
+              "The original failure cause remains unknown; this reconciliation does not change it.",
+              "Identity mapping was checked locally against private provider originals, not independently verified; the review received redacted records.",
+              "Output-token absence is supporting evidence only and lacks a known-generation positive control.",
+              "The run did not record request-start time. The lower bound for query coverage is inferred as recorded completion minus the adapter's 180-second per-operation socket timeout; it is not an observed start timestamp or a total-request deadline.",
+              "Original run cost, budget status, spending exposure, run JSON, and ledger export remain unchanged."
+            ],
+            "evidence_path": "3.0/reconciliations/5e2177f168e2.json",
+            "evidence_sha256": "56bcb3ee843cad550334bbc6094d083bd4aeb9b989f526c53516ca0c9e4f6025",
+            "monitoring_evidence_sha256": "e5f852e61c222d116c4e40ee519ff5120e212e0c2cbcfdb3188ce9c776012519",
+            "ledger_evidence_path": "3.0/ledgers/5e2177f168e2.json",
+            "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96"
+          }
         }
       ]
     }

@@ -74,6 +74,39 @@ reservation and blocks further paid work until billing is reconciled. Gemini
 usage without an explicit thinking-token count also remains uncertain rather
 than assuming that count is zero.
 
+### Append a provider-monitoring billing reconciliation
+
+For the reviewed `5e2177f168e2` DNF only, an operator may import the separately
+reviewed monitoring evidence without making provider calls:
+
+```sh
+rundale-bench reconcile-billing 5e2177f168e2 \
+  --results results \
+  --monitoring-evidence /path/to/monitoring-reconciliation-evidence.json
+```
+
+The command validates the published run, its exported ledger at
+`results/3.0/ledgers/<run-id>.json`, and the evidence's run binding and complete
+request-count query. It appends `results/3.0/reconciliations/<run-id>.json`,
+hash-binding the record to the original run, ledger export, source SQLite ledger
+hash, and monitoring evidence. Repeating an identical import is a no-op; changed
+sources or an existing conflicting record are rejected. `publish` includes a
+small reconciliation summary in the index, while the site copies the full record
+and monitoring evidence to its public evidence directory.
+
+The result means “not billed, based on provider monitoring.” The displayed $0 is
+a monitoring estimate, not an invoice-backed actual cost or a request-specific
+receipt. The original `cost_usd`, unknown failure cause, billing-uncertain status,
+reserved exposure, run JSON, ledger export, and SQLite ledger remain unchanged.
+The run does not record request-start time. The query window starts at least 180
+seconds before recorded completion, based on the adapter's per-operation socket
+timeout, not a total-request deadline; that earliest possible start is an
+inference, not an observed timestamp. Monitoring
+capture and the positive-control point must also fall after/inside their query
+windows. The result does not prove the precise cause of the failed request and
+does not authorize another paid run; diagnosis and the normal launch gates remain
+separate.
+
 For an explicitly approved pre-launch control or adapter correction, use
 `qualify collect --amend-controls --env-file .env.bench`. It archives the prior
 contract, preserves superseded paid responses, reuses every identical request
