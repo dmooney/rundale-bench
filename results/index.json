@@ -13,26 +13,26 @@
         {
           "model": "gemini-3.5-flash-lite",
           "reasoning": "high",
-          "run_id": "5e2177f168e2",
+          "run_id": "8bff4886b04a",
           "status": "dnf",
           "overall": null,
           "scores": {
-            "dialogue": null,
+            "dialogue": 93.92361111111111,
             "multiturn": null,
             "gaeilge": null
           },
-          "completed_at": "2026-10-18T17:34:15.099859+00:00",
-          "cost_usd": 0,
+          "completed_at": "2026-10-19T10:50:32.408614+00:00",
+          "cost_usd": 0.15947393599999998,
           "notice": null,
-          "latest_attempt_id": "5e2177f168e2",
+          "latest_attempt_id": "8bff4886b04a",
           "failure_cause": "unknown",
-          "reason": "Provider streaming transport failed",
-          "budget_usd": 5.0,
+          "reason": "Usage metadata is missing; billing is uncertain",
+          "budget_usd": 4.98,
           "budget_status": "billing_uncertain",
-          "spending_exposure_usd": 0.0185515,
+          "spending_exposure_usd": 0.17844543599999999,
           "coverage": {
             "dialogue": {
-              "completed": 0,
+              "completed": 24,
               "required": 24
             },
             "multiturn": {
@@ -46,22 +46,22 @@
           },
           "uncertainty": {
             "dialogue": {
-              "n": 0,
-              "mean_score": null,
-              "median_score": null,
-              "stddev_score": null,
-              "min_score": null,
-              "max_score": null,
+              "n": 24,
+              "mean_score": 93.9236111111111,
+              "median_score": 93.75,
+              "stddev_score": 6.362320208961353,
+              "min_score": 83.33333333333333,
+              "max_score": 100,
               "latency_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 24,
+                "p50": 4827.869874890894,
+                "p95": 7048.435540869832,
                 "unit": "generation request; nearest-rank percentile"
               },
               "ttft_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 24,
+                "p50": 4745.127792004496,
+                "p95": 6860.395332798362,
                 "unit": "generation request; nearest-rank percentile"
               }
             },
@@ -130,33 +130,14 @@
             }
           },
           "variability": {
-            "repeated_cases": 0,
-            "mean_absolute_score_change": null
+            "repeated_cases": 6,
+            "mean_absolute_score_change": 4.166666666666669
           },
-          "evidence_path": "3.0/runs/5e2177f168e2.json",
+          "evidence_path": "3.0/runs/8bff4886b04a.json",
           "qualification_status": "provisional",
           "score_status": "provisional",
           "validation_basis": "automated_checks_only",
-          "billing_reconciliation": {
-            "recorded_at": "2026-10-19T10:34:50.153882+00:00",
-            "conclusion": "not_billed_based_on_provider_monitoring",
-            "monitoring_estimate_usd": 0,
-            "actual_cost_usd": null,
-            "basis": "Provider request-count monitoring showed no generation request from the locally checked key and project in the window.",
-            "limitations": [
-              "This is a monitoring-based estimate, not an invoice or request-specific billing receipt.",
-              "The original failure cause remains unknown; this reconciliation does not change it.",
-              "Identity mapping was checked locally against private provider originals, not independently verified; the review received redacted records.",
-              "Output-token absence is supporting evidence only and lacks a known-generation positive control.",
-              "The run did not record request-start time. The lower bound for query coverage is inferred as recorded completion minus the adapter's 180-second per-operation socket timeout; it is not an observed start timestamp or a total-request deadline.",
-              "Original run cost, budget status, spending exposure, run JSON, and ledger export remain unchanged."
-            ],
-            "evidence_path": "3.0/reconciliations/5e2177f168e2.json",
-            "evidence_sha256": "3646b63bad0f7ca747c6326be14bb2fd3ba036d6d1b4ad8598565cd016fac16f",
-            "monitoring_evidence_sha256": "902d25b95db380bb5341f3649e0baea6bd4e6f9915d4f6467bf7d1e78c3aefaa",
-            "ledger_evidence_path": "3.0/ledgers/5e2177f168e2.json",
-            "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96"
-          }
+          "billing_reconciliation": null
         }
       ],
       "runs": [
@@ -307,6 +288,135 @@
             "ledger_evidence_path": "3.0/ledgers/5e2177f168e2.json",
             "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96"
           }
+        },
+        {
+          "model": "gemini-3.5-flash-lite",
+          "reasoning": "high",
+          "run_id": "8bff4886b04a",
+          "status": "dnf",
+          "overall": null,
+          "scores": {
+            "dialogue": 93.92361111111111,
+            "multiturn": null,
+            "gaeilge": null
+          },
+          "completed_at": "2026-10-19T10:50:32.408614+00:00",
+          "cost_usd": 0.15947393599999998,
+          "notice": null,
+          "latest_attempt_id": null,
+          "failure_cause": "unknown",
+          "reason": "Usage metadata is missing; billing is uncertain",
+          "budget_usd": 4.98,
+          "budget_status": "billing_uncertain",
+          "spending_exposure_usd": 0.17844543599999999,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 0,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 0,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 93.9236111111111,
+              "median_score": 93.75,
+              "stddev_score": 6.362320208961353,
+              "min_score": 83.33333333333333,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 4827.869874890894,
+                "p95": 7048.435540869832,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 4745.127792004496,
+                "p95": 6860.395332798362,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 0,
+              "mean_score": null,
+              "median_score": null,
+              "stddev_score": null,
+              "min_score": null,
+              "max_score": null,
+              "latency_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 0,
+              "mean_score": null,
+              "median_score": null,
+              "stddev_score": null,
+              "min_score": null,
+              "max_score": null,
+              "latency_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 0,
+                "count": 0,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 0,
+                  "count": 0,
+                  "interval_95": null
+                },
+                "meaning": {
+                  "correct": 0,
+                  "count": 0,
+                  "interval_95": null
+                },
+                "code_switch": {
+                  "correct": 0,
+                  "count": 0,
+                  "interval_95": null
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 6,
+            "mean_absolute_score_change": 4.166666666666669
+          },
+          "evidence_path": "3.0/runs/8bff4886b04a.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
         }
       ]
     }
