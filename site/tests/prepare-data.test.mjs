@@ -19,7 +19,19 @@ test('site preparation copies only named public qualification JSON, including ne
     await mkdir(path.join(root, 'review'), { recursive: true });
     await mkdir(path.join(root, 'archive'), { recursive: true });
     await mkdir(path.join(qualification, 'cases'), { recursive: true });
-    await writeFile(path.join(root, 'results', 'index.json'), JSON.stringify({ schema_version: 1, versions: [{ version: '3.0' }] }));
+    await mkdir(path.join(root, 'results', '3.0', 'reconciliations'), { recursive: true });
+    await mkdir(path.join(root, 'results', '3.0', 'ledgers'), { recursive: true });
+    await writeFile(path.join(root, 'results', 'index.json'), JSON.stringify({ schema_version: 1, versions: [{
+      version: '3.0', rows: [], runs: [{ run_id: 'attempt-1', billing_reconciliation: {
+        evidence_path: '3.0/reconciliations/attempt-1.json', ledger_evidence_path: '3.0/ledgers/attempt-1.json',
+      } }],
+    }] }));
+    const reconciliation = JSON.stringify({ conclusion: 'not_billed_based_on_provider_monitoring', monitoring_estimate_usd: 0, actual_cost_usd: null });
+    await writeFile(path.join(root, 'results', '3.0', 'reconciliations', 'attempt-1.json'), reconciliation);
+    await writeFile(path.join(root, 'results', '3.0', 'reconciliations', 'private-notes.json'), '{"secret":true}');
+    const ledger = '{"billing_reconciled":false,"calls":[]}';
+    await writeFile(path.join(root, 'results', '3.0', 'ledgers', 'attempt-1.json'), ledger);
+    await writeFile(path.join(root, 'results', '3.0', 'ledgers', 'private-notes.json'), '{"secret":true}');
     await writeFile(path.join(root, 'review', 'review.html'), '<html></html>');
     await writeFile(path.join(root, 'archive', 'old.json'), '{}');
     await writeFile(path.join(qualification, 'status.json'), '{"status":"provisional"}');
@@ -37,6 +49,12 @@ test('site preparation copies only named public qualification JSON, including ne
     const topLevel = await readdir(published);
     assert.deepEqual(topLevel.sort(), ['cases', 'controls.json', 'status.json']);
     assert.deepEqual((await readdir(path.join(published, 'cases'))).sort(), ['judgments.json']);
+    const publicReconciliations = path.join(site, 'public', 'evidence', '3.0', 'reconciliations');
+    assert.equal(await readFile(path.join(publicReconciliations, 'attempt-1.json'), 'utf8'), reconciliation);
+    assert.deepEqual((await readdir(publicReconciliations)).sort(), ['attempt-1.json']);
+    const publicLedgers = path.join(site, 'public', 'evidence', '3.0', 'ledgers');
+    assert.equal(await readFile(path.join(publicLedgers, 'attempt-1.json'), 'utf8'), ledger);
+    assert.deepEqual((await readdir(publicLedgers)).sort(), ['attempt-1.json']);
   } finally {
     await rm(temp, { recursive: true, force: true });
   }

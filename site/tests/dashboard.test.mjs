@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  aggregateCostLabel, aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun,
+  aggregateCostLabel, aggregateCoverage, billingLedgerLink, billingReconciliationLink, budgetLabel, coverageLabel, escapeHtml, findRun,
+  monitoringReconciliationLabel, reconciliationDetailsHtml,
   latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
   recordedCostLabel, rowQualificationLabel, runNoticeLabel, runStatusLabel,
   scoreLabel, scoreStatusLabel,
@@ -64,6 +65,24 @@ test('billing-uncertain DNF cost stays a lower bound and exposes uncertain billi
   assert.equal(aggregateCostLabel([{ cost_usd: 0.3, budget_status: 'within_cap', spending_exposure_usd: 0.3 }]), '$0.3000');
 });
 
+test('monitoring reconciliation stays distinct from original uncertain cost and invoice actuals', () => {
+  const reconciliation = {
+    conclusion: 'not_billed_based_on_provider_monitoring',
+    monitoring_estimate_usd: 0,
+    actual_cost_usd: null,
+    evidence_path: '3.0/reconciliations/attempt-1.json',
+    ledger_evidence_path: '3.0/ledgers/attempt-1.json',
+  };
+  const row = { cost_usd: 0, budget_status: 'billing_uncertain', billing_reconciliation: reconciliation };
+  assert.equal(recordedCostLabel(row), '≥ $0.0000 · billing uncertain');
+  assert.equal(monitoringReconciliationLabel(reconciliation), 'Monitoring: not billed · $0.0000 estimate; not invoice-backed');
+  assert.equal(billingReconciliationLink(reconciliation, '/rundale-bench'), '/rundale-bench/evidence/3.0/reconciliations/attempt-1.json');
+  assert.equal(billingLedgerLink(reconciliation, '/rundale-bench'), '/rundale-bench/evidence/3.0/ledgers/attempt-1.json');
+  assert.equal(billingReconciliationLink({ ...reconciliation, evidence_path: '../private.json' }, '/'), null);
+  assert.equal(billingLedgerLink({ ...reconciliation, ledger_evidence_path: '3.0/ledgers/../private.json' }, '/'), null);
+  assert.equal(monitoringReconciliationLabel({ ...reconciliation, actual_cost_usd: 0 }), null);
+});
+
 test('qualification and performance summaries follow published status and p95 values', () => {
   assert.equal(qualificationCopy(version).title, 'Version 3.0 qualification pending.');
   assert.equal(qualificationCopy(version).description, 'Native judge review remains open.');
@@ -104,4 +123,16 @@ test('provisional scoring status is explicit and each row uses its own validatio
 
 test('untrusted display strings are escaped before table markup is assembled', () => {
   assert.equal(escapeHtml('<img src=x onerror="x">'), '&lt;img src=x onerror=&quot;x&quot;&gt;');
+});
+
+ test('monitoring detail displays identity and invoice caveats with escaped content', () => {
+  const detail = reconciliationDetailsHtml({
+    basis: 'No generation request for the locally checked key and project.',
+    limitations: ['Identity mapping was checked locally, not independently verified.', 'Monitoring is not an invoice.', '<script>private()</script>'],
+  });
+  assert.match(detail, /locally checked key/);
+  assert.match(detail, /not independently verified/);
+  assert.match(detail, /not an invoice/);
+  assert.match(detail, /&lt;script&gt;/);
+  assert.doesNotMatch(detail, /<script>/);
 });

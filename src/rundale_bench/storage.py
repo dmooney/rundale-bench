@@ -45,10 +45,66 @@ def rebuild_index(root: Path) -> dict:
     names = sorted(set(previous) | {p.name for p in root.iterdir() if p.is_dir() and p.name[0:1].isdigit()})
     for version in names:
         all_runs = []
+        reconciliation_dir = root/version/'reconciliations'
+        reconciliations = {}
+        if reconciliation_dir.exists():
+            if reconciliation_dir.is_symlink() or not reconciliation_dir.is_dir():
+                raise ValueError('Invalid billing reconciliation directory')
+            for reconciliation_path in sorted(reconciliation_dir.glob('*.json')):
+                if reconciliation_path.is_symlink() or not reconciliation_path.is_file():
+                    raise ValueError('Invalid billing reconciliation artifact')
+                record = json.loads(reconciliation_path.read_text())
+                rid = safe_id(record.get('run_id', ''))
+                if record.get('schema_version') != 1 or record.get('conclusion') != 'not_billed_based_on_provider_monitoring':
+                    raise ValueError('Unsupported billing reconciliation artifact')
+                if reconciliation_path.name != f'{rid}.json' or rid in reconciliations:
+                    raise ValueError('Billing reconciliation identity mismatch')
+                evidence = record.get('monitoring_evidence')
+                artifact_hashes = record.get('original_artifacts', {})
+                canonical = json.dumps(evidence, sort_keys=True, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+                if not isinstance(evidence, dict) or artifact_hashes.get('monitoring_evidence_canonical_sha256') != hashlib.sha256(canonical.encode('utf-8')).hexdigest():
+                    raise ValueError('Billing reconciliation monitoring evidence hash mismatch')
+                if record.get('monitoring_estimate_usd') != 0 or record.get('actual_cost_usd') is not None:
+                    raise ValueError('Monitoring reconciliation cannot claim an invoice-backed actual cost')
+                limitations = record.get('limitations')
+                if (not isinstance(record.get('basis'), str) or 'locally checked' not in record['basis']
+                        or not isinstance(limitations, list) or not all(isinstance(value, str) for value in limitations)
+                        or not any('not independently verified' in value for value in limitations)
+                        or not any('not an invoice' in value for value in limitations)):
+                    raise ValueError('Billing reconciliation must retain its identity and invoice limitations')
+                reconciliations[rid] = record
         for p in sorted((root/version/'runs').glob('*.json')):
             r = json.loads(p.read_text())
             r['evidence_path'] = f'{version}/runs/{p.name}'
+            reconciliation = reconciliations.get(r.get('run_id'))
+            if reconciliation:
+                artifact_hashes = reconciliation.get('original_artifacts', {})
+                expected_hash = artifact_hashes.get('run_sha256')
+                if expected_hash != hashlib.sha256(p.read_bytes()).hexdigest():
+                    raise ValueError('Billing reconciliation run hash does not match immutable run evidence')
+                ledger_path = root/version/'ledgers'/(str(r.get('run_id')) + '.json')
+                if ledger_path.is_symlink() or not ledger_path.is_file():
+                    raise ValueError('Billing reconciliation ledger export is missing or unsafe')
+                if artifact_hashes.get('ledger_export_sha256') != hashlib.sha256(ledger_path.read_bytes()).hexdigest():
+                    raise ValueError('Billing reconciliation ledger hash does not match immutable ledger export')
+                from .reconciliation import _validate_monitoring_evidence
+                _validate_monitoring_evidence(reconciliation['monitoring_evidence'], r['run_id'], r.get('completed_at'))
+                r['billing_reconciliation'] = {
+                    'recorded_at': reconciliation.get('recorded_at'),
+                    'conclusion': reconciliation.get('conclusion'),
+                    'monitoring_estimate_usd': reconciliation.get('monitoring_estimate_usd'),
+                    'actual_cost_usd': reconciliation.get('actual_cost_usd'),
+                    'basis': reconciliation.get('basis'),
+                    'limitations': reconciliation.get('limitations'),
+                    'evidence_path': f'{version}/reconciliations/{p.stem}.json',
+                    'evidence_sha256': hashlib.sha256((reconciliation_dir/f'{r["run_id"]}.json').read_bytes()).hexdigest(),
+                    'monitoring_evidence_sha256': artifact_hashes.get('monitoring_evidence_sha256'),
+                    'ledger_evidence_path': f'{version}/ledgers/{r.get("run_id")}.json',
+                    'ledger_export_sha256': artifact_hashes.get('ledger_export_sha256'),
+                }
             all_runs.append(r)
+        if set(reconciliations) - {r.get('run_id') for r in all_runs}:
+            raise ValueError('Billing reconciliation references missing run evidence')
         all_runs.sort(key=lambda x: (x['completed_at'], x['run_id']))
         latest = {}
         for r in all_runs:
@@ -63,7 +119,7 @@ def rebuild_index(root: Path) -> dict:
                 latest[key] = dict(r, notice=None, latest_attempt_id=r['run_id'])
         rows = sorted(latest.values(), key=lambda x: (x.get('overall') is None, -(x.get('overall') or 0), x['model']))
         # Site index excludes verbose raw evidence; immutable detail stays in run files.
-        fields = ('model','reasoning','run_id','status','overall','scores','completed_at','cost_usd','notice','latest_attempt_id','failure_cause','reason','budget_usd','budget_status','spending_exposure_usd','coverage','uncertainty','variability','evidence_path','qualification_status','score_status','validation_basis')
+        fields = ('model','reasoning','run_id','status','overall','scores','completed_at','cost_usd','notice','latest_attempt_id','failure_cause','reason','budget_usd','budget_status','spending_exposure_usd','coverage','uncertainty','variability','evidence_path','qualification_status','score_status','validation_basis','billing_reconciliation')
         compact = lambda r: {k:r.get(k) for k in fields}
         qualification=previous.get(version,{}).get('qualification',{'status':'pending','reason':'Judge qualification evidence is missing.'})
         qpath=root.parent/'qualification'/version/'status.json'

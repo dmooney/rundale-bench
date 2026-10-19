@@ -119,6 +119,12 @@ raw requests, responses, judgments, coverage, settings, actual or estimated cost
 timing, and any DNF reason. Do not publish generated strength summaries. Preserve
 immutable history and choose the displayed latest run using failure precedence.
 
+A later provider-monitoring billing reconciliation is a separate dated,
+hash-bound artifact. Preserve the original run and ledger, unknown attribution,
+and reserved exposure. Display any monitoring estimate with its evidence and
+identity limitations; it is not invoice-backed actual cost or permission for
+further paid work.
+
 Scores require complete primary coverage and matching pinned judge-screening
 evidence. Provisional rankings are permitted, prominently labeled as automated
 and not human validated, including each historical run. Keep versions in

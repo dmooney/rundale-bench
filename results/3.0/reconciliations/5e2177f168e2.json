@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "run_id": "5e2177f168e2",
+  "recorded_at": "2026-10-19T10:34:50.153882+00:00",
+  "conclusion": "not_billed_based_on_provider_monitoring",
+  "monitoring_estimate_usd": 0,
+  "actual_cost_usd": null,
+  "basis": "Provider request-count monitoring showed no generation request from the locally checked key and project in the window.",
+  "limitations": [
+    "This is a monitoring-based estimate, not an invoice or request-specific billing receipt.",
+    "The original failure cause remains unknown; this reconciliation does not change it.",
+    "Identity mapping was checked locally against private provider originals, not independently verified; the review received redacted records.",
+    "Output-token absence is supporting evidence only and lacks a known-generation positive control.",
+    "The run did not record request-start time. The lower bound for query coverage is inferred as recorded completion minus the adapter's 180-second per-operation socket timeout; it is not an observed start timestamp or a total-request deadline.",
+    "Original run cost, budget status, spending exposure, run JSON, and ledger export remain unchanged."
+  ],
+  "original_artifacts": {
+    "run_sha256": "024909a8a4fae035f64a3f7543564ee79d1caab04c05d7e64fdc03ae40b3c300",
+    "ledger_export_sha256": "fca99e5b57ca18e7f993b359834a674a1cdfb288acac8134bd422b138fe2af96",
+    "source_sqlite_ledger_sha256": "7aaeac0934bec644ecd12227b7ac5c3890e7f4fb573dca0b22c2b0a693eb5eec",
+    "monitoring_evidence_sha256": "902d25b95db380bb5341f3649e0baea6bd4e6f9915d4f6467bf7d1e78c3aefaa",
+    "monitoring_evidence_canonical_sha256": "4c09087b9e7428382f81aa335350c90fa6206287589e2dd032c69f98ebaf719f"
+  },
+  "monitoring_evidence": {
+    "schema_version": 1,
+    "captured_at": "2026-10-18T23:15:28.631331+00:00",
+    "run_id": "5e2177f168e2",
+    "endpoint": "https://monitoring.googleapis.com/v3/projects/<redacted-project>/timeSeries",
+    "identity_binding": {
+      "checked_locally": true,
+      "independently_verified": false,
+      "digest_scheme": "hmac-sha256-over-identifier-sha256-private-key",
+      "lookup_project_number_hmac_sha256": "eae2374ef65adb82b4e28f4138ab880a1f1e506061a78661ca2fb2092aa5c0b7",
+      "described_project_number_hmac_sha256": "eae2374ef65adb82b4e28f4138ab880a1f1e506061a78661ca2fb2092aa5c0b7",
+      "described_project_id_hmac_sha256": "efb96343ffec9c33a8a52eee9182d73c5850afbacdf28cbb0dc604837242c70a",
+      "key_resource_hmac_sha256": "fa11cd817ea6a53988f226bdb2701f30323ef0685dad39e39de66279960ce7f5"
+    },
+    "queries": {
+      "request_count": {
+        "parameters": {
+          "filter": "metric.type=\"serviceruntime.googleapis.com/api/request_count\" AND resource.labels.service=\"generativelanguage.googleapis.com\"",
+          "interval.startTime": "2026-10-18T17:30:00Z",
+          "interval.endTime": "2026-10-18T17:45:00Z",
+          "view": "FULL",
+          "pageSize": 1000
+        },
+        "http_status": 200,
+        "pagination_complete": true,
+        "raw_response_sha256": "fa5426e94d613bec2ca7db5d14f5c0103b4f04de57e256a6e14a4c8ed7626c13",
+        "pages": [
+          {
+            "timeSeries": [
+              {
+                "metric": {
+                  "labels": {
+                    "grpc_status_code": "0",
+                    "response_code_class": "2xx",
+                    "response_code": "200",
+                    "protocol": "https"
+                  },
+                  "type": "serviceruntime.googleapis.com/api/request_count"
+                },
+                "resource": {
+                  "type": "consumed_api",
+                  "labels": {
+                    "method": "google.ai.generativelanguage.v1beta.ModelService.GetModel",
+                    "service": "generativelanguage.googleapis.com",
+                    "version": "v1beta",
+                    "location": "us-east4",
+                    "credential_id": "hmac-sha256:fa11cd817ea6a53988f226bdb2701f30323ef0685dad39e39de66279960ce7f5",
+                    "project_id": "hmac-sha256:efb96343ffec9c33a8a52eee9182d73c5850afbacdf28cbb0dc604837242c70a"
+                  }
+                },
+                "metricKind": "DELTA",
+                "valueType": "INT64",
+                "points": [
+                  {
+                    "interval": {
+                      "startTime": "2026-10-18T17:35:48.001Z",
+                      "endTime": "2026-10-18T17:36:48Z"
+                    },
+                    "value": {
+                      "int64Value": "1"
+                    }
+                  }
+                ]
+              }
+            ],
+            "unit": "1"
+          }
+        ]
+      },
+      "output_tokens": {
+        "parameters": {
+          "filter": "metric.type=\"generativelanguage.googleapis.com/generate_content_usage_output_token_count\"",
+          "interval.startTime": "2026-10-18T17:25:00Z",
+          "interval.endTime": "2026-10-18T17:50:00Z",
+          "view": "FULL",
+          "pageSize": 1000
+        },
+        "http_status": 200,
+        "pagination_complete": true,
+        "raw_response_sha256": "e0249fdf8eea5b8ee5ad9576c3eed890e4945f5ab0c5c4cc63dce27bece0ce97",
+        "pages": [
+          {
+            "unit": "1"
+          }
+        ]
+      }
+    },
+    "positive_control_origin": "The sole GetModel call was the subsequent non-generating native Gemini 3.5 Flash-Lite diagnostic GET, using the same benchmark key and environment; the runner does not call GetModel.",
+    "limitations": [
+      "Provider monitoring is not an invoice or request-specific billing receipt.",
+      "Identity mapping was checked locally against private provider originals; independent review received redacted records.",
+      "The original transport exception is unavailable. Later DNS reproduction does not prove the original precise cause.",
+      "Output-token absence lacks a known-generation positive control and is supporting evidence only.",
+      "Identity tags use HMAC-SHA256 over the original identifier SHA-256 digests with a private local key; they support local consistency checks and cannot be independently verified from this public record."
+    ]
+  }
+}

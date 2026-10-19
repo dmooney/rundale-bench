@@ -14,7 +14,8 @@ import Base from '../layouts/Base.astro';
 <script>
 // @ts-nocheck
 import {
-  aggregateCostLabel, aggregateCoverage, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
+  aggregateCostLabel, aggregateCoverage, billingLedgerLink, billingReconciliationLink, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
+  monitoringReconciliationLabel, reconciliationDetailsHtml,
   qualificationEvidenceLinks,
   performanceLabel, qualificationCopy, rowQualificationLabel, runNoticeLabel,
   recordedCostLabel, runStatusLabel, scoreLabel, scoreStatusLabel,
@@ -103,7 +104,7 @@ function show() {
       <td>${esc(scoreLabel(row.scores?.gaeilge, 'complete'))}<small>${esc(scoreStatusLabel(row))}</small></td>
       <td>${esc(fmtDate(row.completed_at))}</td>
       <td>${esc(performanceLabel(row.uncertainty))}</td>
-      <td>${esc(recordedCostLabel(row))}</td>
+      <td>${esc(recordedCostLabel(row))}${row.billing_reconciliation ? `<small title="${esc((row.billing_reconciliation.limitations || []).join(' '))}">${esc(monitoringReconciliationLabel(row.billing_reconciliation) || '')}</small>` : ''}</td>
       <td>${esc(fmtBudget(row))}</td>
       <td>${esc(coverageLabel(row.coverage))}</td>
       <td>${esc(runStatusLabel(row))}</td>
@@ -124,13 +125,24 @@ async function openRun(version, runId) {
   let evidencePath = run.evidence_path || `${version.version}/runs/${runId}.json`;
   if (!/^[A-Za-z0-9._-]+\/runs\/[A-Za-z0-9._-]+\.json$/.test(evidencePath)) evidencePath = `${version.version}/runs/${runId}.json`;
   const url = `${base}/evidence/${evidencePath.split('/').map(encodeURIComponent).join('/')}`;
+  const reconciliationUrl = billingReconciliationLink(run.billing_reconciliation, base);
+  const ledgerUrl = billingLedgerLink(run.billing_reconciliation, base);
   let raw;
   try { raw = await (await fetch(url)).json(); }
   catch { raw = { error: 'Raw evidence file is not available yet.', evidence_url: url }; }
   byId('detail-title').textContent = `${run.model} · ${run.run_id}`;
   byId('raw-record').textContent = JSON.stringify(raw, null, 2);
   byId('download-run').href = url;
-  byId('detail-links').innerHTML = `<a href="${esc(url)}" download>Raw request, response, and judgment record</a> <span>·</span> <span>Composite: ${esc(scoreLabel(run.overall, run.status))} · Dialogue ${esc(scoreLabel(run.scores?.dialogue, 'complete'))} · Multi-turn ${esc(scoreLabel(run.scores?.multiturn, 'complete'))} · Gaeilge ${esc(scoreLabel(run.scores?.gaeilge, 'complete'))}</span>`;
+  const reconciliationLink = reconciliationUrl
+    ? ` <span>·</span> <a href="${esc(reconciliationUrl)}" download>Monitoring reconciliation and evidence (not invoice-backed)</a>`
+    : '';
+  const ledgerLink = ledgerUrl
+    ? ` <span>·</span> <a href="${esc(ledgerUrl)}" download>Original ledger export</a>`
+    : '';
+  const reconciliationNote = run.billing_reconciliation
+    ? `<p class="separate">Original published run remains billing-uncertain with $${Number(run.spending_exposure_usd || 0).toFixed(4)} reserved exposure. Later provider monitoring supports a $${Number(run.billing_reconciliation.monitoring_estimate_usd || 0).toFixed(4)} not-billed estimate; it is not an invoice-backed actual cost. Failure cause remains ${esc(run.failure_cause || 'unknown')}.</p>`
+    : '';
+  byId('detail-links').innerHTML = `<a href="${esc(url)}" download>Raw request, response, and judgment record</a> <span>·</span> <span>Composite: ${esc(scoreLabel(run.overall, run.status))} · Dialogue ${esc(scoreLabel(run.scores?.dialogue, 'complete'))} · Multi-turn ${esc(scoreLabel(run.scores?.multiturn, 'complete'))} · Gaeilge ${esc(scoreLabel(run.scores?.gaeilge, 'complete'))}</span>${reconciliationLink}${ledgerLink}${reconciliationNote}${reconciliationDetailsHtml(run.billing_reconciliation)}`;
   byId('run-detail').hidden = false;
   byId('run-detail').scrollIntoView({ behavior: 'smooth' });
 }
