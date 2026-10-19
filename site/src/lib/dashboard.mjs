@@ -126,6 +126,37 @@ export function recordedCostLabel(run) {
   return amount || '—';
 }
 
+export function monitoringReconciliationLabel(reconciliation) {
+  if (reconciliation?.conclusion !== 'not_billed_based_on_provider_monitoring'
+      || reconciliation?.actual_cost_usd !== null
+      || typeof reconciliation?.monitoring_estimate_usd !== 'number') return null;
+  return `Monitoring: not billed · $${reconciliation.monitoring_estimate_usd.toFixed(4)} estimate; not invoice-backed`;
+}
+
+export function reconciliationDetailsHtml(reconciliation) {
+  if (!reconciliation) return '';
+  const basis = typeof reconciliation.basis === 'string' ? reconciliation.basis : '';
+  const limitations = Array.isArray(reconciliation.limitations)
+    ? reconciliation.limitations.filter((value) => typeof value === 'string') : [];
+  return `<p>${escapeHtml(basis)}</p><ul>${limitations.map((value) => `<li>${escapeHtml(value)}</li>`).join('')}</ul>`;
+}
+
+export function billingReconciliationLink(reconciliation, baseUrl) {
+  const evidencePath = String(reconciliation?.evidence_path || '');
+  if (!/^[A-Za-z0-9._-]+\/reconciliations\/[A-Za-z0-9._-]+\.json$/.test(evidencePath)) return null;
+  if (evidencePath.split('/').some((part) => part === '.' || part === '..')) return null;
+  const base = String(baseUrl || '').replace(/\/$/, '');
+  return `${base}/evidence/${evidencePath.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+export function billingLedgerLink(reconciliation, baseUrl) {
+  const evidencePath = String(reconciliation?.ledger_evidence_path || '');
+  if (!/^[A-Za-z0-9._-]+\/ledgers\/[A-Za-z0-9._-]+\.json$/.test(evidencePath)) return null;
+  if (evidencePath.split('/').some((part) => part === '.' || part === '..')) return null;
+  const base = String(baseUrl || '').replace(/\/$/, '');
+  return `${base}/evidence/${evidencePath.split('/').map(encodeURIComponent).join('/')}`;
+}
+
 export function aggregateCostLabel(runs) {
   const history = Array.isArray(runs) ? runs : [];
   const entries = history.map((run) => run?.cost_usd).filter((value) => typeof value === 'number' && Number.isFinite(value));

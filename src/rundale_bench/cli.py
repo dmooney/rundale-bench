@@ -26,6 +26,11 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument('--model')
     pub = sub.add_parser('publish', help='rebuild the public results index')
     pub.add_argument('--results', type=Path, default=PACKAGE/'results')
+    reconcile = sub.add_parser('reconcile-billing', help='append explicit provider-monitoring reconciliation evidence offline')
+    reconcile.add_argument('run_id')
+    reconcile.add_argument('--results', type=Path, default=PACKAGE/'results')
+    reconcile.add_argument('--ledger-export', type=Path)
+    reconcile.add_argument('--monitoring-evidence', type=Path, required=True)
     v = sub.add_parser('validate-suite', help='check suite hashes and case structure')
     q = sub.add_parser('qualify', help='collect or evaluate pinned English judge qualification evidence')
     qs = q.add_subparsers(dest='qualify_command', required=True)
@@ -64,6 +69,14 @@ def main(argv=None) -> int:
         if args.command == 'publish':
             report = rebuild_index(args.results)
             print(json.dumps({'published':str(args.results/'index.json'),'versions':len(report['versions'])},indent=2))
+            return 0
+        if args.command == 'reconcile-billing':
+            from .reconciliation import append_monitoring_reconciliation
+            ledger_export = args.ledger_export or args.results/'3.0'/'ledgers'/f'{safe_id(args.run_id)}.json'
+            record = append_monitoring_reconciliation(args.results, args.run_id, ledger_export, args.monitoring_evidence)
+            report = rebuild_index(args.results)
+            print(json.dumps({'recorded':str(args.results/'3.0'/'reconciliations'/f'{safe_id(args.run_id)}.json'),
+                              'recorded_at':record['recorded_at'],'versions':len(report['versions'])},indent=2))
             return 0
         if args.command == 'validate-suite':
             report = validate_suite()
