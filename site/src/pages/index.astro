@@ -8,13 +8,14 @@ import Base from '../layouts/Base.astro';
   <section class="stats" aria-label="Version summary"><div><span>Run history</span><strong id="run-count">—</strong></div><div><span>Qualification</span><strong id="qualification">—</strong><small id="qualification-reason"></small></div><div><span>Cost / billing status</span><strong id="total-cost">—</strong></div><div><span>Evaluation coverage</span><strong id="coverage">—</strong></div></section>
   <section class="section-head"><div><p class="eyebrow">EVALUATION RECORDS</p><h2>Latest model results</h2></div><p>Score status applies to overall and component scores. DNF and missing scores remain explicit.</p></section>
   <div class="table-wrap"><table><thead><tr><th>Model / reasoning</th><th>Overall</th><th>Dialogue</th><th>Multi-turn</th><th>Gaeilge</th><th>Run date</th><th>Performance · p95</th><th>Cost</th><th>Budget</th><th>Coverage</th><th>Run status</th><th>Quality qualification</th><th>Notice / reason</th><th>Evidence</th></tr></thead><tbody id="runs"><tr><td colspan="14">Loading published run index…</td></tr></tbody></table></div>
+  <details id="run-history" class="history"><summary>Other runs for this version</summary><p class="muted">Inspect other recorded attempts, including their status, score, qualification, and billing details.</p><ul id="history-runs"><li>Loading run history…</li></ul></details>
   <p class="separate">Irish-style impressions are provisional and separate from evaluated scores.</p>
   <section id="run-detail" class="run-detail" hidden><div class="section-head"><div><p class="eyebrow">SOURCE RECORD</p><h2 id="detail-title">Run details</h2></div><a id="download-run" class="button" download>Download raw run JSON</a></div><div id="detail-links" class="evidence-links"></div><details><summary>Raw run record</summary><pre id="raw-record"></pre></details></section>
 </main>
 <script>
 // @ts-nocheck
 import {
-  aggregateCostLabel, aggregateCoverage, billingLedgerLink, billingReconciliationLink, budgetLabel, coverageLabel, escapeHtml, findRun, latestRows,
+  aggregateCostLabel, aggregateCoverage, billingLedgerLink, billingReconciliationLink, budgetLabel, coverageLabel, escapeHtml, findRun, historicalRuns, latestRows,
   monitoringReconciliationLabel, reconciliationDetailsHtml,
   qualificationEvidenceLinks,
   performanceLabel, qualificationCopy, rowQualificationLabel, runNoticeLabel,
@@ -87,6 +88,11 @@ function show() {
 
   const history = Array.isArray(version.runs) ? version.runs : [];
   const rows = latestRows(version);
+  const earlier = historicalRuns(version).sort((a, b) => {
+    const dateA = Date.parse(a.completed_at || '') || 0;
+    const dateB = Date.parse(b.completed_at || '') || 0;
+    return dateB - dateA;
+  });
   byId('run-count').textContent = String(history.length);
   byId('total-cost').textContent = aggregateCostLabel(history);
   byId('coverage').textContent = aggregateCoverage(rows);
@@ -109,10 +115,27 @@ function show() {
       <td>${esc(coverageLabel(row.coverage))}</td>
       <td>${esc(runStatusLabel(row))}</td>
       <td>${esc(rowQualificationLabel(row))}</td>
-      <td>${esc(notice)}${attemptButton}</td>
-      <td><button class="text-button" data-run="${esc(row.run_id)}">Open evidence</button></td>
+      <td>${esc(notice)}</td>
+      <td><button class="text-button" data-run="${esc(row.run_id)}">Open evidence</button>${attemptButton}</td>
     </tr>`;
   }).join('') : '<tr><td colspan="14">No latest model records published for this version yet.</td></tr>';
+  const historyList = byId('history-runs');
+  historyList.replaceChildren();
+  if (!earlier.length) {
+    const empty = document.createElement('li');
+    empty.textContent = 'No other runs for this version.';
+    historyList.append(empty);
+  }
+  for (const run of earlier) {
+    const item = document.createElement('li');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'text-button';
+    button.dataset.run = run.run_id;
+    button.textContent = `${run.model || 'Unknown model'} · ${run.reasoning || 'Reasoning unspecified'} · ${fmtDate(run.completed_at)} · ${runStatusLabel(run)} · ${scoreLabel(run.overall, run.status)} · ${recordedCostLabel(run)} · ${rowQualificationLabel(run)}`;
+    item.append(button);
+    historyList.append(item);
+  }
   for (const button of document.querySelectorAll('[data-run]')) {
     button.addEventListener('click', () => openRun(version, button.dataset.run));
   }
