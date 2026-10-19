@@ -5,6 +5,11 @@ export function latestRows(version) {
   return Array.isArray(version?.rows) ? version.rows : [];
 }
 
+export function historicalRuns(version) {
+  const latestIds = new Set(latestRows(version).map((row) => row?.run_id).filter(Boolean));
+  return (Array.isArray(version?.runs) ? version.runs : []).filter((run) => !latestIds.has(run?.run_id));
+}
+
 export function findRun(version, runId) {
   return (Array.isArray(version?.runs) ? version.runs : []).find((run) => run.run_id === runId);
 }

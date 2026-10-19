@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   aggregateCostLabel, aggregateCoverage, billingLedgerLink, billingReconciliationLink, budgetLabel, coverageLabel, escapeHtml, findRun,
   monitoringReconciliationLabel, reconciliationDetailsHtml,
-  latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
+  historicalRuns, latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
   recordedCostLabel, rowQualificationLabel, runNoticeLabel, runStatusLabel,
   scoreLabel, scoreStatusLabel,
 } from '../src/lib/dashboard.mjs';
@@ -33,6 +33,35 @@ test('latest rows and raw history stay separate while details resolve by run id'
   assert.equal(findRun(version, 'attempt-1').overall, 72);
   assert.equal(findRun(version, 'attempt-2').status, 'dnf');
   assert.equal(findRun(version, 'missing'), undefined);
+  assert.deepEqual(historicalRuns(version).map((run) => run.run_id), ['attempt-1']);
+});
+
+test('latest complete result stays selected while an older DNF remains inspectable', () => {
+  const example = {
+    version: '3.0',
+    rows: [{ run_id: 'complete-new', model: 'Example', status: 'complete', overall: 84 }],
+    runs: [
+      { run_id: 'dnf-old', model: 'Example', status: 'dnf', overall: null },
+      { run_id: 'complete-new', model: 'Example', status: 'complete', overall: 84 },
+    ],
+  };
+  assert.equal(latestRows(example)[0].run_id, 'complete-new');
+  assert.deepEqual(historicalRuns(example).map((run) => run.run_id), ['dnf-old']);
+  assert.equal(findRun(example, historicalRuns(example)[0].run_id).status, 'dnf');
+});
+
+test('retained complete score keeps the newer infrastructure DNF attempt inspectable', () => {
+  const example = {
+    version: '3.0',
+    rows: [{ run_id: 'complete-prior', latest_attempt_id: 'dnf-infrastructure', model: 'Example', status: 'complete', overall: 84 }],
+    runs: [
+      { run_id: 'complete-prior', model: 'Example', status: 'complete', overall: 84 },
+      { run_id: 'dnf-infrastructure', model: 'Example', status: 'dnf', overall: null, failure_cause: 'infrastructure' },
+    ],
+  };
+  assert.equal(latestRows(example)[0].run_id, 'complete-prior');
+  assert.deepEqual(historicalRuns(example).map((run) => run.run_id), ['dnf-infrastructure']);
+  assert.equal(findRun(example, historicalRuns(example)[0].run_id).failure_cause, 'infrastructure');
 });
 
 test('DNF, reason, category coverage, and capped budget have readable labels', () => {
