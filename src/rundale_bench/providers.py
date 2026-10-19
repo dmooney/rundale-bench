@@ -451,7 +451,24 @@ def _canonical_usage(provider: str, data: Any) -> dict:
         u = data.get("usageMetadata", {})
         if not isinstance(u, dict): u = {}
         candidates, thoughts = u.get("candidatesTokenCount"), u.get("thoughtsTokenCount")
-        output = candidates + thoughts if type(candidates) is int and type(thoughts) is int else None
+        if type(thoughts) is int and type(candidates) is int:
+            output = candidates + thoughts
+        else:
+            # ProtoJSON omits implicit scalar defaults. Infer omitted thinking as
+            # zero only when total usage corroborates that no tokens are residual.
+            prompt, total = u.get("promptTokenCount"), u.get("totalTokenCount")
+            tool_prompt = u.get("toolUsePromptTokenCount")
+            zero_thoughts = (
+                "thoughtsTokenCount" not in u
+                and type(prompt) is int and prompt >= 0
+                and type(candidates) is int and candidates >= 0
+                and type(total) is int and total >= 0
+                and total == prompt + candidates
+                and ("toolUsePromptTokenCount" not in u or (type(tool_prompt) is int and tool_prompt == 0))
+            )
+            output = candidates if zero_thoughts else None
+            if zero_thoughts:
+                thoughts = 0
         return {"input_tokens": u.get("promptTokenCount"), "cached_input_tokens": u.get("cachedContentTokenCount", 0),
                 "output_tokens": output, "reasoning_tokens": thoughts if type(thoughts) is int else 0}
     if provider == "anthropic":
