@@ -71,8 +71,13 @@ An infrastructure DNF whose response has final usage is charged and cached;
 resuming replays that failure instead of making another paid call. Diagnose the
 issue before starting a new run. An interrupted or unmetered request retains its
 reservation and blocks further paid work until billing is reconciled. Gemini
-usage without an explicit thinking-token count also remains uncertain rather
-than assuming that count is zero.
+usage without `thoughtsTokenCount` remains uncertain unless nonnegative prompt,
+candidate, and total counts are all present, total equals prompt plus candidate,
+and any `toolUsePromptTokenCount` is absent or zero. That exact residual check
+supports an omitted implicit zero; it does not infer nonzero thinking usage or
+settle tool-use tokens. Google's usage metadata defines the total relationship,
+and ProtoJSON omits implicit scalar defaults: [Gemini UsageMetadata](https://ai.google.dev/api/generate-content?hl=en#UsageMetadata),
+[ProtoJSON presence and defaults](https://protobuf.dev/programming-guides/json/#presence-and-default-values).
 
 ### Append a provider-monitoring billing reconciliation
 

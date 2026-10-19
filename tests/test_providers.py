@@ -180,6 +180,48 @@ class ProviderTests(unittest.TestCase):
             NativeClient({"TEST_KEY":"s"}, fake).generate(profile, [{"role":"user","content":"x"}], 30)
         self.assertTrue(caught.exception.billing_uncertain)
 
+    def test_google_missing_thoughts_with_corroborated_zero_residual_is_known(self):
+        fake = FakeTransport({"model":"gemini-3.7-flash","candidates":[{"content":{"parts":[{"text":"ok"}]}}],
+                              "usageMetadata":{"promptTokenCount":2883,"candidatesTokenCount":95,"totalTokenCount":2978}})
+        result = NativeClient({"TEST_KEY":"s"}, fake).generate(
+            self.profile("google", model="gemini-3.7-flash", reasoning="high"), [{"role":"user","content":"x"}], 100)
+        self.assertEqual(result.usage, {"input_tokens":2883,"cached_input_tokens":0,"output_tokens":95,"reasoning_tokens":0})
+
+    def test_google_sse_terminal_usage_with_corroborated_zero_thoughts_is_known(self):
+        lines = [b'data: {"candidates":[{"finishReason":"STOP","content":{"parts":[{"text":"ok"}]}}],"usageMetadata":{"promptTokenCount":2883,"candidatesTokenCount":95,"totalTokenCount":2978}}\n']
+        result = NativeClient({"TEST_KEY":"s"}, FakeStreamingTransport(lines)).generate(
+            self.profile("google", model="gemini-3.7-flash", reasoning="high"), [{"role":"user","content":"x"}], 100)
+        self.assertEqual(result.usage["output_tokens"], 95)
+        self.assertEqual(result.usage["reasoning_tokens"], 0)
+
+    def test_google_missing_thoughts_requires_exact_zero_residual_without_tools(self):
+        base = {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":15}
+        invalid = (
+            {"promptTokenCount":10,"candidatesTokenCount":5},
+            {**base,"totalTokenCount":16},
+            {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":20},
+            {**base,"toolUsePromptTokenCount":2},
+            {**base,"toolUsePromptTokenCount":True},
+            {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":15.0},
+            {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":None},
+            {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":True},
+            {"promptTokenCount":10,"candidatesTokenCount":5,"totalTokenCount":-1},
+            {"promptTokenCount":-1,"candidatesTokenCount":5,"totalTokenCount":4},
+        )
+        for usage in invalid:
+            with self.subTest(usage=usage):
+                response = {"candidates":[{"content":{"parts":[{"text":"ok"}]}}],"usageMetadata":usage}
+                with self.assertRaises(ProviderError) as caught:
+                    NativeClient({"TEST_KEY":"s"}, FakeTransport(response)).generate(
+                        self.profile("google", model="gemini-3.7-flash"), [], 30)
+                self.assertTrue(caught.exception.billing_uncertain)
+
+    def test_google_explicit_thought_count_remains_canonical(self):
+        usage = {"promptTokenCount":10,"candidatesTokenCount":5,"thoughtsTokenCount":2,"totalTokenCount":17}
+        canonical = NativeClient._parse("google", {"candidates":[{"content":{"parts":[{"text":"ok"}]}}], "usageMetadata":usage})[1]
+        self.assertEqual(canonical["output_tokens"], 7)
+        self.assertEqual(canonical["reasoning_tokens"], 2)
+
     def test_domain_allowlist_rejects_openrouter_before_transport(self):
         fake = FakeTransport({})
         p = self.profile(base_url="https://openrouter.ai/api")
