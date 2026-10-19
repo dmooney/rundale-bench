@@ -36,8 +36,9 @@ class BillingReconciliationTests(unittest.TestCase):
             'schema_version': 1, 'run_id': self.run_id, 'captured_at': '2026-10-18T23:15:28Z',
             'identity_binding': {
                 'checked_locally': True, 'independently_verified': False,
-                'key_resource_sha256': 'b' * 64, 'described_project_id_sha256': 'c' * 64,
-                'lookup_project_number_sha256': 'd' * 64, 'described_project_number_sha256': 'd' * 64,
+                'digest_scheme': 'hmac-sha256-over-identifier-sha256-private-key',
+                'key_resource_hmac_sha256': 'b' * 64, 'described_project_id_hmac_sha256': 'c' * 64,
+                'lookup_project_number_hmac_sha256': 'd' * 64, 'described_project_number_hmac_sha256': 'd' * 64,
             },
             'queries': {
                 'request_count': {
@@ -53,8 +54,8 @@ class BillingReconciliationTests(unittest.TestCase):
                     }, 'resource': {'labels': {
                         'service': 'generativelanguage.googleapis.com',
                         'method': 'google.ai.generativelanguage.v1beta.ModelService.GetModel',
-                        'credential_id': 'key-resource-sha256:' + 'b' * 64,
-                        'project_id': 'sha256:' + 'c' * 64,
+                        'credential_id': 'hmac-sha256:' + 'b' * 64,
+                        'project_id': 'hmac-sha256:' + 'c' * 64,
                     }}, 'points': [{'interval': {'startTime': '2026-10-18T17:35:48.001Z', 'endTime': '2026-10-18T17:36:48Z'},
                                      'value': {'int64Value': '1'}}]}]}],
                 },
@@ -183,6 +184,24 @@ class BillingReconciliationTests(unittest.TestCase):
         path.write_text(json.dumps(record))
         with self.assertRaisesRegex(ValueError, 'identity and invoice limitations'):
             rebuild_index(self.root)
+
+    def test_generation_additional_request_and_identity_mismatches_stop_reconciliation(self):
+        for change in ('generation', 'additional_request', 'wrong_key', 'wrong_project'):
+            with self.subTest(change=change):
+                evidence = copy.deepcopy(self.evidence)
+                series = evidence['queries']['request_count']['pages'][0]['timeSeries']
+                labels = series[0]['resource']['labels']
+                if change == 'generation':
+                    labels['method'] = 'google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent'
+                elif change == 'additional_request':
+                    series.append(copy.deepcopy(series[0]))
+                elif change == 'wrong_key':
+                    labels['credential_id'] = 'hmac-sha256:' + 'd' * 64
+                else:
+                    labels['project_id'] = 'hmac-sha256:' + 'd' * 64
+                self.evidence_path.write_text(json.dumps(evidence))
+                with self.assertRaises(ValueError):
+                    self.reconcile()
 
     def test_original_run_and_ledger_shape_are_required(self):
         self.run['failure_cause'] = 'infrastructure'

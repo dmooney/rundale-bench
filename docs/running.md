@@ -94,6 +94,11 @@ sources or an existing conflicting record are rejected. `publish` includes a
 small reconciliation summary in the index, while the site copies the full record
 and monitoring evidence to its public evidence directory.
 
+Public identity bindings use HMAC-SHA256 tags over identifier digests with a
+private local key. Keep that key outside the repository; unkeyed hashes of
+guessable project identifiers are not suitable public redaction. These tags
+support local consistency checks, not independent identity verification.
+
 The result means “not billed, based on provider monitoring.” The displayed $0 is
 a monitoring estimate, not an invoice-backed actual cost or a request-specific
 receipt. The original `cost_usd`, unknown failure cause, billing-uncertain status,

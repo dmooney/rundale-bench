@@ -123,11 +123,13 @@ def _validate_monitoring_evidence(evidence: dict, run_id: str, completed_at: str
     identity = evidence.get("identity_binding")
     if not isinstance(identity, dict) or identity.get("checked_locally") is not True or identity.get("independently_verified") is not False:
         raise ValueError("Monitoring identity limitations are missing")
-    for key in ("key_resource_sha256", "described_project_id_sha256", "described_project_number_sha256"):
+    if identity.get("digest_scheme") != "hmac-sha256-over-identifier-sha256-private-key":
+        raise ValueError("Monitoring identity tags require a private-key HMAC scheme")
+    for key in ("key_resource_hmac_sha256", "described_project_id_hmac_sha256", "described_project_number_hmac_sha256"):
         value = identity.get(key)
         if not isinstance(value, str) or len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
             raise ValueError("Monitoring identity hash binding is malformed")
-    if identity.get("lookup_project_number_sha256") != identity.get("described_project_number_sha256"):
+    if identity.get("lookup_project_number_hmac_sha256") != identity.get("described_project_number_hmac_sha256"):
         raise ValueError("Monitoring project identity binding does not match")
     pages = request.get("pages")
     series_count = 0
@@ -151,8 +153,8 @@ def _validate_monitoring_evidence(evidence: dict, run_id: str, completed_at: str
             method = resource_labels.get("method")
             if method != "google.ai.generativelanguage.v1beta.ModelService.GetModel":
                 raise ValueError("Monitoring evidence contains a generation request")
-            if (resource_labels.get("credential_id") != f"key-resource-sha256:{identity.get('key_resource_sha256')}"
-                    or resource_labels.get("project_id") != f"sha256:{identity.get('described_project_id_sha256')}"):
+            if (resource_labels.get("credential_id") != f"hmac-sha256:{identity.get('key_resource_hmac_sha256')}"
+                    or resource_labels.get("project_id") != f"hmac-sha256:{identity.get('described_project_id_hmac_sha256')}"):
                 raise ValueError("Monitoring positive control is not bound to the checked key and project")
             points = series.get("points", [])
             if (not isinstance(points, list) or len(points) != 1 or metric_labels.get("response_code") != "200"
