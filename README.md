@@ -7,8 +7,8 @@ and makes no Irish fluency claim.
 
 Version 3.0 publishes provisional scores after automated judge screening. Human
 agreement and accuracy have not been measured; no manual review is required to
-run it. The implementation is awaiting independent review and live launch runs.
-No completed candidate scores are published yet.
+run it. Provisional dialogue and multi-turn component scores and DNF evidence
+are published. A complete baseline is still required for launch acceptance.
 
 ## Requirements and installation
 
