@@ -22,19 +22,23 @@ as superseded evidence.
 
 Scores and run records are explicitly provisional. Human agreement, accuracy,
 MAE against human references, and severe human-reference misses are unmeasured.
-The first Gemini 3.5 Flash-Lite baseline attempt (`8bff4886b04a`) completed all
-24 dialogue cases and scored 93.92 on dialogue. It completed no multi-turn or
-Gaeilge cases (30 of 68 trials total), so it has no overall score and does not
-meet the complete-baseline gate. The run ended with an unknown DNF because a
-Google response omitted `thoughtsTokenCount`; billing remains uncertain in
-the immutable run record. Subsequent diagnosis identified our adapter as the
-cause: the final total exactly matched prompt plus candidate tokens, but the
-adapter required an explicit zero thinking count. A narrowly checked accounting
-fix was independently reviewed and merged in [#10](https://github.com/dmooney/rundale-bench/pull/10);
-this diagnosis does not rewrite the original run or settle its ledger. The runner recorded $0.159474 of known usage and $0.178445 of total spending
-exposure under its $4.98 cap. This is an automated provisional component score,
-not an accuracy-validated or full benchmark result. Its deduplicated failure
-issue is [#9](https://github.com/dmooney/rundale-bench/issues/9).
+The latest Gemini 3.5 Flash-Lite high attempt (`4b4f0c1824d6`) reached 67 of
+68 trials. Dialogue scored 94.27/100 across 24/24 cases; multi-turn scored
+41.67/100 across 8/8 scored cases, including a confirmed malformed-output
+failure scored zero. Gaeilge covered 23/24 cases and has no complete score.
+The second malformed response ended the run as a model-attributed DNF, so there
+is no overall score and the complete-baseline gate remains open. Both failed
+responses reported native `STOP`, rather than an output-token limit. All 156
+calls have committed usage: $0.636991426 known usage-priced cost and spending
+exposure under the $4.80 cap. These are provisional automated component scores,
+not human-validated accuracy estimates. Investigation is tracked in
+[#12](https://github.com/dmooney/rundale-bench/issues/12); no retry followed the DNF.
+
+The previous attempt (`8bff4886b04a`) retains its 93.92 dialogue score,
+unknown DNF attribution and $0.178445436 reserved exposure. Its missing-zero
+thinking-token adapter diagnosis was fixed in
+[#10](https://github.com/dmooney/rundale-bench/pull/10), without rewriting the
+original run or settling its historical ledger.
 
 The earlier run (`5e2177f168e2`) remains a separate unknown DNF. Its original
 run record, ledger, and $0.0185515 uncertain exposure are preserved; the
@@ -50,7 +54,7 @@ Remaining launch gates:
 
 - Independent review and deployment verification.
 - One complete baseline and an additional result or honest DNF under the
-  approved $20 setup allocation. The first baseline attempt is incomplete;
+  approved $20 setup allocation. The native attempts remain incomplete;
   Gemini 3.7 is disabled because Google routes its API name to 3.8, so do not
   silently substitute a different candidate.
 - Working public raw-evidence/archive links and a fresh agent execution check.

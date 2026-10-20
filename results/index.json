@@ -13,127 +13,136 @@
         {
           "model": "gemini-3.5-flash-lite",
           "reasoning": "high",
-          "run_id": "8bff4886b04a",
+          "run_id": "4b4f0c1824d6",
           "status": "dnf",
           "overall": null,
           "scores": {
-            "dialogue": 93.92361111111111,
-            "multiturn": null,
+            "dialogue": 94.27083333333333,
+            "multiturn": 41.666666666666664,
             "gaeilge": null
           },
-          "completed_at": "2026-10-19T10:50:32.408614+00:00",
-          "cost_usd": 0.15947393599999998,
+          "completed_at": "2026-10-19T12:07:46.035526+00:00",
+          "cost_usd": 0.636991426,
           "notice": null,
-          "latest_attempt_id": "8bff4886b04a",
-          "failure_cause": "unknown",
-          "reason": "Usage metadata is missing; billing is uncertain",
-          "budget_usd": 4.98,
-          "budget_status": "billing_uncertain",
-          "spending_exposure_usd": 0.17844543599999999,
+          "latest_attempt_id": "4b4f0c1824d6",
+          "failure_cause": "model",
+          "reason": "Repeated confirmed model failures",
+          "budget_usd": 4.8,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 0.636991426,
           "coverage": {
             "dialogue": {
               "completed": 24,
               "required": 24
             },
             "multiturn": {
-              "completed": 0,
+              "completed": 8,
               "required": 8
             },
             "gaeilge": {
-              "completed": 0,
+              "completed": 23,
               "required": 24
             }
           },
           "uncertainty": {
             "dialogue": {
               "n": 24,
-              "mean_score": 93.9236111111111,
+              "mean_score": 94.27083333333333,
               "median_score": 93.75,
-              "stddev_score": 6.362320208961353,
-              "min_score": 83.33333333333333,
+              "stddev_score": 6.111012467638208,
+              "min_score": 79.16666666666667,
               "max_score": 100,
               "latency_ms": {
                 "n": 24,
-                "p50": 4827.869874890894,
-                "p95": 7048.435540869832,
+                "p50": 4670.003041159362,
+                "p95": 6187.401082832366,
                 "unit": "generation request; nearest-rank percentile"
               },
               "ttft_ms": {
                 "n": 24,
-                "p50": 4745.127792004496,
-                "p95": 6860.395332798362,
+                "p50": 4505.763333290815,
+                "p95": 5999.786582775414,
                 "unit": "generation request; nearest-rank percentile"
               }
             },
             "multiturn": {
-              "n": 0,
-              "mean_score": null,
-              "median_score": null,
-              "stddev_score": null,
-              "min_score": null,
-              "max_score": null,
+              "n": 8,
+              "mean_score": 41.666666666666664,
+              "median_score": 45.83333333333333,
+              "stddev_score": 20.41241452319315,
+              "min_score": 0.0,
+              "max_score": 66.66666666666666,
               "latency_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 47,
+                "p50": 4591.463583987206,
+                "p95": 6757.741790730506,
                 "unit": "generation request; nearest-rank percentile"
               },
               "ttft_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 47,
+                "p50": 4454.869042150676,
+                "p95": 6575.8820828050375,
                 "unit": "generation request; nearest-rank percentile"
               }
             },
             "gaeilge": {
-              "n": 0,
-              "mean_score": null,
-              "median_score": null,
-              "stddev_score": null,
-              "min_score": null,
-              "max_score": null,
+              "n": 23,
+              "mean_score": 86.95652173913044,
+              "median_score": 100.0,
+              "stddev_score": 33.67811605397754,
+              "min_score": 0.0,
+              "max_score": 100.0,
               "latency_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 23,
+                "p50": 2323.2717076316476,
+                "p95": 3958.278500009328,
                 "unit": "generation request; nearest-rank percentile"
               },
               "ttft_ms": {
-                "n": 0,
-                "p50": null,
-                "p95": null,
+                "n": 23,
+                "p50": 2321.281457785517,
+                "p95": 3956.302000209689,
                 "unit": "generation request; nearest-rank percentile"
               },
               "accuracy": {
-                "correct": 0,
-                "count": 0,
+                "correct": 20,
+                "count": 23,
                 "interval_95": null,
                 "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
               },
               "subcategories": {
                 "grammar": {
-                  "correct": 0,
-                  "count": 0,
-                  "interval_95": null
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
                 },
                 "meaning": {
-                  "correct": 0,
-                  "count": 0,
-                  "interval_95": null
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
                 },
                 "code_switch": {
-                  "correct": 0,
-                  "count": 0,
-                  "interval_95": null
+                  "correct": 4,
+                  "count": 7,
+                  "interval_95": [
+                    0.2504583645276572,
+                    0.8417801447485302
+                  ]
                 }
               }
             }
           },
           "variability": {
-            "repeated_cases": 6,
-            "mean_absolute_score_change": 4.166666666666669
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 1.041666666666666
           },
-          "evidence_path": "3.0/runs/8bff4886b04a.json",
+          "evidence_path": "3.0/runs/4b4f0c1824d6.json",
           "qualification_status": "provisional",
           "score_status": "provisional",
           "validation_basis": "automated_checks_only",
@@ -413,6 +422,144 @@
             "mean_absolute_score_change": 4.166666666666669
           },
           "evidence_path": "3.0/runs/8bff4886b04a.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
+        },
+        {
+          "model": "gemini-3.5-flash-lite",
+          "reasoning": "high",
+          "run_id": "4b4f0c1824d6",
+          "status": "dnf",
+          "overall": null,
+          "scores": {
+            "dialogue": 94.27083333333333,
+            "multiturn": 41.666666666666664,
+            "gaeilge": null
+          },
+          "completed_at": "2026-10-19T12:07:46.035526+00:00",
+          "cost_usd": 0.636991426,
+          "notice": null,
+          "latest_attempt_id": null,
+          "failure_cause": "model",
+          "reason": "Repeated confirmed model failures",
+          "budget_usd": 4.8,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 0.636991426,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 8,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 23,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 94.27083333333333,
+              "median_score": 93.75,
+              "stddev_score": 6.111012467638208,
+              "min_score": 79.16666666666667,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 4670.003041159362,
+                "p95": 6187.401082832366,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 4505.763333290815,
+                "p95": 5999.786582775414,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 8,
+              "mean_score": 41.666666666666664,
+              "median_score": 45.83333333333333,
+              "stddev_score": 20.41241452319315,
+              "min_score": 0.0,
+              "max_score": 66.66666666666666,
+              "latency_ms": {
+                "n": 47,
+                "p50": 4591.463583987206,
+                "p95": 6757.741790730506,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 47,
+                "p50": 4454.869042150676,
+                "p95": 6575.8820828050375,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 23,
+              "mean_score": 86.95652173913044,
+              "median_score": 100.0,
+              "stddev_score": 33.67811605397754,
+              "min_score": 0.0,
+              "max_score": 100.0,
+              "latency_ms": {
+                "n": 23,
+                "p50": 2323.2717076316476,
+                "p95": 3958.278500009328,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 23,
+                "p50": 2321.281457785517,
+                "p95": 3956.302000209689,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 20,
+                "count": 23,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "meaning": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "code_switch": {
+                  "correct": 4,
+                  "count": 7,
+                  "interval_95": [
+                    0.2504583645276572,
+                    0.8417801447485302
+                  ]
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 1.041666666666666
+          },
+          "evidence_path": "3.0/runs/4b4f0c1824d6.json",
           "qualification_status": "provisional",
           "score_status": "provisional",
           "validation_basis": "automated_checks_only",
