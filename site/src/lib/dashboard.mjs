@@ -1,3 +1,16 @@
+export const CURRENT_VERSION = '3.1';
+
+export function selectedVersion(versions, requested) {
+  const names = (Array.isArray(versions) ? versions : []).map((version) => version.version);
+  if (requested && names.includes(requested)) return requested;
+  if (names.includes(CURRENT_VERSION)) return CURRENT_VERSION;
+  return names.at(-1) || '';
+}
+
+export function versionRecordLabel(version) {
+  return version?.version === CURRENT_VERSION ? 'Current evaluation' : 'Archived evaluation record';
+}
+
 const CATEGORIES = ['dialogue', 'multiturn', 'gaeilge'];
 const CATEGORY_LABELS = { dialogue: 'Dialogue', multiturn: 'Multi-turn', gaeilge: 'Gaeilge' };
 

@@ -333,7 +333,7 @@ class NativeClient:
             cfg = {"maxOutputTokens": limit}
             if profile.get("reasoning") not in (None, "none"):
                 cfg["thinkingConfig"] = {"thinkingLevel": profile["reasoning"]}
-            if schema: cfg.update({"responseMimeType": "application/json", "responseSchema": schema})
+            if schema: cfg.update({"responseMimeType": "application/json", "responseJsonSchema": schema})
             body = {"contents": contents, "generationConfig": cfg}
             if sys: body["systemInstruction"] = {"parts": [{"text": sys}]}
             return body, base + f"/v1beta/models/{urllib.parse.quote(model, safe='')}:generateContent", {"x-goog-api-key": key, "Content-Type": "application/json"}

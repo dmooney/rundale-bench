@@ -1,0 +1,206 @@
+{
+  "status": "provisional",
+  "screened_at": "2026-10-18T17:27:44.469491+00:00",
+  "reason": "Automated judge checks passed. Scores are provisional; human agreement and accuracy have not been measured.",
+  "validation_basis": "automated_checks_only",
+  "human_validated": false,
+  "suite_hash": "1905b2708add5b7dc1b421fd444c6c67a4cebed53eceeabc8fac25de56a63055",
+  "judges": {
+    "dialogue": {
+      "profile_id": "jev-1.13.0",
+      "qualified": false,
+      "automated_checks_passed": true
+    },
+    "multiturn": {
+      "profile_id": "gpt-6.1-sol-judge-high",
+      "qualified": false,
+      "automated_checks_passed": true
+    }
+  },
+  "selection_rule": "Cheapest collected native judge passing exact rubric-schema, >=90% invariant-axis agreement, and nonconstant original-case grades per eval; not selected for accuracy.",
+  "thresholds": {
+    "repeat_agreement_min": 0.9,
+    "distinct_original_axis_grades_min": 2
+  },
+  "metrics": {
+    "dialogue": {
+      "gpt-6.1-sol-judge-high": {
+        "automated_checks_passed": false,
+        "repeat_agreement": {
+          "cases": 2,
+          "matching_axes": 10,
+          "axes": 12,
+          "fraction": 0.8333333333333334
+        },
+        "invariant_source_ceiling": {
+          "max_grade_axes": 7,
+          "axes": 12
+        },
+        "nonconstant_case_grades": true,
+        "calibration_cost_usd": 0.310964,
+        "human_accuracy": null
+      },
+      "jev-1.13.0": {
+        "automated_checks_passed": true,
+        "repeat_agreement": {
+          "cases": 2,
+          "matching_axes": 12,
+          "axes": 12,
+          "fraction": 1.0
+        },
+        "invariant_source_ceiling": {
+          "max_grade_axes": 11,
+          "axes": 12
+        },
+        "nonconstant_case_grades": true,
+        "calibration_cost_usd": 0.004458048000000001,
+        "human_accuracy": null
+      }
+    },
+    "multiturn": {
+      "gpt-6.1-sol-judge-high": {
+        "automated_checks_passed": true,
+        "repeat_agreement": {
+          "cases": 3,
+          "matching_axes": 9,
+          "axes": 9,
+          "fraction": 1.0
+        },
+        "invariant_source_ceiling": {
+          "max_grade_axes": 6,
+          "axes": 9
+        },
+        "nonconstant_case_grades": true,
+        "calibration_cost_usd": 0.310964,
+        "human_accuracy": null
+      },
+      "jev-1.13.0": {
+        "automated_checks_passed": false,
+        "repeat_agreement": {
+          "cases": 3,
+          "matching_axes": 9,
+          "axes": 9,
+          "fraction": 1.0
+        },
+        "invariant_source_ceiling": {
+          "max_grade_axes": 9,
+          "axes": 9
+        },
+        "nonconstant_case_grades": false,
+        "calibration_cost_usd": 0.004458048000000001,
+        "human_accuracy": null
+      }
+    }
+  },
+  "grade_distributions": {
+    "gpt-6.1-sol-judge-high": {
+      "dialogue": {
+        "cases": 8,
+        "axes": 48,
+        "grades": {
+          "1": 1,
+          "2": 6,
+          "3": 3,
+          "4": 8,
+          "5": 30
+        },
+        "ceiling_fraction": 0.625
+      },
+      "multiturn": {
+        "cases": 8,
+        "axes": 24,
+        "grades": {
+          "1": 0,
+          "2": 1,
+          "3": 2,
+          "4": 5,
+          "5": 16
+        },
+        "ceiling_fraction": 0.6666666666666666
+      }
+    },
+    "jev-1.13.0": {
+      "dialogue": {
+        "cases": 8,
+        "axes": 48,
+        "grades": {
+          "1": 0,
+          "2": 4,
+          "3": 1,
+          "4": 3,
+          "5": 40
+        },
+        "ceiling_fraction": 0.8333333333333334
+      },
+      "multiturn": {
+        "cases": 8,
+        "axes": 24,
+        "grades": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0,
+          "5": 24
+        },
+        "ceiling_fraction": 1.0
+      }
+    }
+  },
+  "inter_judge_agreement": {
+    "dialogue": {
+      "cases": 8,
+      "axes": 48,
+      "mean_absolute_difference": 0.4375,
+      "exact_agreement": 0.7083333333333334,
+      "interpretation": "Inter-judge agreement, not accuracy or human validation."
+    },
+    "multiturn": {
+      "cases": 8,
+      "axes": 24,
+      "mean_absolute_difference": 0.5,
+      "exact_agreement": 0.6666666666666666,
+      "interpretation": "Inter-judge agreement, not accuracy or human validation."
+    }
+  },
+  "evidence_hashes": {
+    "collection.json": "a48709228a2d36b836d2eed56dc72929d429535fe02ed954b7c294e911ad5a2b",
+    "judgments.json": "4860620beee2c07a689a1ab8ee17b3875d50e131ece72cbf10ea6bdf86bfeabb",
+    "controls.json": "92387b5dac27cfbdad0cbf7ef16af2fae36d45199e9f0b912b4bd0a7c7360247",
+    "bias-diagnostics.json": "a167097ac3d7c1824da48d1ea48e2f355f18db9bbe35483ae16dae310c25b577"
+  },
+  "cost_usd": 0.315422048,
+  "cost_basis": "provider usage at recorded prices; not invoice receipt",
+  "exposed_case_ids": [
+    "R-01a7731881",
+    "R-10dea41287",
+    "R-1c00c344e0",
+    "R-34f930c1a4",
+    "R-523aeb913a",
+    "R-64393b3c07",
+    "R-6a4d87c820",
+    "R-894cbc5dd8",
+    "R-92f8cb886f",
+    "R-980d6e39c8",
+    "R-a52722cfb9",
+    "R-aeb44bb132",
+    "R-d00bc62bcc",
+    "R-d6f91d223e",
+    "R-e7c3f2ea54",
+    "R-e8fda4c381"
+  ],
+  "limitations": [
+    "No human reference ratings; no accuracy, human agreement, MAE-to-human, or severe-human-miss gate measured.",
+    "All 16 calibration cases are exposed development examples, not untouched human validation.",
+    "Tiny repeat and bias controls cannot establish general reliability or absence of bias.",
+    "Calibration grades are heavily concentrated at 5. Constant grading is rejected as a development screening heuristic; nonconstant grading still does not establish accuracy, score sensitivity, or ranking quality. Claimed-label upward preference is unobservable on ceiling axes.",
+    "The nonconstant-grade heuristic was added after inspecting these exposed development results during pre-launch review; it is not independently validated and can reject genuinely uniform ratings.",
+    "Dialogue invariance covers two cases (12 axes); multi-turn covers three cases (nine axes). There is no unperturbed-repeat baseline, so changes cannot be attributed to a particular bias rather than sampling noise.",
+    "Irish scoring uses attributed objective keys; Irish naturalness remains unqualified."
+  ],
+  "reused_from": {
+    "version": "3.0",
+    "suite_hash": "5c822a68082241a2c514685293bee7a527662abd6cf3628a9711eed095394fda",
+    "receipt_sha256": "40d176218d86bf8420f75e42cd50b30c00e37a82b9cee51ef4a32fdb9fab66d3",
+    "basis": "Unchanged judge profiles, English rubrics and calibration inputs; candidate schema constraints plus JSON answer-envelope instructions for the 16 objective A/B cases."
+  }
+}

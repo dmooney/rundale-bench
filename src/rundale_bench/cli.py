@@ -1,4 +1,4 @@
-"""Command line interface for Benchmark 3.0."""
+"""Command line interface for versioned native-cloud benchmarks."""
 from __future__ import annotations
 import argparse
 import json
@@ -15,7 +15,7 @@ from .scoring import paired_difference
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog='rundale-bench')
     sub = p.add_subparsers(dest='command', required=True)
-    r = sub.add_parser('run', help='run the fixed 3.0 suite')
+    r = sub.add_parser('run', help='run a fixed versioned suite')
     r.add_argument('model')
     r.add_argument('--reasoning')
     r.add_argument('--budget', type=float, default=5.0)
@@ -43,6 +43,8 @@ def parser() -> argparse.ArgumentParser:
     c = sub.add_parser('compare',help='paired case-level comparison of two published runs')
     c.add_argument('left_run_id')
     c.add_argument('right_run_id')
+    for command in (r, s, v, c):
+        command.add_argument('--version', choices=('3.0', '3.1'), default='3.1', help='benchmark version (default: 3.1 structured output)')
     return p
 
 
@@ -51,13 +53,13 @@ def main(argv=None) -> int:
     try:
         if args.command == 'run':
             result = run(args.model, reasoning=args.reasoning, budget=args.budget,
-                         resume=args.resume, dry=args.dry_run, env_file=args.env_file)
+                         resume=args.resume, dry=args.dry_run, env_file=args.env_file, version=args.version)
             print(json.dumps(result, indent=2, ensure_ascii=False))
             if args.dry_run:
                 return 0 if result.get('valid') and not result.get('problems') and not result.get('blockers') else 1
             return 0 if result.get('status') == 'complete' else 1
         if args.command == 'status':
-            report = validate_suite()
+            report = validate_suite(version=args.version)
             profiles=load_profiles(PACKAGE/'config/providers.json')
             report['profiles'] = list(profiles.values())
             if args.model:
@@ -79,7 +81,7 @@ def main(argv=None) -> int:
                               'recorded_at':record['recorded_at'],'versions':len(report['versions'])},indent=2))
             return 0
         if args.command == 'validate-suite':
-            report = validate_suite()
+            report = validate_suite(version=args.version)
             print(json.dumps(report, indent=2, ensure_ascii=False))
             return 0 if report['valid'] else 1
         if args.command == 'qualify':
@@ -95,9 +97,11 @@ def main(argv=None) -> int:
             return 0 if receipt.get('status') in ('collected','qualified','provisional') else 1
         if args.command == 'compare':
             left_id,right_id=safe_id(args.left_run_id),safe_id(args.right_run_id)
-            left_path=PACKAGE/'results'/'3.0'/'runs'/(left_id+'.json')
-            right_path=PACKAGE/'results'/'3.0'/'runs'/(right_id+'.json')
+            left_path=PACKAGE/'results'/args.version/'runs'/(left_id+'.json')
+            right_path=PACKAGE/'results'/args.version/'runs'/(right_id+'.json')
             left,right=json.loads(left_path.read_text()),json.loads(right_path.read_text())
+            if left.get('version') != right.get('version'):
+                raise ValueError('Cannot compare different benchmark versions')
             def scores(run):
                 return {r['case_id']:r['score'] for r in run.get('case_results',[]) if r.get('trial',0)==0 and r.get('score') is not None}
             report={'left_run_id':left_id,'right_run_id':right_id,'left_model':left.get('model'),'right_model':right.get('model'),
