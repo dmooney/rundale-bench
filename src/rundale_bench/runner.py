@@ -1,4 +1,4 @@
-"""Budgeted, resumable execution of the frozen Benchmark 3.0 suite."""
+"""Budgeted, resumable execution of the frozen versioned benchmark suites."""
 from __future__ import annotations
 
 import hashlib
@@ -15,10 +15,11 @@ from .scoring import aggregate, rubric_score, objective_score, variability, wils
 from .storage import utc_now, atomic_json, publish_run, issue_payload, safe_id
 
 PACKAGE = Path(__file__).resolve().parents[2]
+STRUCTURED_PROVIDERS = frozenset(('google', 'openai', 'anthropic'))
 
 
-def load_suite(root: Path = PACKAGE) -> tuple[dict, list[dict], dict, str]:
-    base = root / 'suites' / '3.0'
+def load_suite(root: Path = PACKAGE, version: str = '3.0') -> tuple[dict, list[dict], dict, str]:
+    base = root / 'suites' / safe_id(version)
     manifest = json.loads((base/'manifest.json').read_text())
     cases_path, rubric_path = base/'cases.jsonl', base/'rubrics.json'
     cases = [json.loads(line) for line in cases_path.read_text().splitlines() if line.strip()]
@@ -32,7 +33,7 @@ def load_suite(root: Path = PACKAGE) -> tuple[dict, list[dict], dict, str]:
 
 
 def qualification_blockers(root: Path, manifest: dict, suite_hash: str) -> list[str]:
-    qpath = root/'qualification'/'3.0'/'status.json'
+    qpath = root/'qualification'/safe_id(manifest.get('version', '3.0'))/'status.json'
     if not qpath.exists():
         return ['Qualification receipt is missing; no paid requests are allowed.']
     try:
@@ -82,8 +83,10 @@ def qualification_blockers(root: Path, manifest: dict, suite_hash: str) -> list[
     return blockers
 
 
-def validate_suite(root: Path = PACKAGE) -> dict:
-    manifest, cases, rubrics, digest = load_suite(root)
+def validate_suite(root: Path = PACKAGE, version: str = '3.0') -> dict:
+    manifest, cases, rubrics, digest = load_suite(root, version)
+    if manifest.get('version') != version:
+        raise ValueError('Suite manifest version does not match requested version')
     ids = [c.get('id') for c in cases]
     problems = []
     if len(ids) != len(set(ids)): problems.append('Case IDs are not unique.')
@@ -92,6 +95,12 @@ def validate_suite(root: Path = PACKAGE) -> dict:
         if c.get('eval') == 'multiturn' and len(c.get('turns', [])) != 6: problems.append(f"{c.get('id')}: multiturn requires six turns")
         if c.get('eval') == 'gaeilge' and c.get('answer', {}).get('type') not in ('choice','exact_json'): problems.append(f"{c.get('id')}: missing objective answer")
     if not set(manifest.get('repeat_ids', [])).issubset(ids): problems.append('Repeat list contains unknown case IDs.')
+    if version != '3.0':
+        from .contracts import candidate_schema
+        for case in cases:
+            expected = candidate_schema(case)
+            if case.get('response_schema') != expected:
+                problems.append(f"{case['id']}: response schema does not match the output contract")
     actual = {k: sum(c.get('eval') == k for c in cases) for k in ('dialogue','multiturn','gaeilge')}
     if actual != manifest.get('counts'): problems.append(f'Suite counts {actual} do not match manifest counts {manifest.get("counts")}.')
     ga_counts = {g: sum(c.get('eval') == 'gaeilge' and c.get('subcategory') == g for c in cases) for g in ('grammar','meaning','code_switch')}
@@ -125,6 +134,11 @@ def _request_for(case: dict, turns: list[dict] | None = None) -> dict:
     return {'messages': messages, 'max_output_tokens': case['max_output_tokens']}
 
 
+def _judge_case(case: dict) -> dict:
+    # Native decoding instructions are candidate transport metadata, not rubric input.
+    return {key: value for key, value in case.items() if key != 'response_schema'}
+
+
 def _rubric_axes(rubrics: dict, category: str) -> dict:
     return rubrics[category]
 
@@ -142,12 +156,14 @@ def _resolve_candidate(model: str, reasoning: str | None, profiles: dict) -> dic
 
 
 def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
-            root: Path = PACKAGE, env_file: Path | None = None) -> dict:
-    result = validate_suite(root)
+            root: Path = PACKAGE, env_file: Path | None = None, version: str = '3.0') -> dict:
+    result = validate_suite(root, version)
     try:
         profiles = load_profiles(root/'config'/'providers.json')
         profile = _resolve_candidate(model, reasoning, profiles)
         result['candidate_profile'] = profile['id']
+        if version != '3.0' and profile['provider'] not in STRUCTURED_PROVIDERS:
+            result['blockers'].append('Candidate provider does not support native structured output.')
     except Exception as exc:
         result['blockers'].append(f'Candidate profile: {exc}')
         profile = None
@@ -159,7 +175,7 @@ def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
     if isinstance(budget,bool) or not isinstance(budget,(int,float)) or not __import__('math').isfinite(budget) or budget <= 0 or budget > 5:
         result['blockers'].append('Budget must be finite, greater than $0 and at most $5.')
     try:
-        manifest, cases, rubrics, _ = load_suite(root)
+        manifest, cases, rubrics, _ = load_suite(root, version)
         estimated = 0.0
         if profile:
             for case in cases:
@@ -172,16 +188,16 @@ def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
                                 ctx=case['initial_context']; ctx=json.dumps(ctx,ensure_ascii=False) if isinstance(ctx,dict) else str(ctx)
                                 turn='Captured initial scene context:\n'+ctx+'\n\nPlayer turn:\n'+turn
                             msgs.append({'role':'user','content':turn})
-                            estimated += upper_cost(profile,msgs,case['max_output_tokens'])
+                            estimated += upper_cost(profile,msgs,case['max_output_tokens'],case.get('response_schema'))
                             msgs.append({'role':'assistant','content':'x'*min(case['max_output_tokens']*4,64000)})
                     else:
                         req = _request_for(case)
-                        estimated += upper_cost(profile, req['messages'], req['max_output_tokens'])
+                        estimated += upper_cost(profile, req['messages'], req['max_output_tokens'],case.get('response_schema'))
                     if case['eval'] in ('dialogue','multiturn'):
                         jp = _profile_for(case['eval'], manifest, profiles)
                         if jp:
                             projected = _project_transcript(case,case['max_output_tokens']) if case['eval']=='multiturn' else [{'role':'assistant','content':'x'*min(case['max_output_tokens']*4,64000)}]
-                            ji={**case,'candidate_response':json.dumps(projected,ensure_ascii=False),'transcript':projected}
+                            ji={**_judge_case(case),'candidate_response':json.dumps(projected,ensure_ascii=False),'transcript':projected}
                             estimated += upper_cost(jp,[{'role':'user','content':json.dumps(ji,ensure_ascii=False)}],JUDGE_MAX_OUTPUT_TOKENS,{'rubric':rubrics[case['eval']]})
             result['estimated_max_usd'] = estimated
             if estimated > budget: result['budget_warning']=f'Worst-case full-suite reservation ${estimated:.4f} exceeds ${budget:.2f}; per-call reservations enforce the cap and may end the run as budget DNF.'
@@ -285,20 +301,22 @@ def _project_transcript(case: dict, max_output_tokens: int) -> list[dict]:
 def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
         root: Path = PACKAGE, output: Path | None = None, run_id: str | None = None,
         resume: str | None = None, dry: bool = False, env_file: Path | None = None,
-        client=None) -> dict:
+        client=None, version: str = '3.0') -> dict:
     root = Path(root)
     if dry:
-        return dry_run(model, reasoning, budget, root, env_file)
+        return dry_run(model, reasoning, budget, root, env_file, version)
     if isinstance(budget, bool) or not isinstance(budget, (int,float)) or not __import__('math').isfinite(budget) or not 0 < budget <= 5:
         raise ValueError('Budget must be finite, greater than $0, and at most $5.')
     profiles = load_profiles(root/'config'/'providers.json')
     profile = _resolve_candidate(model, reasoning, profiles)
-    manifest, cases, rubrics, suite_hash = load_suite(root)
-    validation = validate_suite(root)
+    if version != '3.0' and profile['provider'] not in STRUCTURED_PROVIDERS:
+        raise ValueError('Candidate provider does not support native structured output.')
+    manifest, cases, rubrics, suite_hash = load_suite(root, version)
+    validation = validate_suite(root, version)
     if not validation['valid']: raise ValueError('Invalid suite: ' + ' '.join(validation['problems']))
     blockers = qualification_blockers(root, manifest, suite_hash)
     if blockers: raise ValueError('Paid launch blocked: ' + ' '.join(blockers))
-    qualification = json.loads((root/'qualification/3.0/status.json').read_text())
+    qualification = json.loads((root/'qualification'/safe_id(version)/'status.json').read_text())
     selected_reasoning = profile.get('reasoning')
     run_id = safe_id(resume or run_id or uuid.uuid4().hex[:12])
     outroot = Path(output or root/'output')
@@ -316,7 +334,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
         if run_data.get('status') == 'dnf':
             raise ValueError('A finalized DNF is immutable; start a new run ID after resolving its cause.')
     else:
-        run_data = {'run_id':run_id,'version':'3.0','model':model,'reasoning':selected_reasoning,'status':'running',
+        run_data = {'run_id':run_id,'version':version,'model':model,'reasoning':selected_reasoning,'status':'running',
             'failure_cause':None,'reason':None,'completed_at':utc_now(),'cost_usd':0.0,'scores':{},'overall':None,
             'coverage':{},'case_results':[],'requests':[],'judgments':[],'errors':[],'engine':manifest.get('engine'),
             'suite_hash':suite_hash,'uncertainty':{},'variability':{},'budget_usd':budget,
@@ -366,6 +384,10 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                     messages.append({'role':'user','content':turn_content})
                 prompt_messages = [dict(message) for message in messages]
                 request = {'profile':profile['id'],'messages':prompt_messages,'max_output_tokens':case['max_output_tokens']}
+                schema = case.get('response_schema')
+                if schema is not None:
+                    request['response_schema'] = schema
+                    request['output_protocol'] = 'native-json-schema-v1'
                 call_id = f'{key}:candidate:{step}'
                 cached = ledger.cached(call_id, request)
                 if cached is not None:
@@ -395,24 +417,24 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                         candidate_failed=True
                         record={'text':'','usage':record.get('usage',{}),'raw':record.get('payload',{}),'model':profile['model'],'elapsed_ms':None,'ttft_ms':None}
                 else:
-                    reserve = upper_cost(profile, prompt_messages, case['max_output_tokens'])
+                    reserve = upper_cost(profile, prompt_messages, case['max_output_tokens'], schema)
                     future = 0.0
                     if category == 'multiturn':
                         projected = [dict(x) for x in prompt_messages]
                         for next_step in range(step+1,nturns):
                             projected.append({'role':'assistant','content':'x' * min(case['max_output_tokens'] * 4, 64000)})
                             projected.append({'role':'user','content':case['turns'][next_step]})
-                            future += upper_cost(profile, projected, case['max_output_tokens'])
+                            future += upper_cost(profile, projected, case['max_output_tokens'], schema)
                     if category in ('dialogue','multiturn'):
                         jp = _profile_for(category, manifest, profiles)
                         if jp:
                             projected_transcript = _project_transcript(case,case['max_output_tokens']) if category == 'multiturn' else [{'role':'assistant','content':'x' * min(case['max_output_tokens']*4,64000)}]
-                            judge_item = {**case,'candidate_response':json.dumps(projected_transcript,ensure_ascii=False),'transcript':projected_transcript}
+                            judge_item = {**_judge_case(case),'candidate_response':json.dumps(projected_transcript,ensure_ascii=False),'transcript':projected_transcript}
                             jm = [{'role':'user','content':json.dumps(judge_item,ensure_ascii=False)}]
                             future += upper_cost(jp, jm, JUDGE_MAX_OUTPUT_TOKENS, {'rubric':rubrics[category]})
                     ledger.reserve(call_id, request, reserve, future)
                     try:
-                        response = client.generate(profile, prompt_messages, case['max_output_tokens'])
+                        response = client.generate(profile, prompt_messages, case['max_output_tokens'], **({'response_schema': schema} if schema is not None else {}))
                         cost = actual_cost(profile, response.usage)
                         record = _response_record(response)
                         ledger.commit(call_id, record, cost)
@@ -439,8 +461,14 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                         record = {'text':'','usage':exc.payload.get('usage',{}),'raw':exc.payload,'model':profile['model'],'elapsed_ms':None,'ttft_ms':None}
                 last_response = record
                 npc_text, contract_error = ('',None) if candidate_failed else _npc_text(record.get('text',''), prompt_messages)
+                if not candidate_failed and schema is not None:
+                    from .contracts import validate_output
+                    try:
+                        validate_output(record.get('text', ''), schema)
+                    except ValueError as exc:
+                        contract_error = str(exc)
                 if contract_error:
-                    errors.append({'case_id':case['id'],'trial':trial,'step':step,'kind':'npc_contract','reason':contract_error,'raw':record.get('text'),'billing_uncertain':False})
+                    errors.append({'case_id':case['id'],'trial':trial,'step':step,'kind':('npc_contract' if category in ('dialogue','multiturn') else 'output_contract'),'reason':contract_error,'raw':record.get('text'),'billing_uncertain':False})
                     failures += 1; run_data['failure_events']=failures; run_data['failure_cause']='model'
                     atomic_json(state_path,run_data)
                     if failures >= 2: raise RuntimeError('Repeated confirmed model failures')
@@ -466,7 +494,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                     if failures >= 2: raise RuntimeError('Repeated confirmed model failures')
             else:
                 judge_profile = _profile_for(category, manifest, profiles)
-                judge_item = {**case,'candidate_response':total_text,'transcript':transcript or [{'role':'assistant','content':total_text,'raw':candidate_records[0].get('text','')}]}
+                judge_item = {**_judge_case(case),'candidate_response':total_text,'transcript':transcript or [{'role':'assistant','content':total_text,'raw':candidate_records[0].get('text','')}]}
                 judge_request = {'profile':judge_profile['id'],'item':judge_item,'rubric':rubrics[category]}
                 judge_id = f'{key}:judge'
                 cached_judge = ledger.cached(judge_id, judge_request)

@@ -19,7 +19,7 @@ import {
   monitoringReconciliationLabel, reconciliationDetailsHtml,
   qualificationEvidenceLinks,
   performanceLabel, qualificationCopy, rowQualificationLabel, runNoticeLabel,
-  recordedCostLabel, runStatusLabel, scoreLabel, scoreStatusLabel,
+  recordedCostLabel, runStatusLabel, scoreLabel, scoreStatusLabel, selectedVersion, versionRecordLabel,
 } from '../lib/dashboard.mjs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -48,7 +48,7 @@ for (const version of data.versions || []) {
   selector.append(option);
 }
 const requestedVersion = new URLSearchParams(location.search).get('version');
-if (requestedVersion && [...selector.options].some((option) => option.value === requestedVersion)) selector.value = requestedVersion;
+selector.value = selectedVersion(data.versions, requestedVersion);
 
 function show() {
   const version = (data.versions || []).find((item) => item.version === selector.value);
@@ -84,7 +84,7 @@ function show() {
   evidenceLinks.hidden = evidenceLinks.childElementCount === 0;
   byId('qualification').textContent = qualification.status;
   byId('qualification-reason').textContent = qualification.description;
-  byId('version-note').textContent = version.version === '3.0' ? 'Current evaluation' : 'Archived evaluation record';
+  byId('version-note').textContent = versionRecordLabel(version);
 
   const history = Array.isArray(version.runs) ? version.runs : [];
   const rows = latestRows(version);

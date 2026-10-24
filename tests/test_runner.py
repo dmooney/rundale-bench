@@ -130,7 +130,7 @@ class RunnerTests(unittest.TestCase):
             with patch('rundale_bench.qualification.evaluate',return_value={'status':'qualified'}):
                 with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(cli.main(['qualify','evaluate','--ratings','ratings.json']),0)
             capture=io.StringIO()
-            with contextlib.redirect_stdout(capture): self.assertEqual(cli.main(['compare','left','right']),0)
+            with contextlib.redirect_stdout(capture): self.assertEqual(cli.main(['compare','left','right','--version','3.0']),0)
             self.assertIn('mean_difference',capture.getvalue())
 
     def test_qualification_mismatch_blocks_paid_call(self):

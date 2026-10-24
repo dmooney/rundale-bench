@@ -1,9 +1,15 @@
 # Rundale Benchmark
 
-Benchmark 3.0 evaluates Rundale dialogue, six-turn play, and Gaeilge with fixed,
+Benchmark 3.1 evaluates Rundale dialogue, six-turn play, and Gaeilge with fixed,
 versioned cases. These are product-specific evaluation scores, not measures of
 general intelligence. The Gaeilge evaluation uses source-backed objective checks
 and makes no Irish fluency claim.
+
+Version 3.1 requests native schema-constrained candidate JSON and reuses the
+unchanged provisional judge screening. Version 3.0 evidence stays frozen in its
+own table. The 3.1 result index links two complete runs and their raw evidence for the
+existing Pages publication workflow. [Implementation provenance](docs/evidence/structured-output/provenance.md)
+records their uncommitted source states and final-code replay verification.
 
 Version 3.0 publishes provisional scores after automated judge screening. Human
 agreement and accuracy have not been measured; no manual review is required to

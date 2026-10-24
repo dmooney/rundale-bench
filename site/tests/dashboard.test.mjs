@@ -5,7 +5,7 @@ import {
   monitoringReconciliationLabel, reconciliationDetailsHtml,
   historicalRuns, latestRows, performanceLabel, qualificationCopy, qualificationEvidenceLinks,
   recordedCostLabel, rowQualificationLabel, runNoticeLabel, runStatusLabel,
-  scoreLabel, scoreStatusLabel,
+  scoreLabel, scoreStatusLabel, selectedVersion, versionRecordLabel,
 } from '../src/lib/dashboard.mjs';
 
 const version = {
@@ -164,4 +164,15 @@ test('untrusted display strings are escaped before table markup is assembled', (
   assert.match(detail, /not an invoice/);
   assert.match(detail, /&lt;script&gt;/);
   assert.doesNotMatch(detail, /<script>/);
+});
+
+test('structured 3.1 opens as current while archived deep links retain their version', () => {
+  const versions = [{ version: '2.0' }, { version: '3.0' }, { version: '3.1' }];
+  assert.equal(selectedVersion(versions, null), '3.1');
+  assert.equal(selectedVersion(versions, 'missing'), '3.1');
+  assert.equal(selectedVersion(versions, '3.0'), '3.0');
+  assert.equal(versionRecordLabel(versions[2]), 'Current evaluation');
+  assert.equal(versionRecordLabel(versions[1]), 'Archived evaluation record');
+  assert.equal(selectedVersion(versions.slice(0, 2), null), '3.0');
+  assert.equal(selectedVersion([], null), '');
 });

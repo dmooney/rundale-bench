@@ -1,9 +1,13 @@
 ---
 name: rundale-bench
-description: Run a budgeted Benchmark 3.0 model evaluation after automated judge screening and publish its raw evidence for independent review. Use when asked to test a model or run an evaluation in this repository.
+description: Run a budgeted Benchmark 3.1 model evaluation after automated judge screening and publish its raw evidence for independent review. Use when asked to test a model or run an evaluation in this repository.
 ---
 
 # Test a model
+
+The CLI defaults to 3.1 native structured candidate output. Do not fall back to
+prompt-only 3.0 after a provider error. Read docs/specification.md for screening
+reuse and version boundaries.
 
 For a request to “test MODEL”, use the fixed comprehensive suite and default to
 the model's highest supported native API reasoning setting. Honor a user-pinned
