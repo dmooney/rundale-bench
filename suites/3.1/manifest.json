@@ -1,0 +1,150 @@
+{
+  "cases_sha256": "c431de6c354df81dd0319347b41bb92c4fae08f1a750fc5dd003f2b2b14174f2",
+  "counts": {
+    "dialogue": 24,
+    "gaeilge": 24,
+    "multiturn": 8
+  },
+  "diagnostic_blockers": [
+    "The HF Irish-BLiMP dataset is manually gated; the 20-pairs-per-feature diagnostic selection is pending access."
+  ],
+  "engine": {
+    "capture_file": "suites/3.0/engine_capture.jsonl",
+    "capture_function": "limerick-core::ipc::handlers::prepare_npc_conversation_turn",
+    "capture_sha256": "3c3bb42e59b83e544717bd524530cccbbedbde75e1e2abed97085f439b76cb59",
+    "capture_source_file": "limerick/crates/limerick-core/src/ipc/handlers.rs",
+    "capture_source_sha256": "ac640093287fe15ec29a6fa90be9c141f1fca58da30ea7e65242a99485af3925",
+    "commit": "5c14ea236022aed698e478837a6c754657239ae7",
+    "repository": "dmooney/Rundale"
+  },
+  "generation": {
+    "max_output_tokens": 4096,
+    "prompt_contract": "Native schema-constrained JSON; no output repair or automatic retry.",
+    "output_protocol": "native-json-schema-v1"
+  },
+  "judge_policy": {
+    "dialogue": "jev-1.13.0",
+    "multiturn": "gpt-6.1-sol-judge-high"
+  },
+  "repeat_ids": [
+    "d02",
+    "d08",
+    "d14",
+    "d20",
+    "d22",
+    "d24",
+    "m02",
+    "m06",
+    "g01",
+    "g05",
+    "g10",
+    "g17"
+  ],
+  "rubrics_sha256": "5725adac436d1fd9cbbdc52e8b2ecd3c67d1d7b433e4170884df8018cc84d1e3",
+  "selection": {
+    "eu_mmlu": {
+      "available_subjects": [
+        "global_facts",
+        "international_law",
+        "management",
+        "sociology"
+      ],
+      "config": "GA_IE",
+      "license": "MIT",
+      "revision": "6bf04b0030783b3c9074c8d59416ff761962568a",
+      "source": "https://huggingface.co/datasets/EC-DGT-AI/EU-MMLU",
+      "status": "reviewed; no game-relevant subset identified; no items imported"
+    },
+    "irish_blimp": {
+      "access": "manual-gated; dataset rows and parquet returned HTTP 401 without authentication",
+      "hf_dataset": "https://huggingface.co/datasets/ReliableAI/irish_blimp",
+      "hf_dataset_revision": "160b545b14f76423ccd2c4c27b177cfe26f21b96",
+      "hf_license": "MIT",
+      "qualification_plan": {
+        "actual_dev_record_count": null,
+        "actual_qualification_record_count": null,
+        "actual_split_disjointness_verified": null,
+        "feature_count": 11,
+        "planned_pairs_per_feature": 20,
+        "planned_per_split_per_feature": 10,
+        "planned_total_pairs": 220,
+        "status": "diagnostic_pending_manual_dataset_gate"
+      },
+      "repository": "https://github.com/ReML-AI/Irish-BLiMP",
+      "repository_commit": "5a49894e7d7068d2187773248f64dd1d0bce22f6",
+      "repository_license": "MIT",
+      "split_keys": [
+        "1_verbal_morphology",
+        "2_nouns_cases",
+        "3_adjectives_comparison",
+        "4_pronouns",
+        "5_articles_determiners",
+        "6_numbers",
+        "7_copula_bí",
+        "8_clause_structure_word_order",
+        "9_questions_negations",
+        "10_discourse_sentence_types",
+        "11_adverbs_modifiers"
+      ]
+    }
+  },
+  "source_coverage": {
+    "independent_irish_source_items": 8,
+    "note": "The same eight published examples support grammar, meaning, and code-switch probes; 24 observations are not 24 independent Irish source items.",
+    "observations_are_independent": false,
+    "probe_groups_per_example": 3,
+    "probe_observations": 24,
+    "published_irish_examples": 8
+  },
+  "sources": {
+    "irish_blimp_paper": {
+      "attribution": "McGiff et al. (2025), Irish-BLiMP, Sections 3.2.1–3.2.8",
+      "example_choice_shuffle_seed": 3,
+      "gloss_choice_shuffle_seed": 11,
+      "license": "CC BY 4.0",
+      "pdf_sha256": "fb482892b645bf583c1e5ec47530bf07da9ea895fe1e7cae647582e4c61ec9ab",
+      "url": "https://arxiv.org/html/2510.20957v1"
+    }
+  },
+  "status": "ready",
+  "version": "3.1",
+  "validation_mode": "provisional",
+  "judge_profiles": {
+    "gpt-6.1-sol-judge-high": {
+      "id": "gpt-6.1-sol-judge-high",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "reasoning": "high",
+      "supported_reasoning": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "capabilities_source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "input_per_million_usd": 2.0,
+      "output_per_million_usd": 10.0,
+      "cached_input_per_million_usd": 0.1,
+      "api_key_env": "OPENAI_API_KEY",
+      "pricing_source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "jev-1.13.0": {
+      "id": "jev-1.13.0",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "reasoning": null,
+      "supported_reasoning": [],
+      "capabilities_source": "https://docs.typesafe.ai/models",
+      "input_per_million_usd": 0.042,
+      "output_per_million_usd": 0.0,
+      "cached_input_per_million_usd": null,
+      "api_key_env": "TYPESAFE_API_KEY",
+      "pricing_source": "https://docs.typesafe.ai/models"
+    }
+  },
+  "derived_from": {
+    "version": "3.0",
+    "suite_hash": "5c822a68082241a2c514685293bee7a527662abd6cf3628a9711eed095394fda"
+  }
+}

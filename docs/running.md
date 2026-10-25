@@ -1,4 +1,16 @@
-# Running Benchmark 3.0
+# Running the benchmark
+
+Version 3.1 (native structured output) is the default for `run`, `status`,
+`validate-suite` and `compare`. Use `--version 3.0` explicitly for archived
+prompt-only behavior. Python library callers retain the legacy 3.0 default for
+compatibility and must pass `version='3.1'` for the structured protocol.
+
+The frozen 3.1 suite is derived once by `PYTHONPATH=src python3 scripts/build_structured_suite.py`;
+the builder refuses to overwrite either existing suite or screening evidence.
+It reuses the existing screening receipts without network calls; `qualify`
+commands remain the original 3.0 calibration workflow and must not be used to
+reset or regenerate pinned evidence. Run IDs from a different version cannot
+be resumed or compared as if they used the same contract.
 
 Install the package in editable mode with `python3 -m pip install -e .`. The fixed suite is validated with `rundale-bench validate-suite`; `rundale-bench status` prints candidate profiles and the qualification receipt status.
 
@@ -17,7 +29,7 @@ rundale-bench run gpt-6.1-sol --budget 5 --env-file .env.bench
 rundale-bench run gpt-6.1-sol --reasoning high --resume RUN_ID --env-file .env.bench
 ```
 
-Intermediate responses and the durable SQLite cost ledger are stored under `output/RUN_ID/`. Resuming reuses confirmed calls and refuses changed requests or unresolved billing. Completed and failed evidence is written to `results/3.0/runs/`; `rundale-bench publish` rebuilds the public index after importing reviewed run evidence. A second confirmed refusal or malformed response ends the run and writes a deduplicated-issue payload to the run directory. Unknown billing or infrastructure failures stop execution and preserve the raw diagnostic evidence.
+Intermediate responses and the durable SQLite cost ledger are stored under `output/RUN_ID/`. Resuming reuses confirmed calls and refuses changed requests or unresolved billing. Completed and failed evidence is written to `results/<version>/runs/`; `rundale-bench publish` rebuilds the public index after importing reviewed run evidence. A second confirmed refusal or malformed response ends the run and writes a deduplicated-issue payload to the run directory. Unknown billing or infrastructure failures stop execution and preserve the raw diagnostic evidence.
 
 Native judge calibration has a fixed $10 total cap and saves resumable evidence
 under `output/qualification/`. The default launch path requires no human ratings:
@@ -125,3 +137,6 @@ Pack, rubric, split, and profile changes are refused. This does not amend a
 published judge policy: an already published screening receipt stays frozen.
 The 3.0 human evaluator is retained implementation for future adaptation; a
 new benchmark version must explicitly add its paths and validation design.
+
+`reconcile-billing` remains restricted to the specifically audited 3.0 DNF
+`5e2177f168e2`; it is not a general reconciliation command for 3.1 runs.

@@ -1,0 +1,2254 @@
+{
+  "purpose": "Offline final-source equivalence audit; not a new model evaluation",
+  "audit_script_sha256": "af05596f4839d12635c1650c6c504134353ffdd3ef3a1ca8163ddc2046609f65",
+  "source_files_sha256": {
+    "src/rundale_bench/__init__.py": "779e2c78a9f8a30069fede3b570c749b56ab7754ac303ee9976a557651db9ac7",
+    "src/rundale_bench/accounting.py": "5688426ec7f551f722edcb91bd76dc62a456b94f356c6a11b14be5137acaa06e",
+    "src/rundale_bench/bias.py": "adaff4048a4de9378700b73992c772312c462dc2699af250eaf4325ea1e7c8c2",
+    "src/rundale_bench/cli.py": "58e8f96fe7e40fa0e373086e6b0a3bcedeb27e9ec4a6c742b5a4fb6b169d6adc",
+    "src/rundale_bench/contracts.py": "cd1698a9f9ba8f04396a0d481fe79a05df996c0ed7ff752072f533aa93f53612",
+    "src/rundale_bench/judges.py": "27cb47bc3e898e92632b2c31a050da43eb1b483c59ddad759331632f1f98bead",
+    "src/rundale_bench/providers.py": "199f22ef8b64b8f5db90e4bd636315665c838c03ff0ae1f79025de31d1abc52e",
+    "src/rundale_bench/provisional.py": "ab3cc22253cf4e37b017610426ac247cab4a746b80941d44ddbaa46baf722339",
+    "src/rundale_bench/publication.py": "fc4f72bbb5c0db6594b7d6e1e93f6b87c2e46709d6653cc4352d550ef0aac2ad",
+    "src/rundale_bench/qualification.py": "521a85b9cf22245724b39f40f9b4e22c2276b347b71e28b136b476a1a1fd3739",
+    "src/rundale_bench/reconciliation.py": "c0ab2cca1375ad7cdcd623b51cbf1d68bb64554bf6c0ca4ef49d8978fe153ef3",
+    "src/rundale_bench/runner.py": "1264e7630468c360cfb8c48f295163f020ff34fc8028701d953174eaadef5b84",
+    "src/rundale_bench/scoring.py": "e1c5d5b26f837fb1e0474ba08b929ae6a401733ae9f7ac25d68b3e9f76b1c8e8",
+    "src/rundale_bench/storage.py": "be1c2c0c4110868df8f8098cd231b703113e128e9fa695f09cde19e375665497"
+  },
+  "runs": [
+    {
+      "run_id": "gemini35-structured-20261023",
+      "original_run_sha256": "25110525c0d7a298c659b4c5e02cac4db01a5c2fe32556349473a8198af9fdd4",
+      "matched_request_digests": 158,
+      "case_scores_identical": true,
+      "aggregate_and_costs_identical": true,
+      "provider_calls": 0,
+      "ledger_calls": [
+        {
+          "id": "d01:0:candidate:0",
+          "digest": "2e7f239b383b41cb2e20a43d9b92c3da337e64cb6e57f4d945b5417e1f17b6f6",
+          "state": "committed",
+          "reserved": 0.018712299999999998,
+          "actual": 0.0032933000000000003
+        },
+        {
+          "id": "d01:0:judge",
+          "digest": "368b65ae4842827c73c28b1c3647bc63dc6cf2d0ced76606174c070744997ef6",
+          "state": "committed",
+          "reserved": 0.001859508,
+          "actual": 0.00020844600000000002
+        },
+        {
+          "id": "d02:0:candidate:0",
+          "digest": "d312e61ef0e55e5f4916f2a6f89bc68f2f19288ff1f3f528bd040b0f0f2fc400",
+          "state": "committed",
+          "reserved": 0.0187156,
+          "actual": 0.0049388999999999995
+        },
+        {
+          "id": "d02:0:judge",
+          "digest": "9c8a5e350fa2ee9eeb2e948fa50eb3eb1b432c86108fa4e7ab5a5310428a0a14",
+          "state": "committed",
+          "reserved": 0.001849596,
+          "actual": 0.00020689200000000002
+        },
+        {
+          "id": "d02:1:candidate:0",
+          "digest": "d312e61ef0e55e5f4916f2a6f89bc68f2f19288ff1f3f528bd040b0f0f2fc400",
+          "state": "committed",
+          "reserved": 0.0187156,
+          "actual": 0.0043839
+        },
+        {
+          "id": "d02:1:judge",
+          "digest": "aed87010b1189fa8194d7725777b048a6b25f23692cafba52c409c0436e7aba0",
+          "state": "committed",
+          "reserved": 0.0018504360000000002,
+          "actual": 0.00020693400000000004
+        },
+        {
+          "id": "d03:0:candidate:0",
+          "digest": "523999595df7de7853861b58508a2ad546d2e786abb8b559a6f90351effc0957",
+          "state": "committed",
+          "reserved": 0.0187213,
+          "actual": 0.0032181999999999996
+        },
+        {
+          "id": "d03:0:judge",
+          "digest": "7bb0142386c514d5331bffd62f6959463e5346caf7923a4e96b777acc34a2013",
+          "state": "committed",
+          "reserved": 0.0018485040000000002,
+          "actual": 0.00020752200000000002
+        },
+        {
+          "id": "d04:0:candidate:0",
+          "digest": "c713c279e4f251ec291dfea801cd21fe2af81e6febc7f6e4915709b4328efb26",
+          "state": "committed",
+          "reserved": 0.0187099,
+          "actual": 0.0047452
+        },
+        {
+          "id": "d04:0:judge",
+          "digest": "6cc50e933abfc19ba38fd1f602acc7ef05d5509baa311ccc6ae103fde8ef3231",
+          "state": "committed",
+          "reserved": 0.0018570720000000002,
+          "actual": 0.00020811
+        },
+        {
+          "id": "d05:0:candidate:0",
+          "digest": "5c66dd81b85197250c84755ad13dffdc3070a72f118cf8028919d1e9cd95e641",
+          "state": "committed",
+          "reserved": 0.018718,
+          "actual": 0.003927
+        },
+        {
+          "id": "d05:0:judge",
+          "digest": "3bdff82cb0035ac36fc572fdee44d5b94cb06c88cf3673f68837d1a6fe6a7aae",
+          "state": "committed",
+          "reserved": 0.001845564,
+          "actual": 0.00020655600000000002
+        },
+        {
+          "id": "d06:0:candidate:0",
+          "digest": "acfeb5ae8e11e67f58a6d64e913fb0a4ddd775ed42f39f7025ac50376595d922",
+          "state": "committed",
+          "reserved": 0.018717400000000002,
+          "actual": 0.0068966999999999995
+        },
+        {
+          "id": "d06:0:judge",
+          "digest": "3c77225b43f20dfd4f2623a52a0f2015c440a1aee42a2ef276fec91909eb27a1",
+          "state": "committed",
+          "reserved": 0.0018524520000000003,
+          "actual": 0.00020769000000000004
+        },
+        {
+          "id": "d07:0:candidate:0",
+          "digest": "d27dddd90bb81626e840bda49c1264acf28e7e360823990a58fa4793251b9ed5",
+          "state": "committed",
+          "reserved": 0.0187129,
+          "actual": 0.003363
+        },
+        {
+          "id": "d07:0:judge",
+          "digest": "ce6bc28bae1c1961599bde256105507737f993ad9a8988358f8967f89da6ee51",
+          "state": "committed",
+          "reserved": 0.001853292,
+          "actual": 0.000206976
+        },
+        {
+          "id": "d08:0:candidate:0",
+          "digest": "4eedd6d48ce0aa76b0738c4cdd88991b209d0c5c6747d666584ed97ec32d8709",
+          "state": "committed",
+          "reserved": 0.018722199999999998,
+          "actual": 0.0034482
+        },
+        {
+          "id": "d08:0:judge",
+          "digest": "3300833e7a9bb501f412d006948a30f7ab4133c2e306ed6aca87f3f3b66d7f26",
+          "state": "committed",
+          "reserved": 0.0018509400000000001,
+          "actual": 0.00020769000000000004
+        },
+        {
+          "id": "d08:1:candidate:0",
+          "digest": "4eedd6d48ce0aa76b0738c4cdd88991b209d0c5c6747d666584ed97ec32d8709",
+          "state": "committed",
+          "reserved": 0.018722199999999998,
+          "actual": 0.0032957
+        },
+        {
+          "id": "d08:1:judge",
+          "digest": "ac797abde1827a53ef03a1f1f62418bc7fc36432a3d367b44ba07d8e238e66ee",
+          "state": "committed",
+          "reserved": 0.0018475800000000001,
+          "actual": 0.00020739600000000002
+        },
+        {
+          "id": "d09:0:candidate:0",
+          "digest": "a1f1d384023814e5ccb33edec7ddcacd3f3c4c0a9de3b13fa588abf4dcf32e3d",
+          "state": "committed",
+          "reserved": 0.018687699999999998,
+          "actual": 0.0039141
+        },
+        {
+          "id": "d09:0:judge",
+          "digest": "9701c15f399d5e1e4883498849e72c351474f012a67a56c6d8245396e890d008",
+          "state": "committed",
+          "reserved": 0.0018341400000000002,
+          "actual": 0.00020592600000000002
+        },
+        {
+          "id": "d10:0:candidate:0",
+          "digest": "1eb4ce341e2f9c593fd0a1ac6dd6b2b4df4f0f06ca03204d1bbffb26890e158a",
+          "state": "committed",
+          "reserved": 0.0186865,
+          "actual": 0.004226
+        },
+        {
+          "id": "d10:0:judge",
+          "digest": "0a5c29c48b8282efd186760587710ca275edfae6dd91ad3355f4976b0bfa33e2",
+          "state": "committed",
+          "reserved": 0.0018357360000000001,
+          "actual": 0.00020622
+        },
+        {
+          "id": "d11:0:candidate:0",
+          "digest": "66f2cc60b6e503b5c95e58573de757ba1288ed24e829e63d61f079f7d4145ded",
+          "state": "committed",
+          "reserved": 0.0186853,
+          "actual": 0.0034779
+        },
+        {
+          "id": "d11:0:judge",
+          "digest": "3c93a32e2ac90f092fc1937081c703d3e6969f2d110ab227fdf6daa231498ba0",
+          "state": "committed",
+          "reserved": 0.001843884,
+          "actual": 0.000207354
+        },
+        {
+          "id": "d12:0:candidate:0",
+          "digest": "faa259b2e4351a10f086d978fbeec548d0cb33368aed26f7d5ff967b82a24fb6",
+          "state": "committed",
+          "reserved": 0.018690699999999998,
+          "actual": 0.0038019
+        },
+        {
+          "id": "d12:0:judge",
+          "digest": "997ceaf8efc9609dbb73907ee7e9761fec14160a36f2740f705224b482af5b2d",
+          "state": "committed",
+          "reserved": 0.0018585840000000001,
+          "actual": 0.000208572
+        },
+        {
+          "id": "d13:0:candidate:0",
+          "digest": "ac01ba9d9b230c5f0ab60bf1faa14cb7b29fdbacc22fd85ec35e5d08df32e31a",
+          "state": "committed",
+          "reserved": 0.018686199999999997,
+          "actual": 0.0031201
+        },
+        {
+          "id": "d13:0:judge",
+          "digest": "0d1e010d7aa4c3f0222bc7e738d038533c91483ce28b02adeb41ea7ac897f7ee",
+          "state": "committed",
+          "reserved": 0.001838928,
+          "actual": 0.00020580000000000002
+        },
+        {
+          "id": "d14:0:candidate:0",
+          "digest": "c876c198621b9cdb8c9e9cd5f2920f656305c1f68eb858829c1eb138cd75c756",
+          "state": "committed",
+          "reserved": 0.0186913,
+          "actual": 0.0034438000000000003
+        },
+        {
+          "id": "d14:0:judge",
+          "digest": "74b6a69a9b0ceeb62ef7564876fd1aef85a334e9e48f0cf243c4a7827b91a79b",
+          "state": "committed",
+          "reserved": 0.001865976,
+          "actual": 0.000209664
+        },
+        {
+          "id": "d14:1:candidate:0",
+          "digest": "c876c198621b9cdb8c9e9cd5f2920f656305c1f68eb858829c1eb138cd75c756",
+          "state": "committed",
+          "reserved": 0.0186913,
+          "actual": 0.0038038
+        },
+        {
+          "id": "d14:1:judge",
+          "digest": "1b84592afc5093978719c4340927c03377893fc98c8c5324b79db46cb65da6a0",
+          "state": "committed",
+          "reserved": 0.001862028,
+          "actual": 0.000209244
+        },
+        {
+          "id": "d15:0:candidate:0",
+          "digest": "e70fc18b4f7d4704f4896534ce32eff0d6595848ee3d4e26fcec3acae3da5ce1",
+          "state": "committed",
+          "reserved": 0.0186925,
+          "actual": 0.0049494
+        },
+        {
+          "id": "d15:0:judge",
+          "digest": "9b369ff79fe95d38f15c8f359162159caf69b174f3d67a0e7cce9bf4af947975",
+          "state": "committed",
+          "reserved": 0.0018432120000000003,
+          "actual": 0.000207354
+        },
+        {
+          "id": "d16:0:candidate:0",
+          "digest": "cf524f0ece491c968035bcf0d67b4b961525e6dff2f9267b20cd3cfe0c130264",
+          "state": "committed",
+          "reserved": 0.0186868,
+          "actual": 0.0044881999999999995
+        },
+        {
+          "id": "d16:0:judge",
+          "digest": "45a24244c8a55c7ba49abfc26dfb014ac0793e1a4469e74168c3a870811ae18d",
+          "state": "committed",
+          "reserved": 0.0018377520000000002,
+          "actual": 0.000206094
+        },
+        {
+          "id": "d17:0:candidate:0",
+          "digest": "7060082fb576d334a14acff8b3ae05142c6121a248690c7efa79be14c414a56a",
+          "state": "committed",
+          "reserved": 0.0187015,
+          "actual": 0.0049328
+        },
+        {
+          "id": "d17:0:judge",
+          "digest": "2ec1b31131e4d1e604b54e6f9ab8124c35bbd141ca93a284069b4cb47a25cfe7",
+          "state": "committed",
+          "reserved": 0.001853124,
+          "actual": 0.00020752200000000002
+        },
+        {
+          "id": "d18:0:candidate:0",
+          "digest": "c9448206fa85d37a2a52dc97750377f0d19540b71bf0858c6f00bd1ff5c2f929",
+          "state": "committed",
+          "reserved": 0.018698799999999998,
+          "actual": 0.0036138000000000003
+        },
+        {
+          "id": "d18:0:judge",
+          "digest": "7ee831ee852f0b1f50a3f0e329caef48f12c885603379c8380f1f05dba35fffd",
+          "state": "committed",
+          "reserved": 0.001862448,
+          "actual": 0.00020836200000000002
+        },
+        {
+          "id": "d19:0:candidate:0",
+          "digest": "59348154e9198458e29a0abf7dfc5e6877da5ce60ef3a8fa48b9baed7db0c666",
+          "state": "committed",
+          "reserved": 0.018704199999999997,
+          "actual": 0.0048106
+        },
+        {
+          "id": "d19:0:judge",
+          "digest": "288c6384072b0873f327466c47469f2951fbe0ce672e432c1b87565fc5595da5",
+          "state": "committed",
+          "reserved": 0.001855896,
+          "actual": 0.00020840400000000003
+        },
+        {
+          "id": "d20:0:candidate:0",
+          "digest": "fb6e50ab18b55ebdd2728805c92b99811f267460343277a259abc36d9f471ef5",
+          "state": "committed",
+          "reserved": 0.0186991,
+          "actual": 0.0052943999999999995
+        },
+        {
+          "id": "d20:0:judge",
+          "digest": "4fcad92dc60893fcb9a468e52c1ed5b0eba1fdf171a94452ba71dd2563ff0007",
+          "state": "committed",
+          "reserved": 0.001851864,
+          "actual": 0.00020739600000000002
+        },
+        {
+          "id": "d20:1:candidate:0",
+          "digest": "fb6e50ab18b55ebdd2728805c92b99811f267460343277a259abc36d9f471ef5",
+          "state": "committed",
+          "reserved": 0.0186991,
+          "actual": 0.0045169
+        },
+        {
+          "id": "d20:1:judge",
+          "digest": "2d0491c5d87d997921abb31625f5ef6798077253c4e49dcf5c399e9372e75ffa",
+          "state": "committed",
+          "reserved": 0.0018489240000000003,
+          "actual": 0.000207228
+        },
+        {
+          "id": "d21:0:candidate:0",
+          "digest": "5a80896a5a56d250b445e9b83869a6318c4d7981be307871e2ced5df81829973",
+          "state": "committed",
+          "reserved": 0.0187,
+          "actual": 0.0031303000000000004
+        },
+        {
+          "id": "d21:0:judge",
+          "digest": "ba72d318f280fb0e8deb0283a77820f7e1735983f98b1e1d7ef6f6355e87d5ec",
+          "state": "committed",
+          "reserved": 0.0018494280000000002,
+          "actual": 0.00020769000000000004
+        },
+        {
+          "id": "d22:0:candidate:0",
+          "digest": "baaf67421f6061424838cfa9a740acbca64252ab97dce741165d86250929ab26",
+          "state": "committed",
+          "reserved": 0.018703900000000002,
+          "actual": 0.0035734
+        },
+        {
+          "id": "d22:0:judge",
+          "digest": "60cc830279b07b3d6c2bf1ccb00f41b74a703db565a019dd63d7c478e1724922",
+          "state": "committed",
+          "reserved": 0.001840608,
+          "actual": 0.00020655600000000002
+        },
+        {
+          "id": "d22:1:candidate:0",
+          "digest": "baaf67421f6061424838cfa9a740acbca64252ab97dce741165d86250929ab26",
+          "state": "committed",
+          "reserved": 0.018703900000000002,
+          "actual": 0.0026809
+        },
+        {
+          "id": "d22:1:judge",
+          "digest": "ba08a45cd27bed23a0873a798fff7724f41c5a0caa05ef9cc369e9f302be0778",
+          "state": "committed",
+          "reserved": 0.0018427920000000002,
+          "actual": 0.00020676600000000002
+        },
+        {
+          "id": "d23:0:candidate:0",
+          "digest": "224723ebb447e49d9af5fe45940e68fcd35985153999398797b4c3c6c44e244a",
+          "state": "committed",
+          "reserved": 0.0186958,
+          "actual": 0.0036688000000000003
+        },
+        {
+          "id": "d23:0:judge",
+          "digest": "6905dd8e0236f1d05cfca6de7ca9e0da7e60cb33b7ff47110124d19f0f3c4a21",
+          "state": "committed",
+          "reserved": 0.0018474960000000001,
+          "actual": 0.00020664000000000001
+        },
+        {
+          "id": "d24:0:candidate:0",
+          "digest": "8066a711e21d0caf5a32dffb1bc45eb15ee8f14fccecbce4e2bbaf685e7b72d3",
+          "state": "committed",
+          "reserved": 0.018702699999999996,
+          "actual": 0.0033406
+        },
+        {
+          "id": "d24:0:judge",
+          "digest": "64e2a4a727e28abfda9aa6aa49938ffa92791974094fc6af1437c3323762a4ac",
+          "state": "committed",
+          "reserved": 0.001854048,
+          "actual": 0.000207858
+        },
+        {
+          "id": "d24:1:candidate:0",
+          "digest": "8066a711e21d0caf5a32dffb1bc45eb15ee8f14fccecbce4e2bbaf685e7b72d3",
+          "state": "committed",
+          "reserved": 0.018702699999999996,
+          "actual": 0.0038131
+        },
+        {
+          "id": "d24:1:judge",
+          "digest": "dd8b400fa90063005127310e3896072fa03f40577b65abd79c1a11899688ebb6",
+          "state": "committed",
+          "reserved": 0.001856736,
+          "actual": 0.00020836200000000002
+        },
+        {
+          "id": "g01:0:candidate:0",
+          "digest": "9ee10db281d5b000bda0f053c9564def44dea9a0976c1e8abf20000bcadc1807",
+          "state": "committed",
+          "reserved": 0.015273099999999998,
+          "actual": 0.0034143000000000003
+        },
+        {
+          "id": "g01:1:candidate:0",
+          "digest": "9ee10db281d5b000bda0f053c9564def44dea9a0976c1e8abf20000bcadc1807",
+          "state": "committed",
+          "reserved": 0.015273099999999998,
+          "actual": 0.0027343000000000003
+        },
+        {
+          "id": "g02:0:candidate:0",
+          "digest": "322c56b8e932ae796564fd746cf2bb57ebb082bea861534a9e8c2c14f8b077ee",
+          "state": "committed",
+          "reserved": 0.0152635,
+          "actual": 0.001071
+        },
+        {
+          "id": "g03:0:candidate:0",
+          "digest": "5ebe1b732b8bc0b2805b6c93ed366a82994f810094668d2198662315942c73e9",
+          "state": "committed",
+          "reserved": 0.0152665,
+          "actual": 0.0010397
+        },
+        {
+          "id": "g04:0:candidate:0",
+          "digest": "d54c12024721197fb7e15d4d7ab11a7b102e7d1be27332d9f268c4a0c4bfd22e",
+          "state": "committed",
+          "reserved": 0.015265599999999999,
+          "actual": 0.0014219
+        },
+        {
+          "id": "g05:0:candidate:0",
+          "digest": "53a23814cfe2ad16018adb19d1075ea4b1ffaeec8dfa85a5c907c40c8ca13c69",
+          "state": "committed",
+          "reserved": 0.0152623,
+          "actual": 0.0015129000000000002
+        },
+        {
+          "id": "g05:1:candidate:0",
+          "digest": "53a23814cfe2ad16018adb19d1075ea4b1ffaeec8dfa85a5c907c40c8ca13c69",
+          "state": "committed",
+          "reserved": 0.0152623,
+          "actual": 0.0027429
+        },
+        {
+          "id": "g06:0:candidate:0",
+          "digest": "7e46b1eecf38c2f4acbd2fc4d90b8975b653544055db66d1d5d6d61d3c1a7146",
+          "state": "committed",
+          "reserved": 0.0152623,
+          "actual": 0.0019857
+        },
+        {
+          "id": "g07:0:candidate:0",
+          "digest": "6c81d5f514a75751b72b34a0e2526359702edf5a11c78e959a6d68217451e41e",
+          "state": "committed",
+          "reserved": 0.015265299999999999,
+          "actual": 0.0008916
+        },
+        {
+          "id": "g08:0:candidate:0",
+          "digest": "3ad0a603b24f92c276e9a1bc327c4956669309142a873d995d3b29724ab0010c",
+          "state": "committed",
+          "reserved": 0.0152698,
+          "actual": 0.0006753
+        },
+        {
+          "id": "g09:0:candidate:0",
+          "digest": "c565c0566048823b790fdebaba798e7880751c6e0ea66b3f7cf8de5e1506277f",
+          "state": "committed",
+          "reserved": 0.0152923,
+          "actual": 0.0020029
+        },
+        {
+          "id": "g10:0:candidate:0",
+          "digest": "7d6a0e52d5a358dfcdb3df4ca9dda2d805f36a80e9af023ef064ff4a4bcdaac0",
+          "state": "committed",
+          "reserved": 0.015274,
+          "actual": 0.0002459
+        },
+        {
+          "id": "g10:1:candidate:0",
+          "digest": "7d6a0e52d5a358dfcdb3df4ca9dda2d805f36a80e9af023ef064ff4a4bcdaac0",
+          "state": "committed",
+          "reserved": 0.015274,
+          "actual": 0.0007484
+        },
+        {
+          "id": "g11:0:candidate:0",
+          "digest": "69d534b34221dd0f591417d16d4fd82ee5799abebaa18929ff8d652130fdb18e",
+          "state": "committed",
+          "reserved": 0.0152815,
+          "actual": 0.0003099
+        },
+        {
+          "id": "g12:0:candidate:0",
+          "digest": "8b3d73b36caca51f4fd8e870aec6caa7a9d35aac1e344c880e40bda6f922a559",
+          "state": "committed",
+          "reserved": 0.0152803,
+          "actual": 0.0013208
+        },
+        {
+          "id": "g13:0:candidate:0",
+          "digest": "9019f46caa9a8883bf38303ad21a54d5a4bf2286dec32c7a337e8d947f6038a8",
+          "state": "committed",
+          "reserved": 0.0152755,
+          "actual": 0.0006337000000000001
+        },
+        {
+          "id": "g14:0:candidate:0",
+          "digest": "ad9d6b8b7a2ac910ce9ad54394d8df4f4afd57b7ed175fe6037063fc5973dbf7",
+          "state": "committed",
+          "reserved": 0.015274,
+          "actual": 0.00046310000000000004
+        },
+        {
+          "id": "g15:0:candidate:0",
+          "digest": "5d6534be73ced3c6e78d4ab768abd5d168b53068a38002b11ecfc675a9d54a26",
+          "state": "committed",
+          "reserved": 0.015277,
+          "actual": 0.0011399000000000001
+        },
+        {
+          "id": "g16:0:candidate:0",
+          "digest": "927f9b4b47bbbbbc7774fd8dcd86f85c60801ff3c42a92b23cc43350379faa8a",
+          "state": "committed",
+          "reserved": 0.0152851,
+          "actual": 0.0005152000000000001
+        },
+        {
+          "id": "g17:0:candidate:0",
+          "digest": "cdbd82a743f3200cfa249406409b735d0504cbdb92e5296d8e65f8e52f0d7649",
+          "state": "committed",
+          "reserved": 0.015381099999999998,
+          "actual": 0.0010566
+        },
+        {
+          "id": "g17:1:candidate:0",
+          "digest": "cdbd82a743f3200cfa249406409b735d0504cbdb92e5296d8e65f8e52f0d7649",
+          "state": "committed",
+          "reserved": 0.015381099999999998,
+          "actual": 0.0014315999999999999
+        },
+        {
+          "id": "g18:0:candidate:0",
+          "digest": "7b8352fa0e041a11a7f6923e05e36495b9afacf81169814f274e700b6236264a",
+          "state": "committed",
+          "reserved": 0.0153652,
+          "actual": 0.0014023
+        },
+        {
+          "id": "g19:0:candidate:0",
+          "digest": "7dc47bb537fdd0f31f6f433fc04a4d05f24963780b39900faf95fc812680f414",
+          "state": "committed",
+          "reserved": 0.015361,
+          "actual": 0.0012095
+        },
+        {
+          "id": "g20:0:candidate:0",
+          "digest": "28fa5f12fbfad35cf5c799822217b15ae232154524722bef85c30ee57812d8c8",
+          "state": "committed",
+          "reserved": 0.0153583,
+          "actual": 0.001767
+        },
+        {
+          "id": "g21:0:candidate:0",
+          "digest": "0d639279557ec2cd166b0d83c0ba92aaa1c391610cac86847508fe5c1ebb07de",
+          "state": "committed",
+          "reserved": 0.0153421,
+          "actual": 0.0011552
+        },
+        {
+          "id": "g22:0:candidate:0",
+          "digest": "9bff21c2abfcac162825cfd169804aa7749ccba9589062812d6387be6cc5d148",
+          "state": "committed",
+          "reserved": 0.0153373,
+          "actual": 0.0016915
+        },
+        {
+          "id": "g23:0:candidate:0",
+          "digest": "71b327b724087244f8b6f01e8daa48ed36d17a268162be8b9dd2c87c405c9a3d",
+          "state": "committed",
+          "reserved": 0.015360700000000001,
+          "actual": 0.0014398
+        },
+        {
+          "id": "g24:0:candidate:0",
+          "digest": "ed9e725bc469a21c0dd95ab6204e7150eec240f7c849a7bee791059c3d7f37a7",
+          "state": "committed",
+          "reserved": 0.015360099999999998,
+          "actual": 0.0015142
+        },
+        {
+          "id": "m01:0:candidate:0",
+          "digest": "2ef6e957991d4d35a9cb1165c9200ae34a8aa4ca9af92d845d5b235f3d0ffd32",
+          "state": "committed",
+          "reserved": 0.0187435,
+          "actual": 0.004166100000000001
+        },
+        {
+          "id": "m01:0:candidate:1",
+          "digest": "964aeae793e1e44fa86ca47cd884763d837b14643aedf5943fa9ceb8b1e5175d",
+          "state": "committed",
+          "reserved": 0.018859599999999997,
+          "actual": 0.0051959
+        },
+        {
+          "id": "m01:0:candidate:2",
+          "digest": "0faa1dd7e1f06c9db54dd69afdf592da33275e190b7f8599195c2ab42522547a",
+          "state": "committed",
+          "reserved": 0.0189853,
+          "actual": 0.0039045
+        },
+        {
+          "id": "m01:0:candidate:3",
+          "digest": "fd7015953f0cacda1f7290c6c6ed7fe7d9d807e2a4e9b80136e9114174ab9069",
+          "state": "committed",
+          "reserved": 0.0190936,
+          "actual": 0.0040479
+        },
+        {
+          "id": "m01:0:candidate:4",
+          "digest": "23598266c0f4bb9e26f5375129fc75d17fcbf248595f2d3e7945cf106db84d93",
+          "state": "committed",
+          "reserved": 0.0192235,
+          "actual": 0.0036346
+        },
+        {
+          "id": "m01:0:candidate:5",
+          "digest": "cb4b95216bbc38ba35b405e5fab63b1e1721094c7ea0316bd6ce82a59a0d901d",
+          "state": "committed",
+          "reserved": 0.0193618,
+          "actual": 0.0041142
+        },
+        {
+          "id": "m01:0:judge",
+          "digest": "9dee6b75d85ac486c2be2763b15c51e5c97b7716d9c58483bf162d7adcc971af",
+          "state": "committed",
+          "reserved": 0.143278,
+          "actual": 0.015258
+        },
+        {
+          "id": "m02:0:candidate:0",
+          "digest": "b97fb6e07728d12f5de4ee418b8ee51a172f24d326c18517892f540b37dbe451",
+          "state": "committed",
+          "reserved": 0.0187408,
+          "actual": 0.0048752
+        },
+        {
+          "id": "m02:0:candidate:1",
+          "digest": "a7d08591b4e18be6f666dadb935a65838a6d62228f6c22b794e14e574b2f180c",
+          "state": "committed",
+          "reserved": 0.0188815,
+          "actual": 0.0055687
+        },
+        {
+          "id": "m02:0:candidate:2",
+          "digest": "b5cbe513c33aeea349ecf48f31f0a23ef23857da8b497ba762ac38ddda5eba82",
+          "state": "committed",
+          "reserved": 0.0190072,
+          "actual": 0.0045853000000000005
+        },
+        {
+          "id": "m02:0:candidate:3",
+          "digest": "ec656cf6920d3914ed573abf230f95d7c4c8c2f4ca7bcd05c66227e3f602baf1",
+          "state": "committed",
+          "reserved": 0.0191338,
+          "actual": 0.0036351
+        },
+        {
+          "id": "m02:0:candidate:4",
+          "digest": "dda8dab34f802ac01a085b78bf58a4dd2898b1c99e3ed3753ea463ebb5ef2bfb",
+          "state": "committed",
+          "reserved": 0.019252599999999998,
+          "actual": 0.0039252
+        },
+        {
+          "id": "m02:0:candidate:5",
+          "digest": "b66ede35739d67fe698c6181a1cb59da1b975411619905f6c3199f136f6a9f05",
+          "state": "committed",
+          "reserved": 0.0194071,
+          "actual": 0.004095
+        },
+        {
+          "id": "m02:0:judge",
+          "digest": "4f387018aa0e8042bb99f2068cdccd55958579014b82ef1ab6d2076e69585721",
+          "state": "committed",
+          "reserved": 0.145374,
+          "actual": 0.021362
+        },
+        {
+          "id": "m02:1:candidate:0",
+          "digest": "b97fb6e07728d12f5de4ee418b8ee51a172f24d326c18517892f540b37dbe451",
+          "state": "committed",
+          "reserved": 0.0187408,
+          "actual": 0.0071077
+        },
+        {
+          "id": "m02:1:candidate:1",
+          "digest": "a8ad4d1cd813a6b53190f95586a0b0b7bc0fed2aa582b9b79aeae8929fe36171",
+          "state": "committed",
+          "reserved": 0.0188584,
+          "actual": 0.0058373
+        },
+        {
+          "id": "m02:1:candidate:2",
+          "digest": "deda0656d3fc9c9d7e190eeb893893f7ef2aa68f6f388de9ddc8ac683c346b91",
+          "state": "committed",
+          "reserved": 0.0189832,
+          "actual": 0.0034943
+        },
+        {
+          "id": "m02:1:candidate:3",
+          "digest": "549aa60d7d5709cde8b518ac6cda989318d160f3221a21fc47bc224018df2aa3",
+          "state": "committed",
+          "reserved": 0.019109199999999996,
+          "actual": 0.0072235
+        },
+        {
+          "id": "m02:1:candidate:4",
+          "digest": "40d772285e1d781fc60270498c456b1d6272eee469b698af2c5bdaeea2a8504c",
+          "state": "committed",
+          "reserved": 0.019227400000000002,
+          "actual": 0.0039834
+        },
+        {
+          "id": "m02:1:candidate:5",
+          "digest": "bfa321c6ea3eb7001b7f5f54b1bcf9a21b9ab704b2c7d7a658764afc3c0ef8ff",
+          "state": "committed",
+          "reserved": 0.0193633,
+          "actual": 0.0037266
+        },
+        {
+          "id": "m02:1:judge",
+          "digest": "caba263005b9d1a58ccd15cc60f035ffa1a532574bd51dfde004e4391d06802f",
+          "state": "committed",
+          "reserved": 0.14493,
+          "actual": 0.019944
+        },
+        {
+          "id": "m03:0:candidate:0",
+          "digest": "691fad7d97de62f7cc997e01f5d4471a5683c839bb4ac81c2fabbd5e0e70d32d",
+          "state": "committed",
+          "reserved": 0.0187441,
+          "actual": 0.0033655
+        },
+        {
+          "id": "m03:0:candidate:1",
+          "digest": "13f81dd6c6e2b9e31433ab2157eb0aac5338d17f183db7237a5a423bb790de08",
+          "state": "committed",
+          "reserved": 0.0188746,
+          "actual": 0.0043228
+        },
+        {
+          "id": "m03:0:candidate:2",
+          "digest": "45105c315b90dc69252db409156d82dcefbc3ba0da062f3f5d2595bf7708a90f",
+          "state": "committed",
+          "reserved": 0.019005099999999997,
+          "actual": 0.0039327
+        },
+        {
+          "id": "m03:0:candidate:3",
+          "digest": "0346f7c099ff6df2f6397ce8caa67656a8d0e577e419ea7f4424967cef9c3495",
+          "state": "committed",
+          "reserved": 0.0191356,
+          "actual": 0.0043669
+        },
+        {
+          "id": "m03:0:candidate:4",
+          "digest": "dc0e726d3c167867f509911c2b5361523cff658d15d991aa96d7d2e18d2dc125",
+          "state": "committed",
+          "reserved": 0.019248400000000002,
+          "actual": 0.0043631
+        },
+        {
+          "id": "m03:0:candidate:5",
+          "digest": "6081f29c4c37667f6c49a593eb13f4dab1ed33c987e8dbec4cc9db6eb6f685af",
+          "state": "committed",
+          "reserved": 0.0193684,
+          "actual": 0.0036266
+        },
+        {
+          "id": "m03:0:judge",
+          "digest": "ef7188cc0ea33cb942c24f1747481f8d30b4ad27fb065f19a898f84908d84dfa",
+          "state": "committed",
+          "reserved": 0.14357,
+          "actual": 0.015034
+        },
+        {
+          "id": "m04:0:candidate:0",
+          "digest": "ea9df8852966ca6705f5ff956148bec0c1be6dd87a511151acdf6aff9be92aee",
+          "state": "committed",
+          "reserved": 0.0187189,
+          "actual": 0.0056913
+        },
+        {
+          "id": "m04:0:candidate:1",
+          "digest": "d446fe38dba4aacc91d8c3dac65809dd20f14bfb3969dcba456e86331d96130a",
+          "state": "committed",
+          "reserved": 0.0188341,
+          "actual": 0.0040011
+        },
+        {
+          "id": "m04:0:candidate:2",
+          "digest": "553cb91bf849152469773c69646a60b15527669c47104ede4451e74b978984ba",
+          "state": "committed",
+          "reserved": 0.0189538,
+          "actual": 0.0035841999999999996
+        },
+        {
+          "id": "m04:0:candidate:3",
+          "digest": "e84588820c1ca4a99c3ab071a0271a00434932e50fa96435b72e5add2c4fc472",
+          "state": "committed",
+          "reserved": 0.019063,
+          "actual": 0.0047698
+        },
+        {
+          "id": "m04:0:candidate:4",
+          "digest": "19220de61beab72086509fc2c5ebe0900bbb030a578698fbb6dd18dc231ac725",
+          "state": "committed",
+          "reserved": 0.0191731,
+          "actual": 0.00375
+        },
+        {
+          "id": "m04:0:candidate:5",
+          "digest": "8a8ff32477169cc6c3bc9b365d03ca18f2b8ce2b220b71528188a23ab74ee079",
+          "state": "committed",
+          "reserved": 0.0192925,
+          "actual": 0.0035751999999999997
+        },
+        {
+          "id": "m04:0:judge",
+          "digest": "20e1865453c0bdab31483df1c4fef2eea8730d414a50f892a369e6ad16146b0f",
+          "state": "committed",
+          "reserved": 0.14055,
+          "actual": 0.015528
+        },
+        {
+          "id": "m05:0:candidate:0",
+          "digest": "a88d8e3664e3436342ab4034e47a0a5c3a2092133cc35a6e07a4e1260fda71e8",
+          "state": "committed",
+          "reserved": 0.018713199999999996,
+          "actual": 0.0039792
+        },
+        {
+          "id": "m05:0:candidate:1",
+          "digest": "4f630bb7fe8aca8c042f9cc5da17ef239d37a2a0e21b8e6211b2a560dee7b060",
+          "state": "committed",
+          "reserved": 0.0188269,
+          "actual": 0.0041276
+        },
+        {
+          "id": "m05:0:candidate:2",
+          "digest": "6ddc9aa2b08bbbeaed1ca8c1963247aeb033ea31c7ed6797d4553b1cdca38a5c",
+          "state": "committed",
+          "reserved": 0.018934,
+          "actual": 0.006161600000000001
+        },
+        {
+          "id": "m05:0:candidate:3",
+          "digest": "7a35b73936f8b2066be9f6e84dd7fb66b3b7a914173b23cd7b9553646a31596c",
+          "state": "committed",
+          "reserved": 0.0190516,
+          "actual": 0.004240600000000001
+        },
+        {
+          "id": "m05:0:candidate:4",
+          "digest": "9750d9e7712fb89afae74a5c50323c5fa08d613d0202f11cab7ddb726a511513",
+          "state": "committed",
+          "reserved": 0.019176400000000003,
+          "actual": 0.0034367
+        },
+        {
+          "id": "m05:0:candidate:5",
+          "digest": "8013798ebcb878b34325b7c363c39d4d51b615e6c037fd669ebcd57ffe2dfd7a",
+          "state": "committed",
+          "reserved": 0.0193015,
+          "actual": 0.0039288000000000005
+        },
+        {
+          "id": "m05:0:judge",
+          "digest": "ca183a7d1b50c4efcce237639923757e1f025545db8af7ae9672eb0de0cb9c82",
+          "state": "committed",
+          "reserved": 0.142026,
+          "actual": 0.025954
+        },
+        {
+          "id": "m06:0:candidate:0",
+          "digest": "f26f8eb1ac2c47921d602c784b443abfbfd2b9fc5dddac31e1ed6727c9a80af7",
+          "state": "committed",
+          "reserved": 0.018715,
+          "actual": 0.0063426
+        },
+        {
+          "id": "m06:0:candidate:1",
+          "digest": "c7f41edff9f6639c7988ef67dbcf50d629402ee383afc62047b68f0690942465",
+          "state": "committed",
+          "reserved": 0.018825699999999997,
+          "actual": 0.0038242
+        },
+        {
+          "id": "m06:0:candidate:2",
+          "digest": "d7ee0b755da3caee26a6d6a8cfe89977efc5928f6f72086cf87b542c3e9d3073",
+          "state": "committed",
+          "reserved": 0.0189388,
+          "actual": 0.00398
+        },
+        {
+          "id": "m06:0:candidate:3",
+          "digest": "fbe94781c9245686c001c95bcdc0bde18bd8412782e7fe9515ba12ca2b9b37b7",
+          "state": "committed",
+          "reserved": 0.0190426,
+          "actual": 0.0040609
+        },
+        {
+          "id": "m06:0:candidate:4",
+          "digest": "ee73be821ec862e2c033839bf90901a84fa909a98a559ce9608b9d44a211a84e",
+          "state": "committed",
+          "reserved": 0.019169199999999997,
+          "actual": 0.0033125
+        },
+        {
+          "id": "m06:0:candidate:5",
+          "digest": "3e28605d4192a94b79b46f5ae3bdf341649d889cefe0df8563f5b88d93af6cdd",
+          "state": "committed",
+          "reserved": 0.019296400000000002,
+          "actual": 0.004097600000000001
+        },
+        {
+          "id": "m06:0:judge",
+          "digest": "7104aff7e265b267a09378a3e0cd36b895a2fd25b34a2268fe8da7e05c8e3cdc",
+          "state": "committed",
+          "reserved": 0.141066,
+          "actual": 0.020186
+        },
+        {
+          "id": "m06:1:candidate:0",
+          "digest": "f26f8eb1ac2c47921d602c784b443abfbfd2b9fc5dddac31e1ed6727c9a80af7",
+          "state": "committed",
+          "reserved": 0.018715,
+          "actual": 0.004650100000000001
+        },
+        {
+          "id": "m06:1:candidate:1",
+          "digest": "09e1587bc49f0d7a35ee26d3e64ed94d7ce401e37d7be657d666530b7f85dbce",
+          "state": "committed",
+          "reserved": 0.0188188,
+          "actual": 0.0040417
+        },
+        {
+          "id": "m06:1:candidate:2",
+          "digest": "aca057923912341b12d538a656e6b9b021704f5b55afd472efe760659b8608ab",
+          "state": "committed",
+          "reserved": 0.018922,
+          "actual": 0.004394899999999999
+        },
+        {
+          "id": "m06:1:candidate:3",
+          "digest": "ef6e4b187bc7a9789ef4682b9717420e011e483e4c8dbc9b531ba05a8953fc6d",
+          "state": "committed",
+          "reserved": 0.019026099999999997,
+          "actual": 0.0033983000000000004
+        },
+        {
+          "id": "m06:1:candidate:4",
+          "digest": "4f4d162d38f3f397c819d4bab63b31c799077207bd75e5f1b99473e9361c134e",
+          "state": "committed",
+          "reserved": 0.0191395,
+          "actual": 0.0037575
+        },
+        {
+          "id": "m06:1:candidate:5",
+          "digest": "95709f5c4a200fdd37aef20d88add39c448774f236ddd2c77c9271bfff887e65",
+          "state": "committed",
+          "reserved": 0.019279900000000003,
+          "actual": 0.0045496
+        },
+        {
+          "id": "m06:1:judge",
+          "digest": "71566fe0f1b9b812575638b58312c1d9fb2a528c7587dbf71a8e11e852339545",
+          "state": "committed",
+          "reserved": 0.14041,
+          "actual": 0.015836
+        },
+        {
+          "id": "m07:0:candidate:0",
+          "digest": "7c884be9683a8977c79159128192655bb866e9efb7ab4e8c9d79ff68c8cef071",
+          "state": "committed",
+          "reserved": 0.018735400000000003,
+          "actual": 0.006080899999999999
+        },
+        {
+          "id": "m07:0:candidate:1",
+          "digest": "831d0f5470b7360e1ae75b13753a60a4f91698dd89cce1e44a10178306df0980",
+          "state": "committed",
+          "reserved": 0.0188713,
+          "actual": 0.0035602
+        },
+        {
+          "id": "m07:0:candidate:2",
+          "digest": "aef1f46e418c56296c14e1bffa57faa6ec7d48bf1a4b1e46eeec8af1d30df432",
+          "state": "committed",
+          "reserved": 0.0189955,
+          "actual": 0.0038569
+        },
+        {
+          "id": "m07:0:candidate:3",
+          "digest": "989f6dd575fc546784903c7cf303695aad48e43d138ff7e53987286a074d4489",
+          "state": "committed",
+          "reserved": 0.0191176,
+          "actual": 0.0037191999999999998
+        },
+        {
+          "id": "m07:0:candidate:4",
+          "digest": "5554880fc02e14144c061997ea775daf0a369baba7062d16741ced1610de7fb0",
+          "state": "committed",
+          "reserved": 0.019235199999999997,
+          "actual": 0.0039465
+        },
+        {
+          "id": "m07:0:candidate:5",
+          "digest": "740100734b63574ea69653e6f4c4623d281938514f7bd92e7a0e4ca69a1f1f1d",
+          "state": "committed",
+          "reserved": 0.0193768,
+          "actual": 0.0040749
+        },
+        {
+          "id": "m07:0:judge",
+          "digest": "03883fa3702246110d88962d6b14e372d6c2af27961cff753bdb3b34a73d28e0",
+          "state": "committed",
+          "reserved": 0.144974,
+          "actual": 0.019924
+        },
+        {
+          "id": "m08:0:candidate:0",
+          "digest": "cf857e88bfd6299d60620fd6c69b7bb267e6cc419373c3040591219a32426a0b",
+          "state": "committed",
+          "reserved": 0.0187339,
+          "actual": 0.0047781
+        },
+        {
+          "id": "m08:0:candidate:1",
+          "digest": "674f773b7dd28e51ac86e96ce453b35bb007dee9beaceb387868919a880fe333",
+          "state": "committed",
+          "reserved": 0.018862,
+          "actual": 0.0035469
+        },
+        {
+          "id": "m08:0:candidate:2",
+          "digest": "5ac8e5a504ab5a4c18c1f267a7e726e4a39a258b2da2cc415a5bd3ba661b3d42",
+          "state": "committed",
+          "reserved": 0.0189859,
+          "actual": 0.0052879
+        },
+        {
+          "id": "m08:0:candidate:3",
+          "digest": "ae7e514f7fe04c3489e4de3484cfd672dc5c17d7ffa338fc475e238c21c426c8",
+          "state": "committed",
+          "reserved": 0.0191074,
+          "actual": 0.0036095999999999997
+        },
+        {
+          "id": "m08:0:candidate:4",
+          "digest": "7579de89e3af7a2be17a0147cbc8304b41aa801e21975481ce3f34ec5b0f397d",
+          "state": "committed",
+          "reserved": 0.0192229,
+          "actual": 0.0042802
+        },
+        {
+          "id": "m08:0:candidate:5",
+          "digest": "5c7383b2b606c5e6d1b258818cac93153a36f9fa737c1e0806cf01dd78a58c3a",
+          "state": "committed",
+          "reserved": 0.0193708,
+          "actual": 0.0040063
+        },
+        {
+          "id": "m08:0:judge",
+          "digest": "4e7df1a39447129f4ef749cfaba2c406aaf9a6fb3d141cb7ff790c9c43d88992",
+          "state": "committed",
+          "reserved": 0.143494,
+          "actual": 0.019444
+        }
+      ]
+    },
+    {
+      "run_id": "sol61-structured-20261024",
+      "original_run_sha256": "be683e781b7fd9e7a507b4c3bf719e28c2dc7d39d6754d7b0277a575439e3b3a",
+      "matched_request_digests": 158,
+      "case_scores_identical": true,
+      "aggregate_and_costs_identical": true,
+      "provider_calls": 0,
+      "ledger_calls": [
+        {
+          "id": "d01:0:candidate:0",
+          "digest": "3b678daca4647aa2de3557fee4d668e9a53a8b2882829f7448434284f2261183",
+          "state": "committed",
+          "reserved": 0.097442,
+          "actual": 0.013678
+        },
+        {
+          "id": "d01:0:judge",
+          "digest": "ffff48c246d99eebc33b7c9592d360978d67f3da4d05b0270efd1a0c39fded7c",
+          "state": "committed",
+          "reserved": 0.0018483360000000001,
+          "actual": 0.000206388
+        },
+        {
+          "id": "d02:0:candidate:0",
+          "digest": "a1764adf1b5d0a21c601a0977d31abee73a3ed23c53a9eeeff59f683c14d795f",
+          "state": "committed",
+          "reserved": 0.097464,
+          "actual": 0.0101387
+        },
+        {
+          "id": "d02:0:judge",
+          "digest": "d20156b3c8dd0428a6f2cd212ffa421a467570883cea7d5fb504c6aeda6f8c88",
+          "state": "committed",
+          "reserved": 0.001857912,
+          "actual": 0.00020844600000000002
+        },
+        {
+          "id": "d02:1:candidate:0",
+          "digest": "a1764adf1b5d0a21c601a0977d31abee73a3ed23c53a9eeeff59f683c14d795f",
+          "state": "committed",
+          "reserved": 0.097464,
+          "actual": 0.0106383
+        },
+        {
+          "id": "d02:1:judge",
+          "digest": "af14770fc76089ad9d1d7624fdae944d91688200b6ff7f1a7430a8ccdf8a4bec",
+          "state": "committed",
+          "reserved": 0.0018438000000000003,
+          "actual": 0.00020680800000000003
+        },
+        {
+          "id": "d03:0:candidate:0",
+          "digest": "844e903dfd768233a717e22c569193999db95b3e543e69dedcdb103b08db67da",
+          "state": "committed",
+          "reserved": 0.097502,
+          "actual": 0.0051207
+        },
+        {
+          "id": "d03:0:judge",
+          "digest": "829eec1d7274734f22651cc9f329ccbc471d25582701f0aadf753a9fe840d4ea",
+          "state": "committed",
+          "reserved": 0.001839432,
+          "actual": 0.00020617800000000003
+        },
+        {
+          "id": "d04:0:candidate:0",
+          "digest": "ba78acfdd7f59197550918839fde74fae47679fdcd5a7b643f4d7ba6b4d0d741",
+          "state": "committed",
+          "reserved": 0.097426,
+          "actual": 0.0094307
+        },
+        {
+          "id": "d04:0:judge",
+          "digest": "22d5e6287e88250677c1f204f531cde9bc9f62c26198b0916adf2937f17356b3",
+          "state": "committed",
+          "reserved": 0.0018643800000000001,
+          "actual": 0.000209244
+        },
+        {
+          "id": "d05:0:candidate:0",
+          "digest": "d9c000c9084e130ffba9f82db6c5284956742e05d367d94c6425c016944672d8",
+          "state": "committed",
+          "reserved": 0.09748,
+          "actual": 0.0109487
+        },
+        {
+          "id": "d05:0:judge",
+          "digest": "febdaadb371dc65a7f54d54ddb131281bf524e387435c6ea3df06469386d93ea",
+          "state": "committed",
+          "reserved": 0.0018568200000000001,
+          "actual": 0.00020844600000000002
+        },
+        {
+          "id": "d06:0:candidate:0",
+          "digest": "a8997bc9d6e266a56aa740357c65e20a58e70750ad6115a4e5ebfc448e8ef41d",
+          "state": "committed",
+          "reserved": 0.097476,
+          "actual": 0.0079907
+        },
+        {
+          "id": "d06:0:judge",
+          "digest": "d410d197f1f7b7b65100cca0b12a84b5e0efc26ced070d803898c3144fb1d6ec",
+          "state": "committed",
+          "reserved": 0.001840524,
+          "actual": 0.00020580000000000002
+        },
+        {
+          "id": "d07:0:candidate:0",
+          "digest": "901f96488c6c17d2973608e3496a0fa70f8ad8e99a2ac0b59766dcba60262c36",
+          "state": "committed",
+          "reserved": 0.097446,
+          "actual": 0.011502700000000001
+        },
+        {
+          "id": "d07:0:judge",
+          "digest": "f00077eafad4da26d00bd508d5a79b1f60df29083f464ba8af47c06ad4fc5b3c",
+          "state": "committed",
+          "reserved": 0.0018711,
+          "actual": 0.000208614
+        },
+        {
+          "id": "d08:0:candidate:0",
+          "digest": "1b33fb8d5baf3a3945f462a0c05ecd760098b3fe10a90c5b33f0f2a7211526b5",
+          "state": "committed",
+          "reserved": 0.097508,
+          "actual": 0.0057707
+        },
+        {
+          "id": "d08:0:judge",
+          "digest": "ca751cc92cc7e8e52cf4b4e271e3380ad49655b9c243683a93103596af9c6e9e",
+          "state": "committed",
+          "reserved": 0.001835316,
+          "actual": 0.000205758
+        },
+        {
+          "id": "d08:1:candidate:0",
+          "digest": "1b33fb8d5baf3a3945f462a0c05ecd760098b3fe10a90c5b33f0f2a7211526b5",
+          "state": "committed",
+          "reserved": 0.097508,
+          "actual": 0.0078789
+        },
+        {
+          "id": "d08:1:judge",
+          "digest": "0979026421e76df7924f2cefb2131199b3c7e5c8350c280d25573611482d7f60",
+          "state": "committed",
+          "reserved": 0.0018352320000000002,
+          "actual": 0.00020559000000000002
+        },
+        {
+          "id": "d09:0:candidate:0",
+          "digest": "62f9c242c496b4bea96df3b05a7ae3ce01dea3b651d130ce4db76f62b5c1b0a0",
+          "state": "committed",
+          "reserved": 0.097278,
+          "actual": 0.012242
+        },
+        {
+          "id": "d09:0:judge",
+          "digest": "396bfa24930fae0960a65c0ae4362d1ab3c694637ddca89ac9933d596d8812af",
+          "state": "committed",
+          "reserved": 0.0018356520000000001,
+          "actual": 0.00020605200000000003
+        },
+        {
+          "id": "d10:0:candidate:0",
+          "digest": "21cc74263cd3373abe5cf832ba0c93136d175350944ac35c7f3ab57d192af384",
+          "state": "committed",
+          "reserved": 0.09727,
+          "actual": 0.008160800000000001
+        },
+        {
+          "id": "d10:0:judge",
+          "digest": "710c158023dd26abef2a94f51a0fa0394f02a208afdc2a8af48d5ec3178aacab",
+          "state": "committed",
+          "reserved": 0.00182196,
+          "actual": 0.00020445600000000002
+        },
+        {
+          "id": "d11:0:candidate:0",
+          "digest": "f91627856e6fd4b71c157a0057b7066e1ca71e6bb85dd50c8836131976d82ff5",
+          "state": "committed",
+          "reserved": 0.097262,
+          "actual": 0.0138768
+        },
+        {
+          "id": "d11:0:judge",
+          "digest": "a47b74dcebbe2a4e995e9bd109463d493f3a959abb95fcb0d4dcb3be16449912",
+          "state": "committed",
+          "reserved": 0.0018399360000000001,
+          "actual": 0.000206388
+        },
+        {
+          "id": "d12:0:candidate:0",
+          "digest": "3809da285d7c46308059db9e71b80499e2c0399f5b52ad7b2b1fbb54efab67b2",
+          "state": "committed",
+          "reserved": 0.097298,
+          "actual": 0.0080568
+        },
+        {
+          "id": "d12:0:judge",
+          "digest": "2211d617c92c080290fb35039d16b20c0d9b87b68995df5a26359f3ef09d3c1d",
+          "state": "committed",
+          "reserved": 0.0018360720000000002,
+          "actual": 0.00020592600000000002
+        },
+        {
+          "id": "d13:0:candidate:0",
+          "digest": "895650d8b4e9e435832dfb7a1c949233283fe61aa05e755d4ffaeaab656e7408",
+          "state": "committed",
+          "reserved": 0.097268,
+          "actual": 0.0067548
+        },
+        {
+          "id": "d13:0:judge",
+          "digest": "c2056edb7980fa0aba01b8becf499f6af96e577e56d9aa7d38b7f61970fd34cf",
+          "state": "committed",
+          "reserved": 0.0018367440000000002,
+          "actual": 0.00020605200000000003
+        },
+        {
+          "id": "d14:0:candidate:0",
+          "digest": "b922e7e35ff925c6774cb19ef04df7c497dc5e126acfd97645c380f0aae7dbc5",
+          "state": "committed",
+          "reserved": 0.097302,
+          "actual": 0.011542799999999999
+        },
+        {
+          "id": "d14:0:judge",
+          "digest": "3aea662a19e10aeca75d685a90c1b7f447526871b546f835f285ad9e8bf4d50a",
+          "state": "committed",
+          "reserved": 0.0018683280000000003,
+          "actual": 0.000209412
+        },
+        {
+          "id": "d14:1:candidate:0",
+          "digest": "b922e7e35ff925c6774cb19ef04df7c497dc5e126acfd97645c380f0aae7dbc5",
+          "state": "committed",
+          "reserved": 0.097302,
+          "actual": 0.011426700000000001
+        },
+        {
+          "id": "d14:1:judge",
+          "digest": "212dbfd921bd43de45a5ebf74ff74822333115b280abbffc841bc6cafc46446d",
+          "state": "committed",
+          "reserved": 0.0018585000000000001,
+          "actual": 0.000207984
+        },
+        {
+          "id": "d15:0:candidate:0",
+          "digest": "85a64c904f8b7270bf3bd5747c41b7deb2d035df654d2d797582b44653c07150",
+          "state": "committed",
+          "reserved": 0.09731,
+          "actual": 0.0083568
+        },
+        {
+          "id": "d15:0:judge",
+          "digest": "8c204e1ed142b3039fca518fef48ced5c7d3beaea972444f60fefc8e5b42b40c",
+          "state": "committed",
+          "reserved": 0.0018368280000000002,
+          "actual": 0.00020613600000000002
+        },
+        {
+          "id": "d16:0:candidate:0",
+          "digest": "6d979a94fadae9b04ff655999a3b6f81e3471db1679dfe90c244c79098da6ec5",
+          "state": "committed",
+          "reserved": 0.097272,
+          "actual": 0.0081888
+        },
+        {
+          "id": "d16:0:judge",
+          "digest": "c768408fc22f31d92df285507b0e5501c30fa6f0470345ab366f1d0d3167ec98",
+          "state": "committed",
+          "reserved": 0.001827756,
+          "actual": 0.00020529600000000002
+        },
+        {
+          "id": "d17:0:candidate:0",
+          "digest": "e117896089e30371b114d734cf8995300b518d96d672cc961d7000dc03e03688",
+          "state": "committed",
+          "reserved": 0.09737,
+          "actual": 0.016208
+        },
+        {
+          "id": "d17:0:judge",
+          "digest": "911df99d88b1f54dd12cb0a8d75a197c1789aadaecbba168ac101af67c6fc16b",
+          "state": "committed",
+          "reserved": 0.0018360720000000002,
+          "actual": 0.000205506
+        },
+        {
+          "id": "d18:0:candidate:0",
+          "digest": "aeb73a194709e529b1df12c7b6d52877942b23eca67b15adf662ea347dc7dd88",
+          "state": "committed",
+          "reserved": 0.097352,
+          "actual": 0.0086932
+        },
+        {
+          "id": "d18:0:judge",
+          "digest": "cc4e6c87b86ec8db00cabb11314048194aebf96f1f0b3ca37f4bca52fe6159b2",
+          "state": "committed",
+          "reserved": 0.0018387600000000003,
+          "actual": 0.00020580000000000002
+        },
+        {
+          "id": "d19:0:candidate:0",
+          "digest": "e3bf7be4c29c44710b2092f930ba2d584fd98f5adad90e2612bd42ac033f8848",
+          "state": "committed",
+          "reserved": 0.097388,
+          "actual": 0.011475200000000001
+        },
+        {
+          "id": "d19:0:judge",
+          "digest": "e813354d08dab2131a5e9cff35528ec6a5783fca7a39ad55dfa65a917d084d0f",
+          "state": "committed",
+          "reserved": 0.001857324,
+          "actual": 0.000208488
+        },
+        {
+          "id": "d20:0:candidate:0",
+          "digest": "01e22dedfaa8f2ff832eb74da5267c06915c5ab8840ede9e45f77dfb2374d0fe",
+          "state": "committed",
+          "reserved": 0.097354,
+          "actual": 0.009607200000000002
+        },
+        {
+          "id": "d20:0:judge",
+          "digest": "7ac856bc181da9d25768daca4e3062d62bfc2bf3e4c3dce25266083e47fd3866",
+          "state": "committed",
+          "reserved": 0.0018384240000000002,
+          "actual": 0.00020580000000000002
+        },
+        {
+          "id": "d20:1:candidate:0",
+          "digest": "01e22dedfaa8f2ff832eb74da5267c06915c5ab8840ede9e45f77dfb2374d0fe",
+          "state": "committed",
+          "reserved": 0.097354,
+          "actual": 0.0084868
+        },
+        {
+          "id": "d20:1:judge",
+          "digest": "5565672ebd5c954e5e649477aea2d443200e6f0553f4a50c908a3f461ee629e9",
+          "state": "committed",
+          "reserved": 0.001839096,
+          "actual": 0.00020596800000000003
+        },
+        {
+          "id": "d21:0:candidate:0",
+          "digest": "3d8eca56287033eaad78350735f18a2fcfde9f2ab3a72d20303e6a25f1459509",
+          "state": "committed",
+          "reserved": 0.09736,
+          "actual": 0.0146052
+        },
+        {
+          "id": "d21:0:judge",
+          "digest": "937eb8a1e55fa380e25b6063852e77a39efdf34920112403b6849ce420653204",
+          "state": "committed",
+          "reserved": 0.001851612,
+          "actual": 0.000207942
+        },
+        {
+          "id": "d22:0:candidate:0",
+          "digest": "4e0831dec4bf7a3a94d90d1a80798a24b5b91de956c22afe606c5702f6eb5b74",
+          "state": "committed",
+          "reserved": 0.097386,
+          "actual": 0.0058372
+        },
+        {
+          "id": "d22:0:judge",
+          "digest": "4bc611e0caca46d181cbe245eeac181ad41c8247b99d3d60554c2714825b7570",
+          "state": "committed",
+          "reserved": 0.001839516,
+          "actual": 0.000206304
+        },
+        {
+          "id": "d22:1:candidate:0",
+          "digest": "4e0831dec4bf7a3a94d90d1a80798a24b5b91de956c22afe606c5702f6eb5b74",
+          "state": "committed",
+          "reserved": 0.097386,
+          "actual": 0.0071473000000000005
+        },
+        {
+          "id": "d22:1:judge",
+          "digest": "e8cc3f909b04c8793e72415fb54a82cbdfa36b3b23d8b6977acfd49f4d27f2d3",
+          "state": "committed",
+          "reserved": 0.0018391800000000002,
+          "actual": 0.000205884
+        },
+        {
+          "id": "d23:0:candidate:0",
+          "digest": "bdbe1ee84416dd215bdad539bbab2a867435927b29adabe0aa95b5ac94371071",
+          "state": "committed",
+          "reserved": 0.097332,
+          "actual": 0.008533200000000001
+        },
+        {
+          "id": "d23:0:judge",
+          "digest": "b37deb2e967f81a6ed19e9c4c32ae6ef0dd5e844e6332dd84ef8cf0ce8a3aac4",
+          "state": "committed",
+          "reserved": 0.001845732,
+          "actual": 0.000206388
+        },
+        {
+          "id": "d24:0:candidate:0",
+          "digest": "725231d6f2a1253cd241e0822f51eb01b71fb6347322bda6733df7518f190187",
+          "state": "committed",
+          "reserved": 0.097378,
+          "actual": 0.008495200000000001
+        },
+        {
+          "id": "d24:0:judge",
+          "digest": "e0f37e1aa85c7e33cf28fc740b0e91c6fe33c147078cd1e0c8f09f6d09f4347e",
+          "state": "committed",
+          "reserved": 0.0018449760000000001,
+          "actual": 0.00020706
+        },
+        {
+          "id": "d24:1:candidate:0",
+          "digest": "725231d6f2a1253cd241e0822f51eb01b71fb6347322bda6733df7518f190187",
+          "state": "committed",
+          "reserved": 0.097378,
+          "actual": 0.0078772
+        },
+        {
+          "id": "d24:1:judge",
+          "digest": "cf4d2dbe47c489ee4c3877c82959935e1a8f050e68e8b2a10afb3a64b4fa707c",
+          "state": "committed",
+          "reserved": 0.00184674,
+          "actual": 0.00020706
+        },
+        {
+          "id": "g01:0:candidate:0",
+          "digest": "7988b7725c9448309fdb2f31c62d2db51d2d9c201bb8a2e801b5c6acea3956d6",
+          "state": "committed",
+          "reserved": 0.074514,
+          "actual": 0.002794
+        },
+        {
+          "id": "g01:1:candidate:0",
+          "digest": "7988b7725c9448309fdb2f31c62d2db51d2d9c201bb8a2e801b5c6acea3956d6",
+          "state": "committed",
+          "reserved": 0.074514,
+          "actual": 0.003014
+        },
+        {
+          "id": "g02:0:candidate:0",
+          "digest": "b0c8c3a0dd2ff13aed45908d668ed6a8324d074f2dc2cc1affeccbe1cc25999c",
+          "state": "committed",
+          "reserved": 0.07445,
+          "actual": 0.001474
+        },
+        {
+          "id": "g03:0:candidate:0",
+          "digest": "f05e33f850ed1fa1fac7ef85f4e327b56de1fda4af8457458ecdc3ad6b317f9a",
+          "state": "committed",
+          "reserved": 0.07447,
+          "actual": 0.001538
+        },
+        {
+          "id": "g04:0:candidate:0",
+          "digest": "5ff2b721a9b2f08d110b406081782f4fbc505edeee071d3d4d1bc5d8f76495fa",
+          "state": "committed",
+          "reserved": 0.074464,
+          "actual": 0.002046
+        },
+        {
+          "id": "g05:0:candidate:0",
+          "digest": "6b1cedb519a82588b976c78a061ab4e9a4bc0656a631fba51d3f89d19524d8df",
+          "state": "committed",
+          "reserved": 0.074442,
+          "actual": 0.00172
+        },
+        {
+          "id": "g05:1:candidate:0",
+          "digest": "6b1cedb519a82588b976c78a061ab4e9a4bc0656a631fba51d3f89d19524d8df",
+          "state": "committed",
+          "reserved": 0.074442,
+          "actual": 0.00145
+        },
+        {
+          "id": "g06:0:candidate:0",
+          "digest": "678ed208e965bb4936ea95b1fdd754c92cb19d574664220e9cacbb0505355f9d",
+          "state": "committed",
+          "reserved": 0.074442,
+          "actual": 0.002992
+        },
+        {
+          "id": "g07:0:candidate:0",
+          "digest": "fc42241d9ca78985a0a050a96375119a1a05c8389cf83f21e2463cffcaee5017",
+          "state": "committed",
+          "reserved": 0.074462,
+          "actual": 0.001214
+        },
+        {
+          "id": "g08:0:candidate:0",
+          "digest": "d1dfa5e98641a465238e87d14df4dc0ea98ea08d2cc30ed65720be87f8837c45",
+          "state": "committed",
+          "reserved": 0.074492,
+          "actual": 0.000986
+        },
+        {
+          "id": "g09:0:candidate:0",
+          "digest": "fc48735a82ab9499e4cdd11913f6782b937e185e9ee207e08ccd5737eada9143",
+          "state": "committed",
+          "reserved": 0.074642,
+          "actual": 0.001448
+        },
+        {
+          "id": "g10:0:candidate:0",
+          "digest": "f254d1205cdde4a3cc17800381aec41374b70e70788887e17961f14b6c17213e",
+          "state": "committed",
+          "reserved": 0.07452,
+          "actual": 0.000928
+        },
+        {
+          "id": "g10:1:candidate:0",
+          "digest": "f254d1205cdde4a3cc17800381aec41374b70e70788887e17961f14b6c17213e",
+          "state": "committed",
+          "reserved": 0.07452,
+          "actual": 0.000788
+        },
+        {
+          "id": "g11:0:candidate:0",
+          "digest": "71694ffc725c82c67ee4b1223e4d870038b66b73be4e6103d90363c8e12c3cb7",
+          "state": "committed",
+          "reserved": 0.07457,
+          "actual": 0.001088
+        },
+        {
+          "id": "g12:0:candidate:0",
+          "digest": "0e393c9842b0d1b6bd25f9c9ef9e744cc0321555551ea77f4320a5884e4c279e",
+          "state": "committed",
+          "reserved": 0.074562,
+          "actual": 0.001064
+        },
+        {
+          "id": "g13:0:candidate:0",
+          "digest": "4c0b936feb4e6341f1b2e848876a419ab92139e827605bba8b2daf3e8152857a",
+          "state": "committed",
+          "reserved": 0.07453,
+          "actual": 0.00077
+        },
+        {
+          "id": "g14:0:candidate:0",
+          "digest": "0e31b1361a2eeb05f3e904fcb052a2ebfe96b87b363c3d55aa0e823e60bdc79e",
+          "state": "committed",
+          "reserved": 0.07452,
+          "actual": 0.000916
+        },
+        {
+          "id": "g15:0:candidate:0",
+          "digest": "f18dd72337e1cffb34e893f09f6fbed084147e3ae5f09257c6ea45af5842cd17",
+          "state": "committed",
+          "reserved": 0.07454,
+          "actual": 0.000836
+        },
+        {
+          "id": "g16:0:candidate:0",
+          "digest": "6dd0978e7603248f57fbab4500238e216dc304cb8cd85595db90c8ee789b4302",
+          "state": "committed",
+          "reserved": 0.074594,
+          "actual": 0.00082
+        },
+        {
+          "id": "g17:0:candidate:0",
+          "digest": "d8b3910716a20901342298eaaa079c7c41756c418e0060227db0d446728a062c",
+          "state": "committed",
+          "reserved": 0.075234,
+          "actual": 0.001894
+        },
+        {
+          "id": "g17:1:candidate:0",
+          "digest": "d8b3910716a20901342298eaaa079c7c41756c418e0060227db0d446728a062c",
+          "state": "committed",
+          "reserved": 0.075234,
+          "actual": 0.002164
+        },
+        {
+          "id": "g18:0:candidate:0",
+          "digest": "5f1795178f098005bc5ab3fd1feddca2649679728ea666fee68f7257492b85fa",
+          "state": "committed",
+          "reserved": 0.075128,
+          "actual": 0.001684
+        },
+        {
+          "id": "g19:0:candidate:0",
+          "digest": "46218aa35244f30d82ce23058a9000914851061df45a06159d3778e17c563269",
+          "state": "committed",
+          "reserved": 0.0751,
+          "actual": 0.00183
+        },
+        {
+          "id": "g20:0:candidate:0",
+          "digest": "a511f75c24456eec417217717d8d4c6c9b6002e5e4d67f0882ca5cf7906a81d6",
+          "state": "committed",
+          "reserved": 0.075082,
+          "actual": 0.002692
+        },
+        {
+          "id": "g21:0:candidate:0",
+          "digest": "ae1f7c66fab8b7d7a2f6b912fad12a9c75676ccaac8a86e8556126759f68456d",
+          "state": "committed",
+          "reserved": 0.074974,
+          "actual": 0.001644
+        },
+        {
+          "id": "g22:0:candidate:0",
+          "digest": "ebc78f3bd0807e164c3edab6d40c5d1fdcf2f00a3a1b2fe942234b87744879de",
+          "state": "committed",
+          "reserved": 0.074942,
+          "actual": 0.001558
+        },
+        {
+          "id": "g23:0:candidate:0",
+          "digest": "3e72e81b61179b5e3122bce7acf4103ca12156e5486589378bfe5c85e22bd36e",
+          "state": "committed",
+          "reserved": 0.075098,
+          "actual": 0.001992
+        },
+        {
+          "id": "g24:0:candidate:0",
+          "digest": "0ae50b2663be9a688fd868ded616e96c9e9e88c1203fbf049ca4efc4b8538753",
+          "state": "committed",
+          "reserved": 0.075094,
+          "actual": 0.003538
+        },
+        {
+          "id": "m01:0:candidate:0",
+          "digest": "73f371f9eb519fc9afc61f9112c13f955f7d7b115753976e59aa3d3c1f630fce",
+          "state": "committed",
+          "reserved": 0.09765,
+          "actual": 0.010680700000000001
+        },
+        {
+          "id": "m01:0:candidate:1",
+          "digest": "5d866ecb99440734feb6de4001972ad628fd098f8000723e1fb113ca2dd9a5fd",
+          "state": "committed",
+          "reserved": 0.098276,
+          "actual": 0.0113744
+        },
+        {
+          "id": "m01:0:candidate:2",
+          "digest": "c2e7ff600194b896f7bfef9013d425b50221eb2a27f79c7cb6b138cd1611e0e4",
+          "state": "committed",
+          "reserved": 0.098952,
+          "actual": 0.016605599999999998
+        },
+        {
+          "id": "m01:0:candidate:3",
+          "digest": "995335ea554cdc6dcbe075b0850302f19d1c8edb4b0b4cabdcd6b961e118487c",
+          "state": "committed",
+          "reserved": 0.099662,
+          "actual": 0.009397
+        },
+        {
+          "id": "m01:0:candidate:4",
+          "digest": "a5a7187bb7c3a0ad336cbc4388cdb98db95cec2eeb6739714593b36f8493d51f",
+          "state": "committed",
+          "reserved": 0.100424,
+          "actual": 0.0163246
+        },
+        {
+          "id": "m01:0:candidate:5",
+          "digest": "1fd6e0726859528d8ab60499ee2995515b4456c47194e3eeff76f6195de3052b",
+          "state": "committed",
+          "reserved": 0.101298,
+          "actual": 0.0157447
+        },
+        {
+          "id": "m01:0:judge",
+          "digest": "0e2ff988df27d3a03482f761ce223b527b9d15fbf0f1a904497c8130e76ce9fa",
+          "state": "committed",
+          "reserved": 0.142114,
+          "actual": 0.012004
+        },
+        {
+          "id": "m02:0:candidate:0",
+          "digest": "652c53830038ad8245b053d22cecc4210680b792070f797416f3c117cc603d46",
+          "state": "committed",
+          "reserved": 0.097632,
+          "actual": 0.0136647
+        },
+        {
+          "id": "m02:0:candidate:1",
+          "digest": "9cd26b3a5041963c1f9df6f66903519728748962c5e248a6d02eb00b46dda801",
+          "state": "committed",
+          "reserved": 0.098306,
+          "actual": 0.0129021
+        },
+        {
+          "id": "m02:0:candidate:2",
+          "digest": "7b0f6e3d87476926691b575f2a5885cd8dd278f72d6aa70650202ef80056a387",
+          "state": "committed",
+          "reserved": 0.099128,
+          "actual": 0.015079700000000001
+        },
+        {
+          "id": "m02:0:candidate:3",
+          "digest": "e1d9a8fae93b7752c22792f73de775d6eaa36a71aa691510ff0d5a3c97d04b81",
+          "state": "committed",
+          "reserved": 0.099896,
+          "actual": 0.0168408
+        },
+        {
+          "id": "m02:0:candidate:4",
+          "digest": "11f4c48ee65f675f58d448ff8046396f5700351c32c61b46f25e898454f1b0be",
+          "state": "committed",
+          "reserved": 0.100742,
+          "actual": 0.0151975
+        },
+        {
+          "id": "m02:0:candidate:5",
+          "digest": "f134cf8a74982154ae7d6ecdca87f8c1d70c56cc438f0dc2c70eb6960f810d25",
+          "state": "committed",
+          "reserved": 0.101724,
+          "actual": 0.0102451
+        },
+        {
+          "id": "m02:0:judge",
+          "digest": "d31c73a4d5eedb678d12892ce1dcd96967550eda5ae135e03063cc1bf9c0f4f5",
+          "state": "committed",
+          "reserved": 0.14321,
+          "actual": 0.014384
+        },
+        {
+          "id": "m02:1:candidate:0",
+          "digest": "652c53830038ad8245b053d22cecc4210680b792070f797416f3c117cc603d46",
+          "state": "committed",
+          "reserved": 0.097632,
+          "actual": 0.016560099999999998
+        },
+        {
+          "id": "m02:1:candidate:1",
+          "digest": "5d3a17675944fbe027231d31e33fb200c6e0180d1d1796ba0218fca9f748cca5",
+          "state": "committed",
+          "reserved": 0.098396,
+          "actual": 0.0164881
+        },
+        {
+          "id": "m02:1:candidate:2",
+          "digest": "98b09be0334684ae5f912174c3b27c2c3b828533a15725891b6211306d28e6a2",
+          "state": "committed",
+          "reserved": 0.099202,
+          "actual": 0.013859
+        },
+        {
+          "id": "m02:1:candidate:3",
+          "digest": "36f9144baad34e94ab149a2a4250b40f7da7d881144a180461c3d079a4d15920",
+          "state": "committed",
+          "reserved": 0.100082,
+          "actual": 0.013692
+        },
+        {
+          "id": "m02:1:candidate:4",
+          "digest": "40e007806acabd4231d782ec0887c61b2137831d263453c9b3f7336839764795",
+          "state": "committed",
+          "reserved": 0.100892,
+          "actual": 0.014515700000000001
+        },
+        {
+          "id": "m02:1:candidate:5",
+          "digest": "d49336f4c0a68c36ae0576621f0154a5e4ac21ca1898e7e60735e8a860f6e93f",
+          "state": "committed",
+          "reserved": 0.101874,
+          "actual": 0.0153391
+        },
+        {
+          "id": "m02:1:judge",
+          "digest": "3695b825ab3e7699c344af6bbe5e41593d231a174925b73e8c17b31fdb67d30a",
+          "state": "committed",
+          "reserved": 0.14477,
+          "actual": 0.014604
+        },
+        {
+          "id": "m03:0:candidate:0",
+          "digest": "b469ad80e6bc08585e36320b6443b833527ecbcd0bf68c018e149bd8bcc4683c",
+          "state": "committed",
+          "reserved": 0.097654,
+          "actual": 0.019756700000000002
+        },
+        {
+          "id": "m03:0:candidate:1",
+          "digest": "114de6df3abd81aa42e75b6d779007a747ff5534bd8e4005a201be3e8bdba647",
+          "state": "committed",
+          "reserved": 0.098516,
+          "actual": 0.0147942
+        },
+        {
+          "id": "m03:0:candidate:2",
+          "digest": "979a103bda0ee2c5732a51dc13182f90070194d5a0f53bdc55f5e22cfcc94521",
+          "state": "committed",
+          "reserved": 0.099218,
+          "actual": 0.013390899999999999
+        },
+        {
+          "id": "m03:0:candidate:3",
+          "digest": "a54bf7cbf8dacfa89b8174b87f7dce48e10d8cbf2b7f6f8b53a9e3a88d6b8c2c",
+          "state": "committed",
+          "reserved": 0.099988,
+          "actual": 0.0146165
+        },
+        {
+          "id": "m03:0:candidate:4",
+          "digest": "b87cb3c66bc428980f24bf2304050cdf0148cca495ee2a4318062a970b72185b",
+          "state": "committed",
+          "reserved": 0.100756,
+          "actual": 0.012383
+        },
+        {
+          "id": "m03:0:candidate:5",
+          "digest": "455c347122d23b9f64a26db990732e67a5b25f9c3ef0ff683b552ae99cb073ba",
+          "state": "committed",
+          "reserved": 0.101516,
+          "actual": 0.0136774
+        },
+        {
+          "id": "m03:0:judge",
+          "digest": "7e0bc336e92b997fdadb71904a60f9c78f2fe6de26783859ca02bba27c2a5bf1",
+          "state": "committed",
+          "reserved": 0.14245,
+          "actual": 0.014926
+        },
+        {
+          "id": "m04:0:candidate:0",
+          "digest": "80f42308147b832a9e311ce5e25788b3b95877807c10b68ad43709563dadf8af",
+          "state": "committed",
+          "reserved": 0.097486,
+          "actual": 0.0165368
+        },
+        {
+          "id": "m04:0:candidate:1",
+          "digest": "213144e5e6762d01b39e9341472bc1970d649d306452b68712112e009fd176f0",
+          "state": "committed",
+          "reserved": 0.098152,
+          "actual": 0.0186329
+        },
+        {
+          "id": "m04:0:candidate:2",
+          "digest": "3da8087a33c017cc9df2fc3c4707137103d7a67e0ecd8e1656f0bd2ddbd32888",
+          "state": "committed",
+          "reserved": 0.098756,
+          "actual": 0.0100006
+        },
+        {
+          "id": "m04:0:candidate:3",
+          "digest": "a9548aaedc4c47d964d7f6039d487fea10d2759af22b9614d8f2d78cd9e8880f",
+          "state": "committed",
+          "reserved": 0.0994,
+          "actual": 0.0108893
+        },
+        {
+          "id": "m04:0:candidate:4",
+          "digest": "6b3ddc03d001a5fce0efbf0bd21ccdcdad3f5a75cf19b25a2bb4373cee3bc7a8",
+          "state": "committed",
+          "reserved": 0.099998,
+          "actual": 0.011318100000000001
+        },
+        {
+          "id": "m04:0:candidate:5",
+          "digest": "9dc73bc136d41286bbfa8f760c2c207be7874f55da81ad35bc2ec31d00b7b7c7",
+          "state": "committed",
+          "reserved": 0.100744,
+          "actual": 0.0112965
+        },
+        {
+          "id": "m04:0:judge",
+          "digest": "6d63fe902965c8653da232858ee4f8740dd207c6c5fc4dfd9457caea2c1aeb38",
+          "state": "committed",
+          "reserved": 0.139494,
+          "actual": 0.015622
+        },
+        {
+          "id": "m05:0:candidate:0",
+          "digest": "d6a8a634680ba8150ab0c47fbade5758255d675f6204085c3c58a759d10a44ac",
+          "state": "committed",
+          "reserved": 0.097448,
+          "actual": 0.0113508
+        },
+        {
+          "id": "m05:0:candidate:1",
+          "digest": "ef1d57c457fc0f019f9f5c69ace5553f0d1d9fcb3a8d832e9b57caedc7cb8428",
+          "state": "committed",
+          "reserved": 0.098164,
+          "actual": 0.009474100000000001
+        },
+        {
+          "id": "m05:0:candidate:2",
+          "digest": "4896862ed49e1693dd86b765f970fb81130751981518a9d9ebaf78a948ecf29b",
+          "state": "committed",
+          "reserved": 0.098776,
+          "actual": 0.011319899999999999
+        },
+        {
+          "id": "m05:0:candidate:3",
+          "digest": "7fa7b5284d5d7a9c9856fc36a92f0eb7cd2a4401f9a86fb9744d472a6059607f",
+          "state": "committed",
+          "reserved": 0.099406,
+          "actual": 0.0155286
+        },
+        {
+          "id": "m05:0:candidate:4",
+          "digest": "6ba5667349b26756d1044e0961cbcd59020ba5ec3fcdb06cccfc4956c3ca402e",
+          "state": "committed",
+          "reserved": 0.100144,
+          "actual": 0.0114994
+        },
+        {
+          "id": "m05:0:candidate:5",
+          "digest": "5ff17bcec822f3791083b1dac7cdfbcceb5f82578e1bf3f6f4193096f30cf4e1",
+          "state": "committed",
+          "reserved": 0.101046,
+          "actual": 0.024095400000000003
+        },
+        {
+          "id": "m05:0:judge",
+          "digest": "ed40f68462acbd7d9a8147a69453a8bc5997f0e674f98b1f42487a04939a352d",
+          "state": "committed",
+          "reserved": 0.141626,
+          "actual": 0.011612
+        },
+        {
+          "id": "m06:0:candidate:0",
+          "digest": "b25fcca099ca9160806f0d232d8ec77239a32ae1547999c87c9a9d5960f960b5",
+          "state": "committed",
+          "reserved": 0.09746,
+          "actual": 0.0187188
+        },
+        {
+          "id": "m06:0:candidate:1",
+          "digest": "20396313b27c2d53fd2c52562f8b455b34eb1920b368c2ffee3fd76ede2587b7",
+          "state": "committed",
+          "reserved": 0.098214,
+          "actual": 0.0166525
+        },
+        {
+          "id": "m06:0:candidate:2",
+          "digest": "398413a5079e5f4f427fe38b1897e5724de32c29f171f22c38952512ed8a867c",
+          "state": "committed",
+          "reserved": 0.098958,
+          "actual": 0.0113767
+        },
+        {
+          "id": "m06:0:candidate:3",
+          "digest": "58316905f642c993266284358ff552813e12a762a59d9385639720865cfe6e3d",
+          "state": "committed",
+          "reserved": 0.099586,
+          "actual": 0.010494700000000001
+        },
+        {
+          "id": "m06:0:candidate:4",
+          "digest": "11ef51517187a4c61f7eeeaf89158439272caf72499747fcdc30679a2f3589d7",
+          "state": "committed",
+          "reserved": 0.100318,
+          "actual": 0.016641700000000002
+        },
+        {
+          "id": "m06:0:candidate:5",
+          "digest": "8f4978a28ad22cd4db593b186fb9a846f4842a76d659048d233fb9da1bdc1175",
+          "state": "committed",
+          "reserved": 0.101092,
+          "actual": 0.0166917
+        },
+        {
+          "id": "m06:0:judge",
+          "digest": "b1c34ecb9ead76fa8623068ce3aa9edf8835f50a2ac035981927bd10fa30ff77",
+          "state": "committed",
+          "reserved": 0.141018,
+          "actual": 0.014532
+        },
+        {
+          "id": "m06:1:candidate:0",
+          "digest": "b25fcca099ca9160806f0d232d8ec77239a32ae1547999c87c9a9d5960f960b5",
+          "state": "committed",
+          "reserved": 0.09746,
+          "actual": 0.0112885
+        },
+        {
+          "id": "m06:1:candidate:1",
+          "digest": "60e3068dd721d4ec3952a1d2706ce28c273ec2b43450ccf39c3fee52d226d6c1",
+          "state": "committed",
+          "reserved": 0.098208,
+          "actual": 0.0154065
+        },
+        {
+          "id": "m06:1:candidate:2",
+          "digest": "c139ad472ffcdc5d23754e6e183225375cf7ae491647a24e9c41e743d29f8e22",
+          "state": "committed",
+          "reserved": 0.098886,
+          "actual": 0.0088524
+        },
+        {
+          "id": "m06:1:candidate:3",
+          "digest": "89b1e661df7adccc3b5111e0fde553683d2ea801a0c1957f5f5b4936a1e5b97f",
+          "state": "committed",
+          "reserved": 0.09947,
+          "actual": 0.0165957
+        },
+        {
+          "id": "m06:1:candidate:4",
+          "digest": "334614a687961e6fd0d9948864500069fe9c85c695b2b2c48136be16e171bd41",
+          "state": "committed",
+          "reserved": 0.100206,
+          "actual": 0.0159703
+        },
+        {
+          "id": "m06:1:candidate:5",
+          "digest": "a48b3afc7c2905b2e0fd309229b1d4fc6c78b4224966b63bd06606b99eaacb10",
+          "state": "committed",
+          "reserved": 0.101044,
+          "actual": 0.0139963
+        },
+        {
+          "id": "m06:1:judge",
+          "digest": "6db37e3024c7fe32b7e5f620fad16f0ada1ff338125bbe62ae0123d8e02c94d6",
+          "state": "committed",
+          "reserved": 0.141362,
+          "actual": 0.01769
+        },
+        {
+          "id": "m07:0:candidate:0",
+          "digest": "3591d8593c7bd3274529d15cc487a22025c5b1d8a84ef055e9dffd81a2853d29",
+          "state": "committed",
+          "reserved": 0.097596,
+          "actual": 0.0164112
+        },
+        {
+          "id": "m07:0:candidate:1",
+          "digest": "083f7a1fb61a5f9a2213957dba9d3cf9c0b8384d25d9cb0ac57a8c562d63f091",
+          "state": "committed",
+          "reserved": 0.098432,
+          "actual": 0.0091195
+        },
+        {
+          "id": "m07:0:candidate:2",
+          "digest": "25c8bfc18001683dfab52df1698481f311bbddfa4d618a40a509e24d389188a9",
+          "state": "committed",
+          "reserved": 0.099134,
+          "actual": 0.015495
+        },
+        {
+          "id": "m07:0:candidate:3",
+          "digest": "49a0f961c4af0800932d9d9a06301ed285eb7e1a50ec25efa031876cc24a4b5d",
+          "state": "committed",
+          "reserved": 0.099904,
+          "actual": 0.018022299999999998
+        },
+        {
+          "id": "m07:0:candidate:4",
+          "digest": "e2f18a57d798fb5dd95e53bfcdce690d784c324105a7e647e1c62066841c894c",
+          "state": "committed",
+          "reserved": 0.100594,
+          "actual": 0.0139941
+        },
+        {
+          "id": "m07:0:candidate:5",
+          "digest": "2c6673e14821dca803e57377e251caf3b5d88cb3799b6a2bf46eefefe1af1510",
+          "state": "committed",
+          "reserved": 0.101436,
+          "actual": 0.0074096000000000006
+        },
+        {
+          "id": "m07:0:judge",
+          "digest": "bd38cc7ac063944e77652a8156d519ef201f5eda9bc706ebe06c3c0996e79484",
+          "state": "committed",
+          "reserved": 0.141634,
+          "actual": 0.011626
+        },
+        {
+          "id": "m08:0:candidate:0",
+          "digest": "45f294a86f2f25a6cce700ac4d580bf97c858555c91f89f0f82044c08f50b09c",
+          "state": "committed",
+          "reserved": 0.097586,
+          "actual": 0.0167012
+        },
+        {
+          "id": "m08:0:candidate:1",
+          "digest": "4dcdd4f740bdb4550bbe489262a9c418d93273184a30d3054634c6618ae121aa",
+          "state": "committed",
+          "reserved": 0.098488,
+          "actual": 0.0115855
+        },
+        {
+          "id": "m08:0:candidate:2",
+          "digest": "568c40893fa22c5b1d39fd0b2aae0b97e622de67266259e2978a6f0ef1e597e9",
+          "state": "committed",
+          "reserved": 0.099318,
+          "actual": 0.016734799999999998
+        },
+        {
+          "id": "m08:0:candidate:3",
+          "digest": "ef3fc7b2be654e025b1cb676b93a8fd72a9cd48d76b9edfd26036a427a181c8b",
+          "state": "committed",
+          "reserved": 0.100146,
+          "actual": 0.0119916
+        },
+        {
+          "id": "m08:0:candidate:4",
+          "digest": "383d518dc95f7bd7cc7a09fa95dc2fe1b6016324c6c4b7d2d9cad7a713f93a51",
+          "state": "committed",
+          "reserved": 0.100998,
+          "actual": 0.0156323
+        },
+        {
+          "id": "m08:0:candidate:5",
+          "digest": "1ee2295a69384ddf5ab235a9d3fe6ddc23d9b0cbcdffb9d9fb3d30f30ad06b11",
+          "state": "committed",
+          "reserved": 0.10191,
+          "actual": 0.0100151
+        },
+        {
+          "id": "m08:0:judge",
+          "digest": "9a3332f3700802164a092a384a0fd3edcb74f408c3c662017b47e8ed0b8b8bc7",
+          "state": "committed",
+          "reserved": 0.144902,
+          "actual": 0.01195
+        }
+      ]
+    }
+  ]
+}

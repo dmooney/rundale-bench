@@ -1,6 +1,6 @@
-# Benchmark 3.0 specification
+# Benchmark specification
 
-Benchmark 3.0 is an agent-operated evaluation of models used in Rundale. It uses
+Benchmark 3.1 is an agent-operated evaluation of models used in Rundale. It uses
 native provider APIs and reports three equally weighted evaluations: dialogue,
 multi-turn play, and Gaeilge. Each evaluation is scored from 0 to 100. The overall
 score is a product-specific composite, not a measure of general intelligence.
@@ -24,6 +24,52 @@ conversation, and 4 Gaeilge repeat trials. The engine revision is pinned to
 hashes; engine capture is complete. A matching automated-screening receipt
 permits a provisional launch. Full sessions, intent, simulation,
 reactions, local models, and app delivery are deferred.
+
+## Native structured output (3.1)
+
+Owner decision, October 23, 2026: candidate JSON contracts must use native
+schema-constrained generation. Production is still under development; this is
+an explicit benchmark contract, not a claim of production-wire equivalence.
+Version 3.1 is the CLI default. Version 3.0 remains frozen and can be selected
+explicitly with `--version 3.0`; results from the two versions are not pooled.
+
+Every 3.1 case pins a response schema in the hashed cases file. NPC responses
+require dialogue, action, mood, language_hints (word/pronunciation/meaning
+objects), and nullable assigned_task, with no extra fields. Property order puts
+dialogue first and assigned_task last. Gaeilge choices use an `answer` object
+field restricted to A or B; extraction tasks constrain requested keys and
+string types. Schemas never contain the correct choice or expected fact values.
+
+Google requests use `responseMimeType: application/json` and `responseJsonSchema`
+(the JSON Schema field rather than the older OpenAPI `responseSchema` field).
+The adapter uses this field for any Google schema request, including a future
+Google judge request; no current pinned judge uses Google.
+OpenAI uses strict Responses JSON Schema; Anthropic uses native JSON Schema
+output configuration. Anthropic candidate schemas are unit-tested only; the live
+3.1 evidence covers Google and OpenAI. Unsupported candidate providers are blocked. See
+[Google's native structured-output documentation](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
+Schema validation still runs locally. No Markdown-fence removal, JSON repair,
+semantic answer normalization, or automatic retries are introduced.
+
+The same primary scenarios, source examples, engine capture, repeats, rubrics,
+objective answer keys, judge profiles, scoring and stop rule are retained.
+The 16 Gaeilge A/B choice prompts replace “Reply A or B only.” with
+“Reply with exactly one JSON object: {"answer":"A"} or {"answer":"B"}.”
+All remaining choice-prompt text is unchanged. This is an explicit change to
+candidate instructions as well as native decoding, so 3.0 and 3.1 results must
+not be pooled. The eight JSON extraction prompts are unchanged. Gaeilge exact-string answers
+remain a narrow canonical-extraction measure; semantically equivalent wording
+can still score zero. Changing that policy is separate work. Schema shape does
+not establish correctness, Irish fluency, or production quality.
+
+3.1 reuses the original automated judge screening: its judge requests, anchors,
+profiles and calibration inputs are unchanged. The receipt records the source
+suite and receipt hashes, retains original screening dates and limitations,
+and includes byte-identical screening artifacts. This is no new qualification
+or human validation, and makes no new paid calibration calls. Changed judge
+profiles or rubrics still block execution. Candidate request evidence and the
+resume digest include the full schema and output protocol; reservations account
+for schema input. Old paid responses cannot silently satisfy a changed request.
 
 ## Judge screening and validation
 

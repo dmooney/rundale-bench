@@ -1,0 +1,200 @@
+{
+  "profiles": {
+    "gpt-6.1-sol-judge-high": {
+      "profile_family": "openai",
+      "controls": {
+        "check-0": {
+          "source_id": "R-34f930c1a4",
+          "kind": "claimed-model-openai",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": 0,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 1
+          },
+          "invariant_mismatch_axes": [
+            "responsiveness"
+          ],
+          "observed_axes": 6,
+          "claimed_label_relation": "own-family"
+        },
+        "check-1": {
+          "source_id": "R-01a7731881",
+          "kind": "claimed-model-typesafe",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3,
+          "claimed_label_relation": "other-family"
+        },
+        "check-2": {
+          "source_id": "R-894cbc5dd8",
+          "kind": "whitespace",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": -1,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 0
+          },
+          "invariant_mismatch_axes": [
+            "craft"
+          ],
+          "observed_axes": 6
+        },
+        "check-3": {
+          "source_id": "R-10dea41287",
+          "kind": "grade-order",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3
+        },
+        "check-4": {
+          "source_id": "R-92f8cb886f",
+          "kind": "duplicated-response-diagnostic",
+          "expected_invariant": false,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": -3,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 6
+        },
+        "check-5": {
+          "source_id": "R-1c00c344e0",
+          "kind": "metadata-injection",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3
+        }
+      },
+      "limitations": [
+        "Each condition has one case; this is a startup diagnostic, not a bias estimate.",
+        "The two claimed-model-label controls compare own-family with other-family labels only once per condition; they cannot establish general model-family bias.",
+        "No result, including zero deltas, establishes absence of bias.",
+        "Duplicated-response grades may legitimately change craft or persona; deltas are diagnostic and are not ground truth or a failure."
+      ]
+    },
+    "jev-1.13.0": {
+      "profile_family": "typesafe",
+      "controls": {
+        "check-0": {
+          "source_id": "R-34f930c1a4",
+          "kind": "claimed-model-openai",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": 0,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 6,
+          "claimed_label_relation": "other-family"
+        },
+        "check-1": {
+          "source_id": "R-01a7731881",
+          "kind": "claimed-model-typesafe",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3,
+          "claimed_label_relation": "own-family"
+        },
+        "check-2": {
+          "source_id": "R-894cbc5dd8",
+          "kind": "whitespace",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": 0,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 6
+        },
+        "check-3": {
+          "source_id": "R-10dea41287",
+          "kind": "grade-order",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3
+        },
+        "check-4": {
+          "source_id": "R-92f8cb886f",
+          "kind": "duplicated-response-diagnostic",
+          "expected_invariant": false,
+          "paired_axis_deltas": {
+            "character": 0,
+            "craft": -3,
+            "grounding": 0,
+            "mood_fidelity": 0,
+            "period_authenticity": 0,
+            "responsiveness": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 6
+        },
+        "check-5": {
+          "source_id": "R-1c00c344e0",
+          "kind": "metadata-injection",
+          "expected_invariant": true,
+          "paired_axis_deltas": {
+            "conversational_relevance": 0,
+            "memory_consistency": 0,
+            "persona_consistency": 0
+          },
+          "invariant_mismatch_axes": [],
+          "observed_axes": 3
+        }
+      },
+      "limitations": [
+        "Each condition has one case; this is a startup diagnostic, not a bias estimate.",
+        "The two claimed-model-label controls compare own-family with other-family labels only once per condition; they cannot establish general model-family bias.",
+        "No result, including zero deltas, establishes absence of bias.",
+        "Duplicated-response grades may legitimately change craft or persona; deltas are diagnostic and are not ground truth or a failure."
+      ]
+    }
+  },
+  "limitations": [
+    "Six controls are drawn only from English selection data; held-out validation data is excluded.",
+    "Counts are too small to support population-level bias claims."
+  ]
+}

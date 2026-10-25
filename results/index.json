@@ -566,6 +566,571 @@
           "billing_reconciliation": null
         }
       ]
+    },
+    {
+      "version": "3.1",
+      "qualification": {
+        "status": "provisional",
+        "reason": "Automated judge checks passed. Scores are provisional; human agreement and accuracy have not been measured.",
+        "suite_hash": "1905b2708add5b7dc1b421fd444c6c67a4cebed53eceeabc8fac25de56a63055",
+        "validation_basis": "automated_checks_only"
+      },
+      "rows": [
+        {
+          "model": "gpt-6.1-sol",
+          "reasoning": "max",
+          "run_id": "sol61-structured-20261024",
+          "status": "complete",
+          "overall": 92.41898148148148,
+          "scores": {
+            "dialogue": 96.00694444444444,
+            "multiturn": 89.58333333333333,
+            "gaeilge": 91.66666666666667
+          },
+          "completed_at": "2026-10-24T19:28:58.370810+00:00",
+          "cost_usd": 1.321573274,
+          "notice": null,
+          "latest_attempt_id": "sol61-structured-20261024",
+          "failure_cause": null,
+          "reason": null,
+          "budget_usd": 5,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 1.321573274,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 8,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 24,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 96.00694444444444,
+              "median_score": 95.83333333333333,
+              "stddev_score": 4.416006021519758,
+              "min_score": 87.5,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 19159.373458009213,
+                "p95": 26219.434041995555,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 8,
+              "mean_score": 89.58333333333333,
+              "median_score": 95.83333333333334,
+              "stddev_score": 12.325166214790869,
+              "min_score": 66.66666666666666,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 48,
+                "p50": 29014.405500143766,
+                "p95": 41281.38954099268,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 24,
+              "mean_score": 91.66666666666667,
+              "median_score": 100.0,
+              "stddev_score": 27.638539919628332,
+              "min_score": 0.0,
+              "max_score": 100.0,
+              "latency_ms": {
+                "n": 24,
+                "p50": 3768.069916870445,
+                "p95": 6923.748167231679,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 22,
+                "count": 24,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "meaning": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "code_switch": {
+                  "correct": 6,
+                  "count": 8,
+                  "interval_95": [
+                    0.40927543031016883,
+                    0.9285207872478909
+                  ]
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 2.430555555555555
+          },
+          "evidence_path": "3.1/runs/sol61-structured-20261024.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
+        },
+        {
+          "model": "gemini-3.5-flash-lite",
+          "reasoning": "high",
+          "run_id": "gemini35-structured-20261023",
+          "status": "complete",
+          "overall": 76.85185185185185,
+          "scores": {
+            "dialogue": 95.13888888888889,
+            "multiturn": 52.083333333333336,
+            "gaeilge": 83.33333333333333
+          },
+          "completed_at": "2026-10-24T03:14:42.749609+00:00",
+          "cost_usd": 0.611842924,
+          "notice": null,
+          "latest_attempt_id": "gemini35-structured-20261023",
+          "failure_cause": null,
+          "reason": null,
+          "budget_usd": 5,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 0.611842924,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 8,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 24,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 95.1388888888889,
+              "median_score": 97.91666666666666,
+              "stddev_score": 5.851492898039137,
+              "min_score": 79.16666666666667,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 3830.404874868691,
+                "p95": 5470.435291994363,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 3696.2439590133727,
+                "p95": 5365.015083923936,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 8,
+              "mean_score": 52.08333333333333,
+              "median_score": 50.0,
+              "stddev_score": 20.72890493972125,
+              "min_score": 16.666666666666668,
+              "max_score": 91.66666666666667,
+              "latency_ms": {
+                "n": 48,
+                "p50": 4174.9630831182,
+                "p95": 6084.30074993521,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 48,
+                "p50": 4029.3831662274897,
+                "p95": 5999.17137529701,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 24,
+              "mean_score": 83.33333333333333,
+              "median_score": 100.0,
+              "stddev_score": 37.26779962499649,
+              "min_score": 0.0,
+              "max_score": 100.0,
+              "latency_ms": {
+                "n": 24,
+                "p50": 1998.2728753238916,
+                "p95": 3252.759125083685,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 1941.6705830954015,
+                "p95": 3252.0197089761496,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 20,
+                "count": 24,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 7,
+                  "count": 8,
+                  "interval_95": [
+                    0.5291118177871464,
+                    0.9775825085499433
+                  ]
+                },
+                "meaning": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "code_switch": {
+                  "correct": 5,
+                  "count": 8,
+                  "interval_95": [
+                    0.30574239460262737,
+                    0.8631557141764026
+                  ]
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 1.7361111111111096
+          },
+          "evidence_path": "3.1/runs/gemini35-structured-20261023.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
+        }
+      ],
+      "runs": [
+        {
+          "model": "gemini-3.5-flash-lite",
+          "reasoning": "high",
+          "run_id": "gemini35-structured-20261023",
+          "status": "complete",
+          "overall": 76.85185185185185,
+          "scores": {
+            "dialogue": 95.13888888888889,
+            "multiturn": 52.083333333333336,
+            "gaeilge": 83.33333333333333
+          },
+          "completed_at": "2026-10-24T03:14:42.749609+00:00",
+          "cost_usd": 0.611842924,
+          "notice": null,
+          "latest_attempt_id": null,
+          "failure_cause": null,
+          "reason": null,
+          "budget_usd": 5,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 0.611842924,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 8,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 24,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 95.1388888888889,
+              "median_score": 97.91666666666666,
+              "stddev_score": 5.851492898039137,
+              "min_score": 79.16666666666667,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 3830.404874868691,
+                "p95": 5470.435291994363,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 3696.2439590133727,
+                "p95": 5365.015083923936,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 8,
+              "mean_score": 52.08333333333333,
+              "median_score": 50.0,
+              "stddev_score": 20.72890493972125,
+              "min_score": 16.666666666666668,
+              "max_score": 91.66666666666667,
+              "latency_ms": {
+                "n": 48,
+                "p50": 4174.9630831182,
+                "p95": 6084.30074993521,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 48,
+                "p50": 4029.3831662274897,
+                "p95": 5999.17137529701,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 24,
+              "mean_score": 83.33333333333333,
+              "median_score": 100.0,
+              "stddev_score": 37.26779962499649,
+              "min_score": 0.0,
+              "max_score": 100.0,
+              "latency_ms": {
+                "n": 24,
+                "p50": 1998.2728753238916,
+                "p95": 3252.759125083685,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 24,
+                "p50": 1941.6705830954015,
+                "p95": 3252.0197089761496,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 20,
+                "count": 24,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 7,
+                  "count": 8,
+                  "interval_95": [
+                    0.5291118177871464,
+                    0.9775825085499433
+                  ]
+                },
+                "meaning": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "code_switch": {
+                  "correct": 5,
+                  "count": 8,
+                  "interval_95": [
+                    0.30574239460262737,
+                    0.8631557141764026
+                  ]
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 1.7361111111111096
+          },
+          "evidence_path": "3.1/runs/gemini35-structured-20261023.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "reasoning": "max",
+          "run_id": "sol61-structured-20261024",
+          "status": "complete",
+          "overall": 92.41898148148148,
+          "scores": {
+            "dialogue": 96.00694444444444,
+            "multiturn": 89.58333333333333,
+            "gaeilge": 91.66666666666667
+          },
+          "completed_at": "2026-10-24T19:28:58.370810+00:00",
+          "cost_usd": 1.321573274,
+          "notice": null,
+          "latest_attempt_id": null,
+          "failure_cause": null,
+          "reason": null,
+          "budget_usd": 5,
+          "budget_status": "within_cap",
+          "spending_exposure_usd": 1.321573274,
+          "coverage": {
+            "dialogue": {
+              "completed": 24,
+              "required": 24
+            },
+            "multiturn": {
+              "completed": 8,
+              "required": 8
+            },
+            "gaeilge": {
+              "completed": 24,
+              "required": 24
+            }
+          },
+          "uncertainty": {
+            "dialogue": {
+              "n": 24,
+              "mean_score": 96.00694444444444,
+              "median_score": 95.83333333333333,
+              "stddev_score": 4.416006021519758,
+              "min_score": 87.5,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 24,
+                "p50": 19159.373458009213,
+                "p95": 26219.434041995555,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "multiturn": {
+              "n": 8,
+              "mean_score": 89.58333333333333,
+              "median_score": 95.83333333333334,
+              "stddev_score": 12.325166214790869,
+              "min_score": 66.66666666666666,
+              "max_score": 100,
+              "latency_ms": {
+                "n": 48,
+                "p50": 29014.405500143766,
+                "p95": 41281.38954099268,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              }
+            },
+            "gaeilge": {
+              "n": 24,
+              "mean_score": 91.66666666666667,
+              "median_score": 100.0,
+              "stddev_score": 27.638539919628332,
+              "min_score": 0.0,
+              "max_score": 100.0,
+              "latency_ms": {
+                "n": 24,
+                "p50": 3768.069916870445,
+                "p95": 6923.748167231679,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "ttft_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null,
+                "unit": "generation request; nearest-rank percentile"
+              },
+              "accuracy": {
+                "correct": 22,
+                "count": 24,
+                "interval_95": null,
+                "dependency_note": "The same eight source examples occur across three subcategories; pooled Wilson independence is not assumed."
+              },
+              "subcategories": {
+                "grammar": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "meaning": {
+                  "correct": 8,
+                  "count": 8,
+                  "interval_95": [
+                    0.6755924351161198,
+                    1
+                  ]
+                },
+                "code_switch": {
+                  "correct": 6,
+                  "count": 8,
+                  "interval_95": [
+                    0.40927543031016883,
+                    0.9285207872478909
+                  ]
+                }
+              }
+            }
+          },
+          "variability": {
+            "repeated_cases": 12,
+            "mean_absolute_score_change": 2.430555555555555
+          },
+          "evidence_path": "3.1/runs/sol61-structured-20261024.json",
+          "qualification_status": "provisional",
+          "score_status": "provisional",
+          "validation_basis": "automated_checks_only",
+          "billing_reconciliation": null
+        }
+      ]
     }
   ]
 }
