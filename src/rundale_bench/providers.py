@@ -341,6 +341,7 @@ class NativeClient:
             sys = "\n".join(m["content"] for m in messages if m["role"] in ("system", "developer"))
             body = {"model": model, "max_tokens": limit, "messages": [{"role": m["role"], "content": m["content"]} for m in messages if m["role"] in ("user", "assistant")]}
             if sys: body["system"] = sys
+            if profile.get("thinking_enabled") is True: body["thinking"] = {"type": "adaptive"}
             if profile.get("reasoning") not in (None, "none"): body["output_config"] = {"effort": profile["reasoning"]}
             if schema:
                 body["output_config"] = {**body.get("output_config", {}), "format": {"type": "json_schema", "schema": schema}}

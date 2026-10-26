@@ -115,6 +115,14 @@ needs its own sampling and adjudication design. Do not retroactively relabel old
 provisional runs as human validated. Changing a pinned judge or scoring policy
 requires a new benchmark version.
 
+Benchmark 3.2 is a separate draft policy for one native Anthropic Claude Opus
+5.5 judge at high effort on both English evaluations. Anthropic models are
+reserved for judging and are excluded as 3.2 candidate models. This policy is
+not launch-ready until Opus calibration has been collected and passes the
+versioned automated screen; no 3.0 or 3.1 evidence is reused as Opus evidence.
+The first calibration attempt stopped at provider authentication before any
+judgment was collected. See `qualification/3.2/calibration-attempt.json` and the pre-attempt per-file source hashes under `docs/evidence/opus-judge/`. Correct the credential before another calibration attempt.
+
 Gaeilge scores use attributed objective answer keys. Expanded Irish-BLiMP
 qualification remains pending dataset access; Irish naturalness/style remains
 unqualified and excluded from ranking.

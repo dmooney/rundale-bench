@@ -13,16 +13,18 @@ from .qualification import PROFILES, digest, load_review
 from .storage import atomic_json, rebuild_index, utc_now
 
 
-def screen(root: Path) -> dict:
+def screen(root: Path, version: str = '3.0') -> dict:
     """Select the cheapest structurally valid judge passing presentation checks.
 
     This does not measure accuracy. Agreement between judges is diagnostic only.
     Uses existing paid receipts; never calls a provider or invents reference labels.
     """
+    if version not in ('3.0', '3.2'):
+        raise ValueError('Screening is supported only for Benchmark 3.0 or the new 3.2 policy')
     pack, rubrics, split = load_review(root)
     english = {i['id']: i for i in pack['items'] if i['category'] in ('dialogue', 'multiturn')}
     checks = build_checks(english, split)
-    out = root/'output/qualification'
+    out = (root/'output/qualification' if version == '3.0' else root/'output/qualification'/version)
     collection = json.loads((out/'collection.json').read_text())
     judgments = json.loads((out/'judgments.json').read_text())
     profiles = load_profiles(root/'config/providers.json')
@@ -35,19 +37,28 @@ def screen(root: Path) -> dict:
     metadata = [{k: v for k, v in c.items() if k != 'item'} for c in checks]
     if collection.get('checks') != metadata:
         raise ValueError('Calibration control metadata changed')
-    if collection.get('profiles') != {pid: profiles[pid] for pid in PROFILES}:
+    if version != '3.0' and collection.get('version') != version:
+        raise ValueError('Calibration collection version does not match requested suite')
+    manifest_path = root/'suites'/version/'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    profile_ids = tuple(collection.get('profiles', {}))
+    if not profile_ids or collection.get('profiles') != {pid: profiles[pid] for pid in profile_ids}:
         raise ValueError('Native judge profiles changed after collection')
-    if collection.get('adapter_protocols') != {'typesafe_grade_order': 'state-and-criteria-v2'}:
+    expected_profile_ids = set(PROFILES) if version == '3.0' else set(manifest.get('judge_policy', {}).values())
+    if set(profile_ids) != expected_profile_ids:
+        raise ValueError('Collected judge profiles do not match the versioned judge policy')
+    expected_adapters = {'typesafe_grade_order': 'state-and-criteria-v2'} if any(profiles[pid]['provider']=='typesafe' for pid in profile_ids) else {}
+    if collection.get('adapter_protocols') != expected_adapters:
         raise ValueError('Jev grade-order evidence uses the legacy adapter; explicitly repair that control')
-    suite_rubrics = json.loads((root/'suites/3.0/rubrics.json').read_text())
+    suite_rubrics = json.loads((root/'suites'/version/'rubrics.json').read_text())
     if suite_rubrics != {k: rubrics[k] for k in ('dialogue', 'multiturn')}:
         raise ValueError('Review anchors differ from launch rubric')
     expected = {**english, **{c['id']: c['item'] for c in checks}}
-    if set(judgments) != set(PROFILES):
-        raise ValueError('Both native judge collections are required')
+    if set(judgments) != set(profile_ids):
+        raise ValueError('Judge collections do not match the versioned calibration contract')
     metrics, selected, distributions = {}, {}, {}
     costs = {}
-    for pid in PROFILES:
+    for pid in profile_ids:
         rows = judgments[pid]
         if set(rows) != set(expected):
             raise ValueError('Calibration must contain all 16 English cases and six controls')
@@ -75,7 +86,7 @@ def screen(root: Path) -> dict:
     for category in ('dialogue', 'multiturn'):
         metrics[category] = {}
         candidates = []
-        for pid in PROFILES:
+        for pid in profile_ids:
             relevant = [c for c in checks if c['expected_invariant'] and english[c['source_id']]['category'] == category]
             matching = total = 0
             ceiling = 0
@@ -97,25 +108,30 @@ def screen(root: Path) -> dict:
                 candidates.append(pid)
         if not candidates:
             raise ValueError(f'No judge passes the automated repeat gate for {category}')
-        selected[category] = min(candidates, key=lambda pid: (costs[pid], pid))
+        pinned = manifest.get('judge_policy', {}).get(category)
+        if version == '3.0':
+            selected[category] = min(candidates, key=lambda pid: (costs[pid], pid))
+        elif pinned in candidates:
+            selected[category] = pinned
+        else:
+            raise ValueError(f'Pinned judge {pinned!r} does not pass automated screening for {category}')
     agreement = {}
     for category in ('dialogue', 'multiturn'):
-        deltas = [abs(judgments[PROFILES[0]][cid]['axes'][a] - judgments[PROFILES[1]][cid]['axes'][a])
+        deltas = [abs(judgments[profile_ids[0]][cid]['axes'][a] - judgments[profile_ids[1]][cid]['axes'][a])
                   for cid, item in english.items() if item['category'] == category
-                  for a in rubrics[category]]
-        agreement[category] = {'cases': sum(i['category'] == category for i in english.values()),
+                  for a in rubrics[category]] if len(profile_ids) > 1 else []
+        case_count = sum(i['category'] == category for i in english.values())
+        agreement[category] = {'cases': case_count,
             'axes': len(deltas), 'mean_absolute_difference': sum(deltas)/len(deltas),
             'exact_agreement': sum(d == 0 for d in deltas)/len(deltas),
-            'interpretation': 'Inter-judge agreement, not accuracy or human validation.'}
-    manifest_path = root/'suites/3.0/manifest.json'
-    manifest = json.loads(manifest_path.read_text())
+            'interpretation': 'Inter-judge agreement, not accuracy or human validation.'} if deltas else {'cases': case_count, 'axes': 0, 'mean_absolute_difference': None, 'exact_agreement': None, 'interpretation': 'Single judge; inter-judge agreement is not applicable.'}
     if manifest.get('status') == 'ready' and (manifest.get('judge_policy') != selected
                                              or manifest.get('validation_mode') != 'provisional'):
         raise ValueError('Active judge policy is frozen; create a new benchmark version')
     manifest.update(status='ready', validation_mode='provisional', judge_policy=selected,
                     judge_profiles={pid: profiles[pid] for pid in sorted(set(selected.values()))})
     manifest.pop('launch_blocker', None)
-    target = root/'qualification/3.0'
+    target = root/'qualification'/version
     public_collection = dict(collection)
     public_collection.pop('judgments_path', None)
     artifacts = {'collection.json': public_collection, 'judgments.json': judgments,
@@ -123,12 +139,15 @@ def screen(root: Path) -> dict:
     # Pin the exact public calibration evidence as well as the suite manifest.
     encode = lambda value: (json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n').encode()
     evidence_hashes = {name: hashlib.sha256(encode(value)).hexdigest() for name, value in artifacts.items()}
+    selection_rule = ('Cheapest collected native judge passing exact rubric-schema, >=90% invariant-axis agreement, and nonconstant original-case grades per eval; not selected for accuracy.'
+                      if version == '3.0' else
+                      'The version-pinned single judge must pass exact rubric-schema, >=90% invariant-axis agreement, and nonconstant original-case grades per eval; not selected for accuracy.')
     receipt = {'status': 'provisional', 'screened_at': utc_now(),
         'reason': 'Automated judge checks passed. Scores are provisional; human agreement and accuracy have not been measured.',
         'validation_basis': 'automated_checks_only', 'human_validated': False,
         'suite_hash': hashlib.sha256(encode(manifest)).hexdigest(),
         'judges': {category: {'profile_id': pid, 'qualified': False, 'automated_checks_passed': True} for category, pid in selected.items()},
-        'selection_rule': 'Cheapest collected native judge passing exact rubric-schema, >=90% invariant-axis agreement, and nonconstant original-case grades per eval; not selected for accuracy.',
+        'selection_rule': selection_rule,
         'thresholds': {'repeat_agreement_min': .9, 'distinct_original_axis_grades_min': 2}, 'metrics': metrics,
         'grade_distributions': distributions,
         'inter_judge_agreement': agreement, 'evidence_hashes': evidence_hashes,

@@ -1,0 +1,27 @@
+{
+  "status": "blocked",
+  "profile_id": "claude-opus-5-5-judge-high",
+  "provider": "anthropic",
+  "attempted_at": "2026-10-25T23:42:42Z",
+  "failure": "Authentication rejected by Anthropic before any judgment was collected.",
+  "billing_uncertain": false,
+  "judgments_collected": 0,
+  "usage_cost_usd": null,
+  "reservation": "Cancelled; no usage receipt was returned.",
+  "next_step": "Correct the local Anthropic credential before another calibration attempt. No automatic retry was made.",
+  "attempted_at_basis": "Modification time of the captured local authentication error receipt.",
+  "attempt_profile_settings": {
+    "model": "claude-opus-5-5",
+    "effort": "high",
+    "thinking_enabled_flag": true,
+    "request_thinking_field": null,
+    "judge_output_limit": 4096,
+    "supported_reasoning": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "note": "Exact pre-attempt contract and adapter profile; request stopped at authentication. Adaptive thinking is the Opus 5.5 default when the field is omitted, but the request was not authenticated or processed."
+  },
+  "archived_pre_attempt_contract": "output/qualification/3.2/aborted-auth-contract.json"
+}

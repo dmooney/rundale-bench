@@ -1,0 +1,7 @@
+{
+  "status": "pending",
+  "reason": "Opus 5.5 calibration and automated screening evidence have not been collected.",
+  "validation_basis": "automated_checks_only",
+  "human_validated": false,
+  "judges": {}
+}

@@ -33,6 +33,7 @@ def parser() -> argparse.ArgumentParser:
     reconcile.add_argument('--monitoring-evidence', type=Path, required=True)
     v = sub.add_parser('validate-suite', help='check suite hashes and case structure')
     q = sub.add_parser('qualify', help='collect or evaluate pinned English judge qualification evidence')
+    q.add_argument('--version', choices=('3.0', '3.1', '3.2'), default='3.0')
     qs = q.add_subparsers(dest='qualify_command', required=True)
     qc = qs.add_parser('collect', help='run qualification trials using the fixed $10 cap')
     qc.add_argument('--env-file',type=Path)
@@ -44,7 +45,7 @@ def parser() -> argparse.ArgumentParser:
     c.add_argument('left_run_id')
     c.add_argument('right_run_id')
     for command in (r, s, v, c):
-        command.add_argument('--version', choices=('3.0', '3.1'), default='3.1', help='benchmark version (default: 3.1 structured output)')
+        command.add_argument('--version', choices=('3.0', '3.1', '3.2'), default='3.1', help='benchmark version (default: 3.1 structured output)')
     return p
 
 
@@ -87,11 +88,21 @@ def main(argv=None) -> int:
         if args.command == 'qualify':
             from .qualification import collect, evaluate
             if args.qualify_command == 'collect':
-                receipt=collect(PACKAGE,{**__import__('os').environ,**_load_env(args.env_file)},repair_grade_order=args.repair_grade_order)
+                if args.version == '3.1':
+                    raise ValueError('Benchmark 3.1 reuses immutable qualification evidence; collect into a new version instead')
+                ids=None
+                if args.version != '3.0':
+                    suite=json.loads((PACKAGE/'suites'/args.version/'manifest.json').read_text())
+                    ids=tuple(sorted(set(suite.get('judge_policy',{}).values())))
+                receipt=collect(PACKAGE,{**__import__('os').environ,**_load_env(args.env_file)},repair_grade_order=args.repair_grade_order,version=args.version,profile_ids=ids)
             elif args.qualify_command == 'screen':
+                if args.version == '3.1':
+                    raise ValueError('Benchmark 3.1 reuses immutable qualification evidence; screening is not available')
                 from .provisional import screen
-                receipt=screen(PACKAGE)
+                receipt=screen(PACKAGE,args.version)
             else:
+                if args.version != '3.0':
+                    raise ValueError('Owner-reference evaluation is only implemented for Benchmark 3.0')
                 receipt=evaluate(PACKAGE,args.ratings)
             print(json.dumps(receipt,indent=2,ensure_ascii=False))
             return 0 if receipt.get('status') in ('collected','qualified','provisional') else 1

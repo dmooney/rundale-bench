@@ -76,6 +76,28 @@ class NativeOpenAITransport:
 
 
 class RunnerTests(unittest.TestCase):
+    def test_opus_profile_limit_is_used_for_runner_estimates_and_reservations(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td); fixture(root)
+            profile_path=root/'config/providers.json'; registry=json.loads(profile_path.read_text())
+            profile=registry['profiles'][0]; profile['judge_max_output_tokens']=16384
+            profile_path.write_text(json.dumps(registry))
+            manifest_path=root/'suites/3.0/manifest.json'; manifest=json.loads(manifest_path.read_text())
+            manifest['judge_profiles']['fake-high']=profile; manifest_path.write_text(json.dumps(manifest)); rehash(root)
+            def judge(_client, _profile, item, _rubric):
+                axis='voice' if item['eval']=='dialogue' else 'memory'
+                return {'axes':{axis:4},'usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1,'reasoning_tokens':0}}
+            from rundale_bench.runner import upper_cost as real_upper_cost
+            with patch('rundale_bench.runner.upper_cost', wraps=real_upper_cost) as estimate_calls:
+                preview=dry_run('fake',root=root)
+                self.assertIsNotNone(preview.get('estimated_max_usd'))
+                self.assertIn(16384,[call.args[2] for call in estimate_calls.call_args_list])
+                estimate_calls.reset_mock()
+                with patch('rundale_bench.runner.judge_response',side_effect=judge):
+                    run('fake',root=root,output=root/'output',budget=5,client=FakeClient(),run_id='judge-limit')
+            self.assertIn(16384,[call.args[2] for call in estimate_calls.call_args_list])
+            self.assertIn(20,[call.args[2] for call in estimate_calls.call_args_list])
+
     def test_full_run_and_resume_reuses_paid_calls(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td); fixture(root); client=FakeClient()
@@ -132,6 +154,18 @@ class RunnerTests(unittest.TestCase):
             capture=io.StringIO()
             with contextlib.redirect_stdout(capture): self.assertEqual(cli.main(['compare','left','right','--version','3.0']),0)
             self.assertIn('mean_difference',capture.getvalue())
+
+    def test_cli_rejects_mutation_of_3_1_evidence_and_unimplemented_3_2_human_evaluation(self):
+        from rundale_bench import cli
+        original = cli.PACKAGE
+        with tempfile.TemporaryDirectory() as td:
+            cli.PACKAGE = Path(td)
+            try:
+                with contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(cli.main(['qualify','--version','3.1','collect']), 2)
+                    self.assertEqual(cli.main(['qualify','--version','3.2','evaluate','--ratings','ratings.json']), 2)
+            finally:
+                cli.PACKAGE = original
 
     def test_qualification_mismatch_blocks_paid_call(self):
         with tempfile.TemporaryDirectory() as td:

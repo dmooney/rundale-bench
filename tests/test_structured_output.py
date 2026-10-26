@@ -165,6 +165,10 @@ class StructuredOutputTests(unittest.TestCase):
                 run('fake', root=root, version='3.1', client=client)
             self.assertEqual(client.calls, 0)
 
+    def test_anthropic_candidate_is_excluded_from_3_2_even_when_profile_is_enabled(self):
+        report = dry_run('claude-sonnet-4-6', root=ROOT, version='3.2')
+        self.assertTrue(any('Anthropic profiles are reserved for judging' in blocker for blocker in report['blockers']))
+
     def test_cached_audit_reconstructs_final_requests_and_rejects_digest_drift(self):
         audit_spec = importlib.util.spec_from_file_location('replay_cached_run', ROOT/'scripts/replay_cached_run.py')
         audit = importlib.util.module_from_spec(audit_spec)

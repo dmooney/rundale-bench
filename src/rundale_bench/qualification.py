@@ -6,7 +6,7 @@ import math
 import statistics
 from pathlib import Path
 from .accounting import Ledger, BudgetError, actual_cost, upper_cost
-from .judges import judge_response
+from .judges import judge_response, judge_output_limit
 from .bias import build_checks, summarize_biases
 from .providers import NativeClient, ProviderError, load_profiles
 from .storage import atomic_json, utc_now
@@ -48,14 +48,21 @@ def owner_references(root: Path, path: Path) -> dict:
         refs[row['id']] = axes
     return refs
 
-def collect(root: Path, credentials: dict, client: NativeClient|None=None, *, repair_grade_order: bool=False) -> dict:
+def collect(root: Path, credentials: dict, client: NativeClient|None=None, *, repair_grade_order: bool=False,
+            version: str = '3.0', profile_ids: tuple[str, ...] | None = None) -> dict:
+    if version not in ('3.0', '3.2'):
+        raise ValueError('Judge collection is supported only for Benchmark 3.0 or the new 3.2 policy')
     pack,rubrics,split = load_review(root)
     english = [i for i in pack['items'] if i['category'] in ('dialogue','multiturn')]
     profiles = load_profiles(root/'config/providers.json')
-    out = root/'output/qualification';out.mkdir(parents=True,exist_ok=True)
+    selected_profiles = PROFILES if profile_ids is None else profile_ids
+    if not selected_profiles or any(pid not in profiles for pid in selected_profiles):
+        raise ValueError('Unknown or empty judge profile selection')
+    out = (root/'output/qualification' if version == '3.0' else root/'output/qualification'/version);out.mkdir(parents=True,exist_ok=True)
     checks = build_checks({i['id']:i for i in english}, split)
     protocol_hash=hashlib.sha256(json.dumps(checks,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
-    contract = {'pack_sha256':digest(root/'review/pack.json'),'rubric_sha256':digest(root/'review/rubric.json'),'split_sha256':digest(root/'review/split.json'),'bias_protocol_sha256':protocol_hash,'profiles':{k:profiles[k] for k in PROFILES},'adapter_protocols':{'typesafe_grade_order':'state-and-criteria-v2'}}
+    contract = {'pack_sha256':digest(root/'review/pack.json'),'rubric_sha256':digest(root/'review/rubric.json'),'split_sha256':digest(root/'review/split.json'),'bias_protocol_sha256':protocol_hash,'profiles':{k:profiles[k] for k in selected_profiles},'adapter_protocols':({'typesafe_grade_order':'state-and-criteria-v2'} if any(profiles[k]['provider']=='typesafe' for k in selected_profiles) else {})}
+    if version != '3.0': contract['version'] = version
     frozen = out/'contract.json'
     if frozen.exists():
         existing=json.loads(frozen.read_text())
@@ -84,7 +91,7 @@ def collect(root: Path, credentials: dict, client: NativeClient|None=None, *, re
     requests += [(check['id'],check['item'],check.get('grade_order')) for check in checks]
     selected_call_ids=set()
     try:
-        for profile_id in PROFILES:
+        for profile_id in selected_profiles:
             results.setdefault(profile_id,{})
             for rid,item,grade_order in requests:
                 request={'profile':profiles[profile_id],'item':item,'rubric':rubrics[item['category']],'grade_order':grade_order}
@@ -100,7 +107,7 @@ def collect(root: Path, credentials: dict, client: NativeClient|None=None, *, re
                     continue
                 request_sha=ledger.request_digest(request)
                 call_id=f'{profile_id}:{rid}:{request_sha[:12]}'
-                bound=upper_cost(profiles[profile_id],[{'role':'user','content':json.dumps(item,ensure_ascii=False)}],4096,request['rubric'])
+                bound=upper_cost(profiles[profile_id],[{'role':'user','content':json.dumps(item,ensure_ascii=False)}],judge_output_limit(profiles[profile_id]),request['rubric'])
                 ledger.reserve(call_id,request,bound)
                 try:
                     answer=judge_response(client,profiles[profile_id],item,request['rubric'],grade_order=grade_order)

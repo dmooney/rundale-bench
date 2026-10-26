@@ -66,6 +66,7 @@ class QualificationTests(unittest.TestCase):
   import shutil
   from unittest.mock import patch
   from rundale_bench.qualification import collect,PROFILES
+  from rundale_bench.accounting import upper_cost as real_upper_cost
   source=Path(__file__).resolve().parents[1]
   with tempfile.TemporaryDirectory() as t:
    root=Path(t)
@@ -73,10 +74,11 @@ class QualificationTests(unittest.TestCase):
    def fake_judge(client,profile,item,rubric,*,grade_order=None):
     if item['id']=='check-3':self.assertEqual(grade_order,[5,4,3,2,1])
     return {'axes':{axis:3 for axis in rubric},'usage':{'input_tokens':100,'output_tokens':10,'cached_input_tokens':0},'raw':{'fixture':True}}
-   with patch('rundale_bench.qualification.judge_response',side_effect=fake_judge) as judged:
+   with patch('rundale_bench.qualification.judge_response',side_effect=fake_judge) as judged, patch('rundale_bench.qualification.upper_cost',wraps=real_upper_cost) as reservations:
     first=collect(root,{},client=object())
     again=collect(root,{},client=object())
     self.assertEqual(judged.call_count,44)
+   self.assertTrue(all(call.args[2]==4096 for call in reservations.call_args_list))
    self.assertEqual(first['cost_usd'],again['cost_usd'])
    self.assertEqual(len(first['checks']),6)
    self.assertEqual(len(first['bias_protocol_sha256']),64)
@@ -84,6 +86,24 @@ class QualificationTests(unittest.TestCase):
    contract=root/'output/qualification/contract.json'
    frozen=json.loads(contract.read_text());frozen['bias_protocol_sha256']='changed';contract.write_text(json.dumps(frozen))
    with self.assertRaisesRegex(ValueError,'contract changed'):collect(root,{},client=object())
+ def test_opus_collection_reserves_profile_output_limit(self):
+  import shutil
+  from unittest.mock import patch
+  from rundale_bench.qualification import collect
+  from rundale_bench.accounting import upper_cost as real_upper_cost
+  source=Path(__file__).resolve().parents[1]
+  with tempfile.TemporaryDirectory() as t:
+   root=Path(t)
+   for directory in ('review','config'):shutil.copytree(source/directory,root/directory)
+   def fake_judge(client,profile,item,rubric,*,grade_order=None):
+    return {'axes':{axis:3 for axis in rubric},'usage':{'input_tokens':100,'output_tokens':10,'cached_input_tokens':0},'raw':{'fixture':True}}
+   with patch('rundale_bench.qualification.judge_response',side_effect=fake_judge), patch('rundale_bench.qualification.upper_cost',wraps=real_upper_cost) as reservations:
+    receipt=collect(root,{},client=object(),version='3.2',profile_ids=('claude-opus-5-5-judge-high',))
+   self.assertEqual(receipt['version'],'3.2')
+   self.assertEqual(len(reservations.call_args_list),22)
+   self.assertTrue(all(call.args[2]==16384 for call in reservations.call_args_list))
+   self.assertTrue((root/'output/qualification/3.2/collection.json').exists())
+   self.assertFalse((root/'output/qualification/collection.json').exists())
  def test_provisional_evaluation_refuses_before_writes(self):
   import shutil
   from rundale_bench.qualification import evaluate

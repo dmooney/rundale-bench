@@ -33,6 +33,13 @@ class JudgeTests(unittest.TestCase):
         self.assertEqual(schema["properties"]["axes"]["properties"]["voice"]["enum"], [1,2,3,4,5])
         self.assertEqual(fake.calls[0][2]["max_output_tokens"], JUDGE_MAX_OUTPUT_TOKENS)
 
+    def test_profile_specific_judge_output_limit_keeps_default_for_legacy_profiles(self):
+        result_text = json.dumps({"axes":{"voice":5,"continuity":4},"rationales":{"voice":"Voice evidence","continuity":"Context evidence"}})
+        fake = FakeTransport({"model":"claude-opus-5-5","content":[{"type":"text","text":result_text}],"stop_reason":"end_turn","usage":{"input_tokens":30,"output_tokens":15}})
+        profile = {"provider":"anthropic","model":"claude-opus-5-5","reasoning":"high","thinking_enabled":True,"judge_max_output_tokens":16384,"api_key_env":"T"}
+        judge_response(NativeClient({"T":"key"}, fake), profile, self.item, self.rubric)
+        self.assertEqual(fake.calls[0][2]["max_tokens"], 16384)
+
     def test_jev_native_choice_uses_full_anchor_text(self):
         data = {"model":"jev-1.13.0","answers":{"voice":{"choice":"5"},"continuity":{"choice":"1"}},"usage":{"input_tokens":40,"output_tokens":0}}
         fake = FakeTransport(data)
