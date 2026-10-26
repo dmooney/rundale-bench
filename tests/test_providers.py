@@ -46,6 +46,19 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(registry["jev-1.13.0"]["input_per_million_usd"], 0.042)
         self.assertEqual(registry["gemini-3.5-flash-lite"]["supported_reasoning"], ["minimal", "low", "medium", "high"])
         with self.assertRaisesRegex(ValueError, "disabled"): resolve_profile("gemini-3.7-flash", registry=registry)
+        opus = registry["claude-opus-5-5-judge-high"]
+        self.assertEqual((opus["model"], opus["reasoning"], opus["input_per_million_usd"], opus["output_per_million_usd"], opus["cached_input_per_million_usd"]), ("claude-opus-5-5", "high", 4.0, 20.0, .20))
+        self.assertEqual(opus["supported_reasoning"], ["low", "medium", "high", "xhigh", "max"])
+        self.assertEqual(opus["judge_max_output_tokens"], 16384)
+        with self.assertRaisesRegex(ValueError, "disabled"): resolve_profile("claude-opus-5-5", registry=registry)
+
+    def test_anthropic_effort_and_judge_schema_request(self):
+        fake = FakeTransport({"id":"msg_1","type":"message","model":"claude-opus-5-5","content":[{"type":"text","text":"{}"}],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":2,"cache_read_input_tokens":3}})
+        profile = {"id":"opus","provider":"anthropic","model":"claude-opus-5-5","reasoning":"high","api_key_env":"TEST_KEY"}
+        NativeClient({"TEST_KEY":"secret"}, fake).generate(profile, [{"role":"system","content":"judge"},{"role":"user","content":"{}"}], 50, response_schema={"type":"object"})
+        body = fake.calls[0][2]
+        self.assertEqual(body["output_config"]["effort"], "high")
+        self.assertEqual(body["output_config"]["format"], {"type":"json_schema","schema":{"type":"object"}})
 
     def test_openai_native_response_usage_and_request(self):
         fake = FakeTransport({"model":"gpt-6.1-sol", "output_text":"hello", "usage":{"input_tokens":10,"input_tokens_details":{"cached_tokens":4},"output_tokens":7,"output_tokens_details":{"reasoning_tokens":3}}})
@@ -261,6 +274,14 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(result.usage["cached_input_tokens"], 8)
         self.assertEqual(result.usage["cache_write_input_tokens"], 3)
         self.assertEqual(result.usage["input_tokens"], 23)
+
+    def test_opus_adaptive_thinking_is_explicit_in_native_request(self):
+        fake = FakeTransport({"model":"claude-opus-5-5","content":[{"type":"text","text":"{}"}],"stop_reason":"end_turn","usage":{"input_tokens":5,"output_tokens":3}})
+        profile = {"id":"opus","provider":"anthropic","model":"claude-opus-5-5","reasoning":"high","thinking_enabled":True,"api_key_env":"TEST_KEY"}
+        NativeClient({"TEST_KEY":"secret"}, fake).generate(profile, [{"role":"user","content":"judge"}], 44, response_schema={"type":"object"})
+        body = fake.calls[0][2]
+        self.assertEqual(body["thinking"], {"type":"adaptive"})
+        self.assertEqual(body["output_config"], {"effort":"high","format":{"type":"json_schema","schema":{"type":"object"}}})
 
     def test_actual_provider_refusal_not_plain_text_npc_refusal(self):
         fake = FakeTransport({"error":{"code":"content_filter","message":"blocked"}}, status=400)

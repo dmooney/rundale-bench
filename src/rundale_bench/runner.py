@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 
 from .accounting import Ledger, BudgetError, UncertainBilling, upper_cost, actual_cost
-from .judges import judge_response, JUDGE_MAX_OUTPUT_TOKENS
+from .judges import judge_response, JUDGE_MAX_OUTPUT_TOKENS, judge_output_limit
 from .providers import NativeClient, ProviderError, resolve_profile, load_profiles
 from .scoring import aggregate, rubric_score, objective_score, variability, wilson
 from .storage import utc_now, atomic_json, publish_run, issue_payload, safe_id
@@ -155,6 +155,12 @@ def _resolve_candidate(model: str, reasoning: str | None, profiles: dict) -> dic
     return profile
 
 
+def _version_candidate_blockers(version: str, profile: dict) -> list[str]:
+    if version == '3.2' and profile.get('provider') == 'anthropic':
+        return ['Anthropic profiles are reserved for judging in Benchmark 3.2 and cannot be candidates.']
+    return []
+
+
 def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
             root: Path = PACKAGE, env_file: Path | None = None, version: str = '3.0') -> dict:
     result = validate_suite(root, version)
@@ -162,6 +168,7 @@ def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
         profiles = load_profiles(root/'config'/'providers.json')
         profile = _resolve_candidate(model, reasoning, profiles)
         result['candidate_profile'] = profile['id']
+        result['blockers'].extend(_version_candidate_blockers(version, profile))
         if version != '3.0' and profile['provider'] not in STRUCTURED_PROVIDERS:
             result['blockers'].append('Candidate provider does not support native structured output.')
     except Exception as exc:
@@ -198,7 +205,7 @@ def dry_run(model: str, reasoning: str | None = None, budget: float = 5.0,
                         if jp:
                             projected = _project_transcript(case,case['max_output_tokens']) if case['eval']=='multiturn' else [{'role':'assistant','content':'x'*min(case['max_output_tokens']*4,64000)}]
                             ji={**_judge_case(case),'candidate_response':json.dumps(projected,ensure_ascii=False),'transcript':projected}
-                            estimated += upper_cost(jp,[{'role':'user','content':json.dumps(ji,ensure_ascii=False)}],JUDGE_MAX_OUTPUT_TOKENS,{'rubric':rubrics[case['eval']]})
+                            estimated += upper_cost(jp,[{'role':'user','content':json.dumps(ji,ensure_ascii=False)}],judge_output_limit(jp),{'rubric':rubrics[case['eval']]})
             result['estimated_max_usd'] = estimated
             if estimated > budget: result['budget_warning']=f'Worst-case full-suite reservation ${estimated:.4f} exceeds ${budget:.2f}; per-call reservations enforce the cap and may end the run as budget DNF.'
     except Exception as exc: result['blockers'].append(f'Pricing or suite error: {exc}')
@@ -309,6 +316,8 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
         raise ValueError('Budget must be finite, greater than $0, and at most $5.')
     profiles = load_profiles(root/'config'/'providers.json')
     profile = _resolve_candidate(model, reasoning, profiles)
+    candidate_blockers = _version_candidate_blockers(version, profile)
+    if candidate_blockers: raise ValueError('Candidate profile: ' + ' '.join(candidate_blockers))
     if version != '3.0' and profile['provider'] not in STRUCTURED_PROVIDERS:
         raise ValueError('Candidate provider does not support native structured output.')
     manifest, cases, rubrics, suite_hash = load_suite(root, version)
@@ -431,7 +440,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                             projected_transcript = _project_transcript(case,case['max_output_tokens']) if category == 'multiturn' else [{'role':'assistant','content':'x' * min(case['max_output_tokens']*4,64000)}]
                             judge_item = {**_judge_case(case),'candidate_response':json.dumps(projected_transcript,ensure_ascii=False),'transcript':projected_transcript}
                             jm = [{'role':'user','content':json.dumps(judge_item,ensure_ascii=False)}]
-                            future += upper_cost(jp, jm, JUDGE_MAX_OUTPUT_TOKENS, {'rubric':rubrics[category]})
+                            future += upper_cost(jp, jm, judge_output_limit(jp), {'rubric':rubrics[category]})
                     ledger.reserve(call_id, request, reserve, future)
                     try:
                         response = client.generate(profile, prompt_messages, case['max_output_tokens'], **({'response_schema': schema} if schema is not None else {}))
@@ -495,7 +504,10 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
             else:
                 judge_profile = _profile_for(category, manifest, profiles)
                 judge_item = {**_judge_case(case),'candidate_response':total_text,'transcript':transcript or [{'role':'assistant','content':total_text,'raw':candidate_records[0].get('text','')}]}
+                judge_limit = judge_output_limit(judge_profile)
                 judge_request = {'profile':judge_profile['id'],'item':judge_item,'rubric':rubrics[category]}
+                if judge_limit != JUDGE_MAX_OUTPUT_TOKENS:
+                    judge_request['max_output_tokens'] = judge_limit
                 judge_id = f'{key}:judge'
                 cached_judge = ledger.cached(judge_id, judge_request)
                 if cached_judge is not None:
@@ -514,7 +526,7 @@ def run(model: str, *, reasoning: str | None = None, budget: float = 5.0,
                         raise RuntimeError('Configured output token limit reached' if kind == 'output_limit' else f'Judge failure ({kind})')
                 else:
                     jm = [{'role':'user','content':json.dumps(judge_item,ensure_ascii=False)}]
-                    reserve = upper_cost(judge_profile,jm,JUDGE_MAX_OUTPUT_TOKENS,{'rubric':rubrics[category],'candidate':judge_item})
+                    reserve = upper_cost(judge_profile,jm,judge_limit,{'rubric':rubrics[category],'candidate':judge_item})
                     ledger.reserve(judge_id, judge_request, reserve)
                     try:
                         judged = judge_response(client, judge_profile, judge_item, rubrics[category])

@@ -1,0 +1,42 @@
+{
+  "status": "captured_before_calibration_attempt",
+  "base_commit": "42cff34c8120d0f6fb08732f41e4c311f29db934",
+  "files": {
+    "config/providers.json": "8a27e58313510e23329392e5ec762463dcb723558f9466f1c7f8abe9fc834916",
+    "review/manifest.json": "f12dba473d1bfd7b9e2a945771f85351ec7091fdcc9ca75abcde54118f69d373",
+    "review/pack.json": "e65d225a1a5d076ffa38c81ec61bb58639352ad0f9f779ce45e3bd86295f336a",
+    "review/provenance.json": "8121f7221c90837ab92fb9776e9986022b62b72cdece535355f36e684ed09bc3",
+    "review/rubric.json": "3713a20465b4fbfd0657b8797e53957a4188d07659bf7b116761d6a702a0be1e",
+    "review/split.json": "a1716ea662de4ca8d373e75dbf19b0a53d2ee017ad2ffa5182652eb361e0a7d8",
+    "src/rundale_bench/__init__.py": "779e2c78a9f8a30069fede3b570c749b56ab7754ac303ee9976a557651db9ac7",
+    "src/rundale_bench/accounting.py": "5688426ec7f551f722edcb91bd76dc62a456b94f356c6a11b14be5137acaa06e",
+    "src/rundale_bench/bias.py": "adaff4048a4de9378700b73992c772312c462dc2699af250eaf4325ea1e7c8c2",
+    "src/rundale_bench/cli.py": "6662296083da02e5ca1102c55e4e7788573b441b033dae368957e0d043a85c47",
+    "src/rundale_bench/contracts.py": "cd1698a9f9ba8f04396a0d481fe79a05df996c0ed7ff752072f533aa93f53612",
+    "src/rundale_bench/judges.py": "27cb47bc3e898e92632b2c31a050da43eb1b483c59ddad759331632f1f98bead",
+    "src/rundale_bench/providers.py": "199f22ef8b64b8f5db90e4bd636315665c838c03ff0ae1f79025de31d1abc52e",
+    "src/rundale_bench/provisional.py": "13a71a091343122ea559113e7e18e77ab7c96ad04ac2a434fed314a87638a379",
+    "src/rundale_bench/publication.py": "fc4f72bbb5c0db6594b7d6e1e93f6b87c2e46709d6653cc4352d550ef0aac2ad",
+    "src/rundale_bench/qualification.py": "8943d89cc5adedf2956d73ec8c5a546ec66a3c97a0d7b5f2b7e5da21b94fd27d",
+    "src/rundale_bench/reconciliation.py": "c0ab2cca1375ad7cdcd623b51cbf1d68bb64554bf6c0ca4ef49d8978fe153ef3",
+    "src/rundale_bench/runner.py": "1264e7630468c360cfb8c48f295163f020ff34fc8028701d953174eaadef5b84",
+    "src/rundale_bench/scoring.py": "e1c5d5b26f837fb1e0474ba08b929ae6a401733ae9f7ac25d68b3e9f76b1c8e8",
+    "src/rundale_bench/storage.py": "be1c2c0c4110868df8f8098cd231b703113e128e9fa695f09cde19e375665497",
+    "suites/3.2/cases.jsonl": "c431de6c354df81dd0319347b41bb92c4fae08f1a750fc5dd003f2b2b14174f2",
+    "suites/3.2/manifest.json": "de9ba108b5ed4c8550db292fa2b219ceeb1cf0c49bd36b0d40ec8b6873670dae",
+    "suites/3.2/rubrics.json": "5725adac436d1fd9cbbdc52e8b2ecd3c67d1d7b433e4170884df8018cc84d1e3"
+  },
+  "scope": "Per-file hashes correspond to the source files captured before the failed authentication attempt.",
+  "known_files_changed_after_snapshot": [
+    "config/providers.json",
+    "src/rundale_bench/cli.py",
+    "src/rundale_bench/judges.py",
+    "src/rundale_bench/providers.py",
+    "src/rundale_bench/provisional.py",
+    "src/rundale_bench/qualification.py",
+    "src/rundale_bench/runner.py",
+    "suites/3.2/manifest.json"
+  ],
+  "calibration_outcome": "The captured attempt returned an authentication error before any judgment; zero paid judgments were collected.",
+  "source_state_note": "Some captured files changed afterward; see known_files_changed_after_snapshot."
+}

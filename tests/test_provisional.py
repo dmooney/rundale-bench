@@ -12,6 +12,7 @@ from rundale_bench.qualification import collect, PROFILES
 from rundale_bench.runner import qualification_blockers
 
 ROOT = Path(__file__).resolve().parents[1]
+OPUS = 'claude-opus-5-5-judge-high'
 
 
 def fixture(root):
@@ -35,7 +36,83 @@ def fixture(root):
         collect(root, {}, client=object())
 
 
+def opus_fixture(root):
+    pack = json.loads((root/'review/pack.json').read_text())
+    from rundale_bench.bias import build_checks
+    _, _, split = __import__('rundale_bench.qualification', fromlist=['load_review']).load_review(root)
+    english = {i['id']: i for i in pack['items'] if i['category'] in ('dialogue', 'multiturn')}
+    sources = {c['source_id'] for c in build_checks(english, split)}
+    varied = {next(cid for cid, item in english.items() if item['category'] == cat and cid not in sources)
+              for cat in ('dialogue', 'multiturn')}
+    def judge(client, profile, item, rubric, *, grade_order=None):
+        return {'axes': {a: 2 if item['id'] in varied else 3 for a in rubric}, 'usage': {'input_tokens': 100, 'output_tokens': 10}, 'model': profile['model']}
+    with patch('rundale_bench.qualification.judge_response', side_effect=judge):
+        collect(root, {}, client=object(), version='3.2', profile_ids=(OPUS,))
+
+
 class ProvisionalTests(unittest.TestCase):
+    def test_legacy_screen_recomputes_cheapest_passing_judge(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root)
+            manifest_path = root/'suites/3.0/manifest.json'
+            manifest = json.loads(manifest_path.read_text())
+            manifest['judge_policy'] = {'dialogue': 'gpt-6.1-sol-judge-high', 'multiturn': 'gpt-6.1-sol-judge-high'}
+            manifest_path.write_text(json.dumps(manifest))
+            receipt = screen(root)
+            self.assertEqual({row['profile_id'] for row in receipt['judges'].values()}, {'jev-1.13.0'})
+
+    def test_single_opus_screen_is_versioned_and_does_not_touch_legacy_evidence(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root); screen(root)
+            legacy_files = list((root/'qualification/3.0').glob('*.json')) + [root/'suites/3.0/manifest.json']
+            before = {p: p.read_bytes() for p in legacy_files}
+            opus_fixture(root)
+            receipt = screen(root, '3.2')
+            self.assertEqual({row['profile_id'] for row in receipt['judges'].values()}, {OPUS})
+            self.assertTrue(all(row['automated_checks_passed'] for row in receipt['judges'].values()))
+            self.assertEqual(receipt['inter_judge_agreement']['dialogue']['cases'], 8)
+            self.assertIsNone(receipt['inter_judge_agreement']['dialogue']['mean_absolute_difference'])
+            self.assertEqual(before, {p: p.read_bytes() for p in legacy_files})
+            self.assertTrue((root/'qualification/3.2/status.json').exists())
+            self.assertFalse((root/'qualification/3.0/status.json').read_bytes() == (root/'qualification/3.2/status.json').read_bytes())
+
+    def test_single_opus_screen_fails_closed_when_repeat_gate_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root); opus_fixture(root)
+            path = root/'output/qualification/3.2/judgments.json'
+            judgments = json.loads(path.read_text())
+            judgments[OPUS]['check-0']['axes'] = {axis: 5 for axis in judgments[OPUS]['check-0']['axes']}
+            path.write_text(json.dumps(judgments))
+            with self.assertRaisesRegex(ValueError, 'repeat gate for dialogue'):
+                screen(root, '3.2')
+            self.assertFalse((root/'qualification/3.2/status.json').exists())
+
+    def test_nonlegacy_collection_requires_an_explicit_version_key(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root); opus_fixture(root)
+            path = root/'output/qualification/3.2/collection.json'
+            collection = json.loads(path.read_text()); collection.pop('version')
+            path.write_text(json.dumps(collection))
+            with self.assertRaisesRegex(ValueError, 'collection version does not match'):
+                screen(root, '3.2')
+
+    def test_screen_requires_complete_legacy_and_exact_pinned_v32_profiles(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root)
+            path = root/'output/qualification/collection.json'
+            collection = json.loads(path.read_text()); collection['profiles'].pop(PROFILES[0])
+            path.write_text(json.dumps(collection))
+            with self.assertRaisesRegex(ValueError, 'versioned judge policy'):
+                screen(root)
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t); fixture(root); opus_fixture(root)
+            path = root/'output/qualification/3.2/collection.json'
+            from rundale_bench.providers import load_profiles
+            collection = json.loads(path.read_text()); collection['profiles']['jev-1.13.0'] = load_profiles(root/'config/providers.json')['jev-1.13.0']
+            path.write_text(json.dumps(collection))
+            with self.assertRaisesRegex(ValueError, 'versioned judge policy'):
+                screen(root, '3.2')
+
     def test_screen_is_offline_honest_and_idempotent(self):
         with tempfile.TemporaryDirectory() as t:
             root = Path(t); fixture(root)

@@ -45,6 +45,26 @@ English eval, and publishes explicitly provisional screening evidence. It never
 produces human accuracy labels. If collection is already complete, do not start
 another collection directory to reset its cap.
 
+### Benchmark 3.2 Opus judge
+
+Version 3.2 is a draft with one Claude Opus 5.5 high-effort judge for both
+English evaluations. Its 16,384-token judge response ceiling reserves bounded
+room for adaptive thinking and per-axis rationales. Anthropic profiles are
+reserved for judging and blocked as candidates. The suite stays blocked until its Opus calibration passes the
+versioned automated screen. After correcting the local Anthropic credential,
+run calibration with the isolated $10 ledger:
+
+```sh
+PYTHONPATH=src python3 -m rundale_bench.cli qualify --version 3.2 collect --env-file <private-env-file>
+PYTHONPATH=src python3 -m rundale_bench.cli qualify --version 3.2 screen
+PYTHONPATH=src python3 -m rundale_bench.cli validate-suite --version 3.2
+```
+
+The current attempt stopped at authentication with no judgments or usage cost;
+there is no automatic retry. Follow the [3.2 calibration runbook](../qualification/3.2/README.md)
+and retain the failed receipt and ledger. Do not use 3.0/3.1 evidence or run
+candidate models against 3.2 while its qualification is pending.
+
 Compare two published run IDs using paired primary-case scores (repeat trials do not affect the comparison):
 
 ```sh
